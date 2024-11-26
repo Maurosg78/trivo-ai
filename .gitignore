@@ -1,0 +1,19 @@
+# Ignorar archivos del sistema
+.DS_Store
+
+# Ignorar directorios y archivos de dependencias
+node_modules/
+env/
+frontend/node_modules/
+backend/node_modules/
+
+# Ignorar archivos de configuración sensible
+*.env
+
+# Ignorar archivos comprimidos
+*.zip
+*.tar.gz
+
+# Ignorar logs y temporales
+*.log
+*.tmp
