@@ -22,3 +22,7 @@ __pycache__/
 # Otros archivos temporales
 .DS_Store
 
+
+# Ignorar directorios backend/node_modules y frontend/
+backend/node_modules/
+frontend/
