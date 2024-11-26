@@ -1,43 +1,65 @@
-require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
-const apiRoutes = require('./routes/api'); // Asegúrate de importar las rutas correctamente
-
+const cors = require('cors');
+const axios = require('axios');
 const app = express();
-const PORT = process.env.PORT || 4000;
 
-// Middleware
-app.use(express.json());
+app.use(cors());
 
-// Usar las rutas definidas en api.js
-app.use('/api', apiRoutes); // Esto hace que todas las rutas de 'api' estén disponibles
+const PORT = 4000;
 
-// Ruta simple
-app.get('/', (req, res) => {
-  res.send('Hello, Trivo AI Backend is running!');
+// Clave API de USDA
+const api_key = 'kd28xuanbTU4ZhuAtWS29tHeoP2jtsEEahsaml43';
+
+// Función para obtener los datos nutricionales de la API de USDA
+async function fetchNutritionalData(ingredient) {
+    try {
+        // Realiza la solicitud GET a la API de USDA dentro de una función async
+        const response = await axios.get('https://api.nal.usda.gov/fdc/v1/foods/search', {
+            params: {
+                query: ingredient,
+                api_key: api_key // Usamos la clave API correcta aquí
+            }
+        });
+
+        // Verifica si la respuesta tiene datos
+        if (response.data && response.data.foods) {
+            return {
+                ingredient: ingredient,
+                nutrients: response.data.foods[0].foodNutrients // Extrae los nutrientes del primer resultado
+            };
+        } else {
+            return null; // Si no hay resultados, retorna null
+        }
+    } catch (error) {
+        console.error('Error al obtener los datos de la API:', error);
+        throw new Error('Error en la obtención de datos nutricionales'); // Lanza un error si algo falla
+    }
+}
+
+// Endpoint para obtener datos nutricionales
+app.get('/api/nutrition', async (req, res) => {
+    const ingredient = req.query.ingredient;  // Obtener el ingrediente desde la URL
+
+    if (!ingredient) {
+        return res.status(400).json({ message: 'Por favor ingresa un ingrediente.' });
+    }
+
+    try {
+        const nutrientData = await fetchNutritionalData(ingredient); // Obtener datos nutricionales
+
+        if (nutrientData) {
+            res.json(nutrientData);  // Si los datos se obtienen, devolverlos en formato JSON
+        } else {
+            res.status(404).json({ message: "No se encontraron datos para este ingrediente." });
+        }
+    } catch (error) {
+        console.error("Error en la obtención de datos:", error);
+        res.status(500).json({ message: "Error al obtener los datos nutricionales." });
+    }
 });
 
-// Conectar a MongoDB
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/trivoai';
-mongoose
-  .connect(MONGO_URI)
-  .then(() => {
-    console.log('Connected to MongoDB');
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error('Failed to connect to MongoDB', err);
-  });
-
-app.get('/test-mongo', async (req, res) => {
-  try {
-    const testCollection = mongoose.connection.db.collection('test');
-    const result = await testCollection.insertOne({ message: 'MongoDB is working!' });
-    res.json(result);
-  } catch (err) {
-    res.status(500).send(err.message);
-  }
+// Iniciar el servidor
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
 
