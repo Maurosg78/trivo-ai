@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Datos Nutricionales de Ingredientes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .nutrient {
+            margin-top: 20px;
+        }
+
+        .nutrient p {
+            font-size: 18px;
+            margin: 5px 0;
+        }
+
+        #nutrients {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Consulta de Datos Nutricionales de Ingredientes</h1>
+        
+        <!-- Formulario de ingreso de código de barras -->
+        <input type="text" id="manual-barcode" placeholder="Escribe el código de barras">
+        <button onclick="fetchNutritionalData()">Obtener Datos Nutricionales</button>
+
+        <!-- Área para mostrar la información nutricional -->
+        <div id="nutrients" class="nutrient"></div>
+    </div>
+
+    <script>
+        // Función para obtener los datos nutricionales
+        async function fetchNutritionalData() {
+            const barcode = document.getElementById('manual-barcode').value.trim(); // Obtener el código ingresado manualmente
+            const nutrientDiv = document.getElementById('nutrients');
+            
+            if (!barcode) {
+                nutrientDiv.innerHTML = "<p>Por favor, ingresa un código de barras.</p>";
+                return;
+            }
+
+            const url = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.product && data.product.nutriments) {
+                    const nutrients = data.product.nutriments;
+                    let output = `<h3>Información Nutricional para: ${data.product.product_name || "Producto Desconocido"}</h3>`;
+                    for (const [key, value] of Object.entries(nutrients)) {
+                        output += `<p><strong>${key}:</strong> ${value}</p>`;
+                    }
+                    nutrientDiv.innerHTML = output;
+                } else {
+                    nutrientDiv.innerHTML = "<p>No se encontraron datos para este código de barras.</p>";
+                }
+            } catch (error) {
+                console.error('Error al obtener los datos:', error);
+                nutrientDiv.innerHTML = "<p>Error al obtener los datos nutricionales. Intenta nuevamente.</p>";
+            }
+        }
+    </script>
+</body>
+</html>

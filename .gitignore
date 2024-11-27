@@ -1,0 +1,17 @@
+# Dependencias de Node.js
+node_modules/
+
+# Archivos de entorno
+.env
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Directorios de construcción
+dist/
+build/
+
+# Configuración del editor
+.vscode/
+.idea/
