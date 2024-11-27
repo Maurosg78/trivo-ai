@@ -1,219 +1,159 @@
 const express = require('express');
 const axios = require('axios');
+require('dotenv').config();
+const cors = require('cors');
 
 const app = express();
 const PORT = 4000;
 
-// Función para buscar alternativas vegetales en línea
-async function findPlantBasedAlternativesOnline(productNutriments) {
+// Configuración de CORS (actualizada para seguridad)
+app.use(cors({
+    origin: '*', // Cambia esto por el dominio del frontend en producción, ej: 'http://localhost:5500'
+    methods: ['GET', 'POST'], // Métodos permitidos
+    allowedHeaders: ['Content-Type'], // Headers permitidos
+}));
+
+// API Key de USDA
+const USDA_API_KEY = process.env.USDA_API_KEY;
+
+// Función para obtener datos de Open Food Facts
+async function fetchFromOpenFoodFacts(barcode) {
     try {
-        // Realizar búsqueda en Open Food Facts por ingredientes vegetales
-        const response = await axios.get('https://world.openfoodfacts.org/cgi/search.pl', {
+        const response = await axios.get(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+        if (response.data.status === 1 && response.data.product) {
+            const product = response.data.product;
+            return {
+                source: 'Open Food Facts',
+                name: product.product_name || 'Unknown',
+                nutriments: product.nutriments || {},
+                ingredients: product.ingredients_text ? [product.ingredients_text] : [],
+            };
+        }
+    } catch (error) {
+        console.error('Error en Open Food Facts:', error.message);
+    }
+    return null;
+}
+
+// Función para obtener datos de USDA
+async function fetchFromUSDA(query) {
+    try {
+        const response = await axios.get('https://api.nal.usda.gov/fdc/v1/foods/search', {
             params: {
-                search_terms: 'vegetables', // Ajuste del término de búsqueda
-                json: true,
-                page_size: 20 // Obtener hasta 20 resultados
+                query: query,
+                api_key: USDA_API_KEY,
+            },
+        });
+
+        if (response.data.foods && response.data.foods.length > 0) {
+            const food = response.data.foods[0]; // Tomar el primer resultado
+
+            // Convertir nutrimentos en un objeto legible
+            const nutrients = {};
+            if (food.foodNutrients) {
+                food.foodNutrients.forEach((n) => {
+                    nutrients[n.nutrientName] = n.value || 'Not available';
+                });
             }
-        });
-
-        const products = response.data.products || [];
-
-        if (products.length === 0) {
-            console.log('No se encontraron productos en Open Food Facts.');
-            return [];
-        }
-
-        // Filtrar productos con valores nutricionales completos
-        const validProducts = products.filter(product => {
-            const nutriments = product.nutriments || {};
-            return nutriments.proteins_100g && nutriments.carbohydrates_100g && nutriments.fat_100g;
-        });
-
-        if (validProducts.length === 0) {
-            console.log('No se encontraron productos con valores nutricionales completos.');
-            return [];
-        }
-
-        // Calcular distancia ponderada entre nutrientes
-        return validProducts.map(product => {
-            const nutriments = product.nutriments;
-
-            const score =
-                2 * Math.abs((productNutriments.proteins || 0) - (nutriments.proteins_100g || 0)) +
-                1 * Math.abs((productNutriments.carbohydrates || 0) - (nutriments.carbohydrates_100g || 0)) +
-                1 * Math.abs((productNutriments.fat || 0) - (nutriments.fat_100g || 0));
 
             return {
-                name: product.product_name || 'Unknown',
-                nutriments,
-                score
+                source: 'USDA',
+                rawData: food, // Respuesta completa para uso adicional
+                name: food.description || 'Unknown',
+                nutriments: nutrients,
+                ingredients: food.ingredients || ['Unknown'], // Ingredientes si están disponibles
             };
-        }).sort((a, b) => a.score - b.score) // Ordenar por menor distancia
-            .slice(0, 5); // Limitar a las 5 mejores alternativas
-    } catch (error) {
-        console.error('Error fetching plant-based alternatives:', error.message);
-        return [];
-    }
-}
-
-// Función para calcular proporciones escaladas
-function calculateProportions(alternatives, targetNutriments, targetWeight = 500) {
-    if (alternatives.length === 0) {
-        return [];
-    }
-
-    const proportions = alternatives.map(alt => {
-        const nutriments = alt.nutriments;
-
-        const scaleFactor = targetWeight / 100; // Basado en 100 g
-        return {
-            name: alt.name,
-            amount: scaleFactor, // Cantidad en gramos
-            contribution: {
-                proteins: (nutriments.proteins_100g || 0) * scaleFactor,
-                carbohydrates: (nutriments.carbohydrates_100g || 0) * scaleFactor,
-                fat: (nutriments.fat_100g || 0) * scaleFactor
-            }
-        };
-    });
-
-    return proportions;
-}
-
-// Endpoint para obtener datos nutricionales por código de barras
-app.get('/api/nutrition/:barcode', async (req, res) => {
-    const { barcode } = req.params;
-
-    try {
-        // Llamar a Open Food Facts para obtener datos del producto
-        const response = await axios.get(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-        const data = response.data;
-
-        if (data.status === 1) {
-            const productNutriments = data.product.nutriments;
-
-            // Validar si el producto tiene valores nutricionales significativos
-            if (
-                (productNutriments.proteins || 0) === 0 &&
-                (productNutriments.carbohydrates || 0) === 0 &&
-                (productNutriments.fat || 0) === 0
-            ) {
-                return res.json({
-                    success: true,
-                    product: {
-                        name: data.product.product_name || 'Unknown',
-                        nutriments: productNutriments
-                    },
-                    message: "Este producto no tiene valores nutricionales significativos para buscar alternativas."
-                });
-            }
-
-            console.log('Buscando alternativas vegetales...');
-            const alternatives = await findPlantBasedAlternativesOnline(productNutriments);
-
-            if (alternatives.length === 0) {
-                return res.json({
-                    success: true,
-                    product: {
-                        name: data.product.product_name || 'Unknown',
-                        nutriments: productNutriments
-                    },
-                    message: "No se encontraron alternativas vegetales relevantes en Open Food Facts."
-                });
-            }
-
-            console.log('Alternativas encontradas:', alternatives);
-
-            const proportions = calculateProportions(alternatives, productNutriments, 500);
-            console.log('Proporciones calculadas:', proportions);
-
-            return res.json({
-                success: true,
-                product: {
-                    name: data.product.product_name || 'Unknown',
-                    nutriments: productNutriments
-                },
-                alternatives,
-                proportions
-            });
-        } else {
-            return res.status(404).json({ success: false, message: 'Product not found' });
         }
     } catch (error) {
-        console.error('Error fetching product data:', error.message);
-        return res.status(500).json({ success: false, message: 'Error fetching product data' });
+        console.error('Error en USDA:', error.message);
+    }
+    return null;
+}
+
+// Función para combinar datos de ambas fuentes
+function combineData(data1, data2) {
+    if (!data1 && !data2) return null;
+
+    const combined = {
+        sources: [],
+        name: data1?.name || data2?.name || 'Unknown',
+        nutriments: {},
+        ingredients: [],
+    };
+
+    if (data1) {
+        combined.sources.push(data1.source);
+        combined.nutriments = { ...combined.nutriments, ...data1.nutriments };
+        combined.ingredients = [...combined.ingredients, ...data1.ingredients];
+    }
+
+    if (data2) {
+        combined.sources.push(data2.source);
+        Object.keys(data2.nutriments).forEach((key) => {
+            if (combined.nutriments[key] !== undefined) {
+                combined.nutriments[key] = (combined.nutriments[key] + data2.nutriments[key]) / 2; // Promedio
+            } else {
+                combined.nutriments[key] = data2.nutriments[key];
+            }
+        });
+        combined.ingredients = [...combined.ingredients, ...data2.ingredients];
+    }
+
+    // Limpiar ingredientes duplicados
+    combined.ingredients = [...new Set(combined.ingredients)];
+
+    // Incluir datos sin procesar si están disponibles
+    if (data2?.rawData) {
+        combined.usdaRawData = data2.rawData;
+    }
+
+    return combined;
+}
+
+// Endpoint principal
+app.get('/api/nutrition/:input', async (req, res) => {
+    const { input } = req.params;
+
+    try {
+        // Verificar si es un código de barras (8 a 13 dígitos numéricos)
+        const isBarcode = /^\d{8,13}$/.test(input);
+
+        let openFoodFactsData = null;
+        let usdaData = null;
+
+        if (isBarcode) {
+            // Si es un código de barras, consultar ambas bases
+            openFoodFactsData = await fetchFromOpenFoodFacts(input);
+            usdaData = await fetchFromUSDA(input); // También se prueba con el código de barras
+        } else {
+            // Si es un nombre de producto, consultar USDA únicamente
+            usdaData = await fetchFromUSDA(input);
+        }
+
+        // Combinar datos de ambas fuentes
+        const combinedData = combineData(openFoodFactsData, usdaData);
+
+        if (!combinedData) {
+            return res.status(404).json({
+                success: false,
+                message: 'Producto no encontrado en ninguna base de datos.',
+            });
+        }
+
+        return res.json({
+            success: true,
+            product: combinedData,
+        });
+    } catch (error) {
+        console.error('Error al obtener datos nutricionales:', error.message);
+        return res.status(500).json({
+            success: false,
+            message: 'Error al procesar la solicitud.',
+        });
     }
 });
 
-// Iniciar el servidor
+// Iniciar servidor
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
-
-app.get('/api/nutrition/:barcode', async (req, res) => {
-    const { barcode } = req.params;
-
-    try {
-        const response = await axios.get(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-        const data = response.data;
-
-        if (data.status === 1) {
-            const productNutriments = data.product.nutriments;
-
-            if (
-                (productNutriments.proteins || 0) === 0 &&
-                (productNutriments.carbohydrates || 0) === 0 &&
-                (productNutriments.fat || 0) === 0
-            ) {
-                console.log('Producto sin nutrientes significativos.');
-                return res.json({
-                    success: true,
-                    product: {
-                        name: data.product.product_name || 'Unknown',
-                        nutriments: productNutriments
-                    },
-                    message: "Este producto no tiene valores nutricionales significativos para buscar alternativas."
-                });
-            }
-
-            console.log('Producto recibido desde Open Food Facts:', data.product.product_name);
-            console.log('Nutrientes del producto:', productNutriments);
-
-            console.log('Buscando alternativas vegetales...');
-            const alternatives = await findPlantBasedAlternativesOnline(productNutriments);
-
-            if (alternatives.length === 0) {
-                console.log('No se encontraron alternativas vegetales relevantes.');
-                return res.json({
-                    success: true,
-                    product: {
-                        name: data.product.product_name || 'Unknown',
-                        nutriments: productNutriments
-                    },
-                    message: "No se encontraron alternativas vegetales relevantes en Open Food Facts."
-                });
-            }
-
-            console.log('Alternativas encontradas:', alternatives);
-
-            const proportions = calculateProportions(alternatives, productNutriments, 500);
-            console.log('Proporciones calculadas:', proportions);
-
-            return res.json({
-                success: true,
-                product: {
-                    name: data.product.product_name || 'Unknown',
-                    nutriments: productNutriments
-                },
-                alternatives,
-                proportions
-            });
-        } else {
-            console.log('Producto no encontrado en Open Food Facts.');
-            return res.status(404).json({ success: false, message: 'Product not found' });
-        }
-    } catch (error) {
-        console.error('Error fetching product data:', error.message);
-        return res.status(500).json({ success: false, message: 'Error fetching product data' });
-    }
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
