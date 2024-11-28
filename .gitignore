@@ -15,3 +15,6 @@ build/
 # Configuración del editor
 .vscode/
 .idea/
+backend/estructura_proyecto.txt
+backend/test.js
+estructura_proyecto.txt
