@@ -1,21 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nutrition Search</title>
-    <link rel="stylesheet" href="./css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Búsqueda de Información Nutricional</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      font-size: 16px;
+    }
+    button {
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Search for Product Nutrition</h1>
-        <form id="nutrition-form">
-            <label for="search-input">Enter Barcode or Product Name:</label>
-            <input type="text" id="search-input" placeholder="E.g., 6001306015501 or Corn Flakes" required>
-            <button type="submit">Search</button>
-        </form>
-        <div id="result-container"></div>
-    </div>
-    <script src="./js/app.js" defer></script>
+  <h1>Búsqueda de Información Nutricional</h1>
+  <input type="text" id="productName" placeholder="Ingrese el nombre del producto" />
+  <button onclick="fetchProductData()">Buscar</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    async function fetchProductData() {
+      const productName = document.getElementById('productName').value.trim();
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = 'Cargando...';
+
+      try {
+        const response = await fetch(`http://localhost:4000/api/nutrition?input=${encodeURIComponent(productName)}`);
+        const data = await response.json();
+
+        if (data.success) {
+          resultDiv.innerHTML = `
+            <h2>Datos del Producto</h2>
+            <h3>USDA Data:</h3>
+            <p><strong>Descripción:</strong> ${data.product.usda.description}</p>
+            <p><strong>Ingredientes:</strong> ${data.product.usda.ingredients}</p>
+            <h4>Nutrientes:</h4>
+            <ul>
+              ${data.product.usda.foodNutrients.map(nutrient => `<li><strong>${nutrient.name}:</strong> ${nutrient.value} ${nutrient.unit}</li>`).join('')}
+            </ul>
+            <h3>Open Food Facts Data:</h3>
+            <p><strong>Ingredientes:</strong> ${data.product.openFoodFacts.ingredients}</p>
+          `;
+        } else {
+          resultDiv.innerHTML = `<p>No se encontraron datos para este producto.</p>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+      }
+    }
+  </script>
 </body>
 </html>
