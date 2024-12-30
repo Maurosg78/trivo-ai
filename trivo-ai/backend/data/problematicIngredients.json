@@ -1,0 +1,80 @@
+{
+    "gluten": {
+      "reason": "Común alérgeno presente en el trigo, la cebada y el centeno.",
+      "substitutes": ["almond flour", "coconut flour", "rice flour"],
+      "regulatedBy": ["EU", "USDA"],
+      "categories": ["allergen"],
+      "aliases": ["trigo", "cebada", "centeno", "harina de trigo", "farine de blé", "wheat flour", "kamut", "spelt", "einkorn", "emmer"]
+    },
+    "lactose": {
+      "reason": "Alérgeno común presente en productos lácteos.",
+      "substitutes": ["almond milk", "oat milk", "coconut milk"],
+      "regulatedBy": ["EU", "USDA"],
+      "categories": ["allergen"],
+      "aliases": ["lactosa", "milk", "leche", "dairy", "buttermilk", "cheese", "cream", "whey"]
+    },
+    "soy": {
+      "reason": "Alérgeno común presente en productos a base de soya.",
+      "substitutes": ["coconut-based products", "almond-based products"],
+      "regulatedBy": ["EU", "USDA"],
+      "categories": ["allergen"],
+      "aliases": ["soja", "soy protein", "edamame", "soy protein isolate", "tofu", "soya", "tempeh", "lecithin (soy)"]
+    },
+    "egg": {
+      "reason": "Común alérgeno en productos derivados del huevo.",
+      "substitutes": ["flaxseed meal", "aquafaba", "chia seeds"],
+      "regulatedBy": ["EU", "USDA"],
+      "categories": ["allergen"],
+      "aliases": ["huevo", "egg", "albumen", "ovoproductos", "ovum", "egg powder"]
+    },
+    "tree nuts": {
+      "reason": "Alérgeno presente en nueces, almendras, avellanas, entre otros.",
+      "substitutes": ["sunflower seeds", "pumpkin seeds"],
+      "regulatedBy": ["EU", "USDA"],
+      "categories": ["allergen"],
+      "aliases": ["nueces", "almendras", "avellanas", "pecans", "macadamia", "cashews", "brazil nuts", "walnuts"]
+    },
+    "crustaceans": {
+      "reason": "Alérgeno común en productos del mar como camarones y cangrejos.",
+      "substitutes": ["tofu", "jackfruit", "mushrooms"],
+      "regulatedBy": ["EU", "USDA"],
+      "categories": ["allergen"],
+      "aliases": ["crustáceos", "shrimp", "prawns", "lobster", "crab", "langoustine"]
+    },
+    "monosodium glutamate (MSG)": {
+      "reason": "Puede causar reacciones de sensibilidad en algunas personas.",
+      "substitutes": ["nutritional yeast", "mushroom powder"],
+      "regulatedBy": ["FAO", "USDA"],
+      "categories": ["chemical", "sensitivity"],
+      "aliases": ["MSG", "glutamato monosódico", "ajinomoto", "E621", "umami enhancer"]
+    },
+    "sodium nitrite (E250)": {
+      "reason": "Posible carcinógeno usado como conservante en carnes procesadas.",
+      "substitutes": ["celery juice powder", "natural salt"],
+      "regulatedBy": ["EU", "WHO"],
+      "categories": ["chemical", "preservative"],
+      "aliases": ["nitrito de sodio", "sodium nitrite"]
+    },
+    "tartrazine (E102)": {
+      "reason": "Colorante artificial amarillo vinculado a hiperactividad en niños y reacciones alérgicas.",
+      "substitutes": ["beet juice", "turmeric", "spirulina"],
+      "regulatedBy": ["EU", "USDA"],
+      "categories": ["chemical", "colorant"],
+      "aliases": ["tartrazine", "FD&C Yellow No. 5"]
+    },
+    "aspartame (E951)": {
+      "reason": "Edulcorante artificial asociado con posibles efectos neurotóxicos y trastornos metabólicos.",
+      "substitutes": ["stevia", "honey", "maple syrup"],
+      "regulatedBy": ["EU", "USDA"],
+      "categories": ["chemical", "sweetener"],
+      "aliases": ["aspartame", "NutraSweet", "Equal"]
+    },
+    "high fructose corn syrup": {
+      "reason": "Asociado con obesidad y problemas metabólicos.",
+      "substitutes": ["honey", "maple syrup"],
+      "regulatedBy": ["USDA"],
+      "categories": ["sweetener", "controversial"],
+      "aliases": ["HFCS", "jarabe de maíz de alta fructosa", "corn syrup solids", "glucose-fructose syrup"]
+    }
+  }
+  
