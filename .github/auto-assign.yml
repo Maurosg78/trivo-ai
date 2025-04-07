@@ -1,0 +1,25 @@
+# Configuración para asignación automática de revisores
+reviewers:
+  - mauriciosobarzo
+
+# Asignar revisores basados en etiquetas
+labelReviewers:
+  bug:
+    - mauriciosobarzo
+  enhancement:
+    - mauriciosobarzo
+  documentation:
+    - mauriciosobarzo
+  dependencies:
+    - mauriciosobarzo
+
+# Asignar revisores basados en directorios
+fileReviewers:
+  src/core/:
+    - mauriciosobarzo
+  src/features/:
+    - mauriciosobarzo
+  tests/:
+    - mauriciosobarzo
+  docs/:
+    - mauriciosobarzo 

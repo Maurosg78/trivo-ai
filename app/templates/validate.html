@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validar Receta - TRIVO-AI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">TRIVO-AI</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/optimize">Crear Receta</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/validate"><i class="fas fa-check-circle me-1"></i> Validar Receta</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/cache-intelligence"><i class="fas fa-brain me-1"></i> Caché Inteligente</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about"><i class="fas fa-info-circle me-1"></i> Acerca de</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="bg-primary text-white text-center py-5">
+        <div class="container">
+            <h1 class="display-4">Validador de Recetas</h1>
+            <p class="lead">Verifica si tu receta cumple con estándares profesionales para diferentes escalas de producción</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container my-5">
+        <div class="row">
+            <div class="col-12">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Validación de Recetas</h5>
+                        <div class="nav nav-tabs card-header-tabs" id="validate-tab" role="tablist">
+                            <button class="nav-link active" id="file-tab" data-bs-toggle="tab" data-bs-target="#file-content" type="button" role="tab" aria-controls="file-content" aria-selected="true">Archivo</button>
+                            <button class="nav-link" id="api-tab" data-bs-toggle="tab" data-bs-target="#api-content" type="button" role="tab" aria-controls="api-content" aria-selected="false">API REST</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="validate-tab-content">
+                            <!-- Pestaña de validación mediante archivo -->
+                            <div class="tab-pane fade show active" id="file-content" role="tabpanel" aria-labelledby="file-tab">
+                                <form action="/validate" method="post" enctype="multipart/form-data">
+                                    <div class="mb-3">
+                                        <label for="recipe_file" class="form-label">Archivo de Receta (JSON):</label>
+                                        <input type="file" class="form-control" id="recipe_file" name="recipe_file" required accept=".json">
+                                        <div class="form-text">Sube un archivo JSON con tu receta</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="production_scale" class="form-label">Escala de Producción:</label>
+                                        <select class="form-select" id="production_scale" name="production_scale" required>
+                                            <option value="individual">Individual/Hogar</option>
+                                            <option value="small_business">Pequeño Negocio</option>
+                                            <option value="industrial">Industrial</option>
+                                        </select>
+                                        <div class="form-text">Selecciona la escala para la que se validará la receta</div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary">Validar Receta</button>
+                                </form>
+                            </div>
+                            
+                            <!-- Nueva pestaña de validación mediante API REST -->
+                            <div class="tab-pane fade" id="api-content" role="tabpanel" aria-labelledby="api-tab">
+                                <p class="mb-3">Valida tu receta utilizando la API REST. Envía los datos en formato JSON directamente.</p>
+                                
+                                <form id="api-form">
+                                    <div class="mb-3">
+                                        <label for="recipe_type" class="form-label">Tipo de Receta:</label>
+                                        <select class="form-select" id="recipe_type" name="recipe_type" required>
+                                            <option value="pizza">Pizza</option>
+                                            <option value="pan">Pan</option>
+                                            <option value="focaccia">Focaccia</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="recipe_json" class="form-label">Ingredientes (JSON):</label>
+                                        <textarea class="form-control" id="recipe_json" name="recipe_json" rows="10" required placeholder='{
+    "harina": 500,
+    "agua": 325, 
+    "sal": 10,
+    "levadura": 5,
+    "aceite_oliva": 15,
+    "tiempo_fermentacion": 24,
+    "temperatura_fermentacion": 4
+}'></textarea>
+                                        <div class="form-text">Ingresa un objeto JSON con tus ingredientes y parámetros</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="api_production_scale" class="form-label">Escala de Producción:</label>
+                                        <select class="form-select" id="api_production_scale" name="api_production_scale" required>
+                                            <option value="individual">Individual/Hogar</option>
+                                            <option value="small_business">Pequeño Negocio</option>
+                                            <option value="industrial">Industrial</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="api_url" class="form-label">URL del Endpoint:</label>
+                                        <input type="text" class="form-control" id="api_url" name="api_url" value="/api/v1/validation/validate" required>
+                                        <div class="form-text">URL del endpoint de validación (por defecto es local)</div>
+                                    </div>
+                                    
+                                    <button type="button" id="api_validate_btn" class="btn btn-primary">Validar mediante API</button>
+                                </form>
+                                
+                                <div class="mt-4" id="api_response_container" style="display: none;">
+                                    <h5>Respuesta de la API:</h5>
+                                    <pre id="api_response" class="bg-light p-3 rounded" style="max-height: 400px; overflow-y: auto;"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if results %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Resultados de la Validación</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h5>Estado General: 
+                                    {% if results.is_viable %}
+                                        <span class="badge bg-success">Viable</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">No Viable</span>
+                                    {% endif %}
+                                </h5>
+                                <p>Reglas verificadas: {{ results.total_rules_checked }} | Problemas encontrados: {{ results.total_issues }}</p>
+                            </div>
+                            <div style="width: 200px; height: 200px;">
+                                <canvas id="issuesChart"></canvas>
+                            </div>
+                        </div>
+
+                        {% if results.recommendations %}
+                        <div class="mb-4">
+                            <h5>Recomendaciones:</h5>
+                            <ul class="list-group">
+                                {% for rec in results.recommendations %}
+                                <li class="list-group-item">{{ rec }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <h5>Detalles:</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Regla</th>
+                                        <th>Resultado</th>
+                                        <th>Severidad</th>
+                                        <th>Mensaje</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for rule in results.details %}
+                                    <tr class="{{ 'table-danger' if not rule.passed and rule.severity == 'critical' else 'table-warning' if not rule.passed else 'table-success' }}">
+                                        <td>{{ rule.code }}</td>
+                                        <td>
+                                            {% if rule.passed %}
+                                            <span class="badge bg-success">Pasó</span>
+                                            {% else %}
+                                            <span class="badge bg-danger">Falló</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if rule.severity == 'critical' %}
+                                            <span class="badge bg-danger">Crítica</span>
+                                            {% elif rule.severity == 'medium' %}
+                                            <span class="badge bg-warning text-dark">Media</span>
+                                            {% else %}
+                                            <span class="badge bg-info text-dark">Baja</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {{ rule.message }}
+                                            {% if not rule.passed and rule.recommendation %}
+                                            <br><small class="text-muted"><strong>Recomendación:</strong> {{ rule.recommendation }}</small>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if contextual_recommendations and contextual_recommendations.issues_found %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Recomendaciones Contextuales Avanzadas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <strong>Contexto de la receta:</strong> 
+                            {% if contextual_recommendations.recipe_context.has_gluten == false %}
+                                <span class="badge bg-info me-1">Sin Gluten</span>
+                            {% endif %}
+                            {% if contextual_recommendations.recipe_context.has_yeast == true %}
+                                <span class="badge bg-info me-1">Con Levadura</span>
+                            {% else %}
+                                <span class="badge bg-info me-1">Sin Levadura</span>
+                            {% endif %}
+                            {% for restriction in contextual_recommendations.recipe_context.dietary_restrictions %}
+                                <span class="badge bg-info me-1">{{ restriction }}</span>
+                            {% endfor %}
+                            <span class="badge bg-info me-1">{{ contextual_recommendations.recipe_context.oven_type|replace('_', ' ')|title }}</span>
+                        </div>
+                        
+                        <!-- Recomendaciones generales -->
+                        {% if contextual_recommendations.combined_recommendations.general %}
+                        <h5 class="mt-4 mb-3">Recomendaciones Generales</h5>
+                        <div class="list-group mb-4">
+                            {% for rec in contextual_recommendations.combined_recommendations.general %}
+                            <div class="list-group-item">
+                                <i class="bi bi-lightbulb text-warning me-2"></i> {{ rec }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Técnicas recomendadas -->
+                        {% if contextual_recommendations.combined_recommendations.techniques %}
+                        <h5 class="mb-3">Técnicas Recomendadas</h5>
+                        <div class="row mb-4">
+                            {% for technique in contextual_recommendations.combined_recommendations.techniques %}
+                            <div class="col-md-6 mb-2">
+                                <div class="card h-100 bg-light">
+                                    <div class="card-body">
+                                        <p class="card-text">
+                                            <i class="bi bi-wrench me-2 text-primary"></i> {{ technique }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Sustituciones de ingredientes -->
+                        {% if contextual_recommendations.combined_recommendations.substitutions %}
+                        <h5 class="mb-3">Sustituciones de Ingredientes</h5>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Ingrediente Original</th>
+                                        <th>Alternativas</th>
+                                        <th>Restricción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for sub in contextual_recommendations.combined_recommendations.substitutions %}
+                                    <tr>
+                                        <td><strong>{{ sub.original }}</strong></td>
+                                        <td>
+                                            <ul class="list-unstyled mb-0">
+                                                {% for alt in sub.alternatives %}
+                                                <li>• {{ alt }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ sub.restriction }}</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Equipo recomendado -->
+                        {% if contextual_recommendations.combined_recommendations.equipment %}
+                        <h5 class="mb-3">Equipo Recomendado</h5>
+                        <div class="alert alert-secondary">
+                            <ul class="mb-0">
+                                {% for equip in contextual_recommendations.combined_recommendations.equipment %}
+                                <li>{{ equip }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>TRIVO-AI</h5>
+                    <p>Sistema inteligente para la formulación y validación de recetas de masas.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h5>Enlaces</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="https://github.com/usuario/TRIVO-AI" target="_blank" rel="noopener" class="text-white">GitHub</a></li>
+                        <li><a href="/about" class="text-white">Acerca de</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12 text-center">
+                    <p class="mb-0">&copy; 2023 TRIVO-AI. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% if results %}
+    <script>
+        // Crear gráfico de problemas
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('issuesChart').getContext('2d');
+            
+            // Datos para el gráfico
+            const issuesBySeverity = {{ results.issues_by_severity|tojson }};
+            const labels = Object.keys(issuesBySeverity);
+            const data = Object.values(issuesBySeverity);
+            
+            // Colores según severidad
+            const colors = {
+                'critical': '#dc3545',
+                'medium': '#ffc107',
+                'low': '#0dcaf0'
+            };
+            
+            const backgroundColors = labels.map(label => colors[label] || '#6c757d');
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Problemas por Severidad'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+    {% endif %}
+    
+    <!-- Script para la pestaña de API -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab navigation
+            const tabs = document.querySelectorAll('#validate-tab .nav-link');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const target = document.querySelector(this.getAttribute('data-bs-target'));
+                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('show', 'active'));
+                    target.classList.add('show', 'active');
+                });
+            });
+            
+            // API validation
+            const apiValidateBtn = document.getElementById('api_validate_btn');
+            if (apiValidateBtn) {
+                apiValidateBtn.addEventListener('click', function() {
+                    // Get form data
+                    const recipeType = document.getElementById('recipe_type').value;
+                    const recipeJson = document.getElementById('recipe_json').value;
+                    const productionScale = document.getElementById('api_production_scale').value;
+                    const apiUrl = document.getElementById('api_url').value;
+                    
+                    // Validate JSON
+                    try {
+                        JSON.parse(recipeJson);
+                    } catch (e) {
+                        alert('Error: El JSON de ingredientes no es válido. Por favor, verifica el formato.');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Validando...';
+                    this.disabled = true;
+                    
+                    // Prepare request
+                    const requestData = {
+                        recipe: JSON.parse(recipeJson),
+                        recipe_type: recipeType,
+                        production_scale: productionScale
+                    };
+                    
+                    // Send request
+                    fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Display response
+                        const responseContainer = document.getElementById('api_response_container');
+                        const responseElement = document.getElementById('api_response');
+                        
+                        responseContainer.style.display = 'block';
+                        responseElement.textContent = JSON.stringify(data, null, 2);
+                        
+                        // Syntax highlighting (if using a library like Prism.js)
+                        if (window.Prism) {
+                            Prism.highlightElement(responseElement);
+                        }
+                    })
+                    .catch(error => {
+                        alert(`Error: ${error.message}`);
+                        console.error('Error:', error);
+                    })
+                    .finally(() => {
+                        // Reset button state
+                        this.innerHTML = 'Validar mediante API';
+                        this.disabled = false;
+                    });
+                });
+            }
+            
+            // Chart for issues if results exist
+            const issuesChartElement = document.getElementById('issuesChart');
+            if (issuesChartElement) {
+                // Variables para el gráfico
+                let chartLabels = ['Críticos', 'Medios', 'Bajos', 'Pasados'];
+                let chartData = [0, 0, 0, 0];
+                let issuesData = {
+                    critical: 0,
+                    medium: 0,
+                    low: 0
+                };
+                let rulesPassed = 0;
+                
+                // Obtener datos de las variables del servidor
+                {% if results and results.issues_by_severity %}
+                    issuesData.critical = {{ results.issues_by_severity.critical|default(0) }};
+                    issuesData.medium = {{ results.issues_by_severity.medium|default(0) }};
+                    issuesData.low = {{ results.issues_by_severity.low|default(0) }};
+                    rulesPassed = {{ results.rules_passed|default(0) }};
+                {% endif %}
+                
+                {% if validation_results and validation_results.issues_by_severity %}
+                    issuesData.critical = {{ validation_results.issues_by_severity.critical|default(0) }};
+                    issuesData.medium = {{ validation_results.issues_by_severity.medium|default(0) }};
+                    issuesData.low = {{ validation_results.issues_by_severity.low|default(0) }};
+                    rulesPassed = {{ validation_results.rules_passed|default(0) }};
+                {% endif %}
+                
+                // Asignar datos al array
+                chartData = [
+                    issuesData.critical,
+                    issuesData.medium,
+                    issuesData.low,
+                    rulesPassed
+                ];
+                
+                // Crear el gráfico
+                const issuesChart = new Chart(issuesChartElement, {
+                    type: 'doughnut',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            data: chartData,
+                            backgroundColor: [
+                                '#dc3545', // Rojo para críticos
+                                '#ffc107', // Amarillo para medios
+                                '#17a2b8', // Azul claro para bajos
+                                '#28a745'  // Verde para pasados
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 15
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        var label = context.label || '';
+                                        var value = context.raw || 0;
+                                        var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        var percentage = Math.round((value / total) * 100);
+                                        return `${label}: ${value} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

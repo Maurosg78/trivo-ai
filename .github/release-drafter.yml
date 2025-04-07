@@ -1,0 +1,48 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+categories:
+  - title: '🚀 Características'
+    labels:
+      - 'enhancement'
+      - 'feature'
+  - title: '🐛 Correcciones de Bugs'
+    labels:
+      - 'bug'
+      - 'fix'
+  - title: '📚 Documentación'
+    labels:
+      - 'documentation'
+  - title: '🔧 Dependencias'
+    labels:
+      - 'dependencies'
+  - title: '⚡️ Mejoras de Rendimiento'
+    labels:
+      - 'performance'
+  - title: '🔒 Seguridad'
+    labels:
+      - 'security'
+  - title: '🧪 Tests'
+    labels:
+      - 'test'
+  - title: '📦 Otros Cambios'
+    labels:
+      - '*'
+
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+
+version-resolver:
+  major:
+    labels:
+      - 'major'
+  minor:
+    labels:
+      - 'minor'
+  patch:
+    labels:
+      - 'patch'
+      - 'fix'
+      - 'bugfix'
+
+template: |
+  ## Cambios
+  $CHANGES 

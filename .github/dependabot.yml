@@ -1,0 +1,28 @@
+version: 2
+updates:
+  # Mantener actualizadas las dependencias de Python
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "pip"
+      include: "scope"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
+      dev-dependencies:
+        patterns:
+          - "pytest*"
+          - "black"
+          - "isort"
+          - "mypy"
+          - "flake8"
+          - "bandit"
+          - "safety" 

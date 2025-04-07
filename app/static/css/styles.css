@@ -1,0 +1,392 @@
+/* TRIVO-AI - Estilos personalizados */
+
+/* Variables de colores */
+:root {
+    --trivo-green: #27ae60;
+    --trivo-green-light: #2ecc71;
+    --trivo-green-dark: #219653;
+    --trivo-orange: #e67e22;
+    --trivo-orange-light: #f39c12;
+    --trivo-orange-dark: #d35400;
+    --trivo-black: #121212;
+    --trivo-dark: #1e1e1e;
+    --trivo-dark-lighter: #2d2d2d;
+    --trivo-gray-dark: #333333;
+    --trivo-gray: #555555;
+    --trivo-gray-light: #aaaaaa;
+    --trivo-light: #f8f9fa;
+}
+
+/* Tema claro (por defecto) */
+.theme-trivo {
+    --bg-primary: var(--trivo-light);
+    --bg-secondary: #ffffff;
+    --bg-accent: var(--trivo-green);
+    --text-primary: #212529;
+    --text-secondary: #555555;
+    --text-accent: #ffffff;
+    --border-color: #e9ecef;
+}
+
+/* Tema oscuro */
+.theme-trivo.dark-mode {
+    --bg-primary: var(--trivo-black);
+    --bg-secondary: var(--trivo-dark);
+    --bg-accent: var(--trivo-green);
+    --text-primary: #f8f9fa;
+    --text-secondary: #cccccc;
+    --text-accent: #ffffff;
+    --border-color: var(--trivo-dark-lighter);
+}
+
+/* Estilos generales */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    transition: all 0.3s ease;
+}
+
+/* Navbar personalizada */
+.navbar-brand {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Hero section */
+.hero-section {
+    background-color: var(--bg-primary);
+    padding: 4rem 0;
+}
+
+.hero-section h1 {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Iconos de características */
+.feature-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+}
+
+/* Cartas con sombras suaves */
+.card {
+    border: none;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card.shadow-sm:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Botones personalizados */
+.btn {
+    border-radius: 5px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--trivo-green);
+    border-color: var(--trivo-green);
+}
+
+.btn-primary:hover {
+    background-color: var(--trivo-green-dark);
+    border-color: var(--trivo-green-dark);
+}
+
+.btn-outline-primary {
+    color: var(--trivo-green);
+    border-color: var(--trivo-green);
+}
+
+.btn-outline-primary:hover {
+    color: #fff;
+    background-color: var(--trivo-green);
+    border-color: var(--trivo-green);
+}
+
+/* Formularios */
+.form-control, .form-select {
+    border-radius: 5px;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--trivo-green-light);
+    box-shadow: 0 0 0 0.25rem rgba(39, 174, 96, 0.25);
+}
+
+.input-group-text {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.9em;
+}
+
+/* Alerts */
+.alert {
+    border-radius: 5px;
+    border: none;
+}
+
+/* Footer */
+footer {
+    background-color: var(--trivo-black);
+}
+
+footer a:hover {
+    color: var(--trivo-green) !important;
+}
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 2rem 0;
+    }
+    
+    .feature-icon {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* Animaciones para botones e interacciones */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.btn-primary:active {
+    animation: pulse 0.3s;
+}
+
+/* Estilos para la página de resultados */
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+/* Estilos para el formulario dinámico de ingredientes */
+.ingredient-row {
+    transition: all 0.3s ease;
+}
+
+.ingredient-row:hover {
+    background-color: var(--bg-primary);
+    border-radius: 5px;
+}
+
+.remove-ingredient {
+    opacity: 0.7;
+}
+
+.remove-ingredient:hover {
+    opacity: 1;
+}
+
+/* Estilos para pre/code */
+pre {
+    background-color: var(--bg-secondary);
+    border-radius: 5px;
+    padding: 1rem;
+    font-size: 0.9rem;
+    overflow-x: auto;
+    color: var(--text-primary);
+}
+
+code {
+    color: var(--trivo-orange);
+}
+
+/* Estilos para pantallas de impresión */
+@media print {
+    .navbar, .footer, .btn {
+        display: none !important;
+    }
+    
+    body {
+        padding: 0;
+        margin: 0;
+    }
+    
+    .container {
+        width: 100%;
+        max-width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd;
+    }
+}
+
+/* Colores específicos TRIVO-AI */
+.bg-primary {
+    background-color: var(--trivo-green) !important;
+}
+
+.bg-dark {
+    background-color: var(--trivo-black) !important;
+}
+
+.text-primary {
+    color: var(--trivo-green) !important;
+}
+
+.feature-icon.bg-primary {
+    background-color: var(--trivo-green) !important;
+}
+
+/* Elementos con color naranja */
+.badge.bg-success {
+    background-color: var(--trivo-orange) !important;
+}
+
+.card-header.bg-success {
+    background-color: var(--trivo-orange) !important;
+}
+
+.alert-success {
+    background-color: rgba(230, 126, 34, 0.1);
+    color: var(--trivo-orange);
+    border-color: var(--trivo-orange-light);
+}
+
+/* Tema general con los colores de marca */
+.theme-trivo .nav-link:hover {
+    color: var(--trivo-orange) !important;
+}
+
+/* Campo para entrada de lenguaje natural */
+.natural-language-input {
+    border: 2px solid var(--trivo-green);
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 1.1rem;
+    min-height: 120px;
+    transition: all 0.3s ease;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.natural-language-input:focus {
+    border-color: var(--trivo-orange);
+    box-shadow: 0 0 0 0.25rem rgba(230, 126, 34, 0.25);
+}
+
+.natural-language-submit {
+    background-color: var(--trivo-orange);
+    border-color: var(--trivo-orange);
+}
+
+.natural-language-submit:hover {
+    background-color: var(--trivo-orange-dark);
+    border-color: var(--trivo-orange-dark);
+}
+
+/* Personalización para tema oscuro */
+.dark-mode .card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .bg-light {
+    background-color: var(--trivo-dark) !important;
+}
+
+.dark-mode .text-muted {
+    color: var(--trivo-gray-light) !important;
+}
+
+.dark-mode .navbar-dark {
+    background-color: var(--trivo-dark) !important;
+}
+
+.dark-mode .alert-info {
+    background-color: rgba(52, 152, 219, 0.15);
+    color: #3498db;
+    border-color: rgba(52, 152, 219, 0.3);
+}
+
+.dark-mode .alert-warning {
+    background-color: rgba(241, 196, 15, 0.15);
+    color: #f1c40f;
+    border-color: rgba(241, 196, 15, 0.3);
+}
+
+.dark-mode .alert-danger {
+    background-color: rgba(231, 76, 60, 0.15);
+    color: #e74c3c;
+    border-color: rgba(231, 76, 60, 0.3);
+}
+
+/* Toggle para cambiar entre modos */
+.theme-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--trivo-dark);
+    color: var(--trivo-orange);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.dark-mode .theme-toggle {
+    background-color: var(--trivo-orange);
+    color: var(--trivo-dark);
+}
+
+.theme-toggle:hover {
+    transform: rotate(30deg);
+}
+
+/* Instrucciones de preparación */
+.instructions-list li {
+    margin-bottom: 1rem;
+}
+
+.instructions-list li strong {
+    color: var(--trivo-green);
+}
+
+.dark-mode .instructions-list li strong {
+    color: var(--trivo-green-light);
+} 

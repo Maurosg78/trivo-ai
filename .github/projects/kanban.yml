@@ -1,0 +1,131 @@
+name: PizzaAI Development Board
+description: Kanban board para el desarrollo de PizzaAI
+
+columns:
+  - name: Backlog
+    description: Tareas pendientes de priorización
+    limit: 20
+    cards:
+      - title: Optimizar motor de recomendaciones
+        description: Mejorar el algoritmo de recomendaciones con ML
+        labels: [enhancement, backend, low-priority]
+        assignees: [mauriciosobarzo]
+        
+      - title: Implementar caché distribuido
+        description: Sistema de caché usando Redis
+        labels: [performance, backend, low-priority]
+        assignees: [mauriciosobarzo]
+        
+      - title: Implementar sistema de notificaciones
+        description: Sistema para notificar a usuarios sobre actualizaciones y cambios
+        labels: [feature, backend]
+        assignees: [mauriciosobarzo]
+        
+      - title: Desarrollar dashboard de métricas
+        description: Panel de control para visualizar KPIs y métricas del sistema
+        labels: [feature, frontend]
+        assignees: [mauriciosobarzo]
+        
+      - title: Implementar sistema de reportes
+        description: Generación de reportes personalizados
+        labels: [feature, backend]
+        assignees: [mauriciosobarzo]
+        
+  - name: Sprint Planning
+    description: Tareas seleccionadas para el siguiente sprint
+    limit: 10
+    cards: []
+        
+  - name: In Progress
+    description: Tareas en desarrollo
+    limit: 5
+    cards:
+      - title: Refactorizar servicio USDA
+        description: Mejorar estructura y manejo de errores
+        labels: [refactor, backend, high-priority]
+        assignees: [mauriciosobarzo]
+        
+  - name: Code Review
+    description: Tareas pendientes de revisión
+    limit: 3
+    cards:
+      - title: Tests de integración USDA
+        description: Implementar tests de integración para el servicio USDA
+        labels: [test, backend, high-priority]
+        assignees: [mauriciosobarzo]
+        
+  - name: Testing
+    description: Tareas en fase de pruebas
+    limit: 5
+    cards: []
+        
+  - name: Done
+    description: Tareas completadas
+    limit: 20
+    cards:
+      - title: Configuración inicial del proyecto
+        description: Estructura base y configuración de desarrollo
+        labels: [setup, completed]
+        assignees: [mauriciosobarzo]
+        
+      - title: Configuración de CI/CD
+        description: Pipeline de integración continua
+        labels: [devops, completed]
+        assignees: [mauriciosobarzo]
+        
+      - title: Integración con USDA API
+        description: Implementar servicio para obtener datos nutricionales
+        labels: [feature, backend, completed]
+        assignees: [mauriciosobarzo]
+        
+      - title: Sistema de recomendaciones
+        description: Motor de recomendaciones personalizadas
+        labels: [feature, backend, completed]
+        assignees: [mauriciosobarzo]
+
+automation:
+  - trigger: card moved to "Done"
+    action: add label "completed"
+    
+  - trigger: card moved to "In Progress"
+    action: add label "in-progress"
+    
+  - trigger: card moved to "Code Review"
+    action: add label "needs-review"
+    
+  - trigger: card moved to "Testing"
+    action: add label "needs-testing"
+    
+  - trigger: new card created
+    action: add label "new"
+    
+  - trigger: card moved to "Sprint Planning"
+    action: add label "sprint"
+    
+  - trigger: card moved to "Backlog"
+    action: add label "backlog"
+
+workflows:
+  - name: Feature Development
+    states:
+      - Backlog
+      - Sprint Planning
+      - In Progress
+      - Code Review
+      - Testing
+      - Done
+      
+  - name: Bug Fix
+    states:
+      - Backlog
+      - In Progress
+      - Code Review
+      - Testing
+      - Done
+      
+  - name: Documentation
+    states:
+      - Backlog
+      - In Progress
+      - Code Review
+      - Done 

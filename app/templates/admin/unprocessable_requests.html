@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Peticiones - TRIVO-AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="theme-trivo dark-mode">
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-pizza-slice me-2"></i>TRIVO-AI</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Menú de navegación">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i> Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/optimize"><i class="fas fa-wand-magic-sparkles me-1"></i> Crear Receta</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/validate"><i class="fas fa-check-circle me-1"></i> Validar Receta</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about"><i class="fas fa-info-circle me-1"></i> Acerca de</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/unprocessable-requests"><i class="fas fa-tools me-1"></i> Admin</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h1 class="h3 mb-3">Gestión de Peticiones No Procesables</h1>
+                <p class="text-muted">Esta página muestra las solicitudes de usuarios que el sistema no pudo procesar correctamente.</p>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+                        <h2 class="h5 mb-0">Peticiones Pendientes</h2>
+                        <div>
+                            <span class="badge bg-danger me-2">Pendientes: {{ requests|selectattr('status', 'equalto', 'pending')|list|length }}</span>
+                            <span class="badge bg-warning me-2">En progreso: {{ requests|selectattr('status', 'equalto', 'in_progress')|list|length }}</span>
+                            <span class="badge bg-success">Implementadas: {{ requests|selectattr('status', 'equalto', 'implemented')|list|length }}</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if requests %}
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Fecha</th>
+                                            <th scope="col">Petición</th>
+                                            <th scope="col">Razón</th>
+                                            <th scope="col">Estado</th>
+                                            <th scope="col">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for request in requests %}
+                                            <tr>
+                                                <td>{{ loop.index }}</td>
+                                                <td>{{ request.timestamp[:8] }}<br>{{ request.timestamp[9:] }}</td>
+                                                <td>
+                                                    <div style="max-width: 300px; word-wrap: break-word;">
+                                                        {{ request.request_text }}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    {% if request.reason == "tipo_desconocido" %}
+                                                        <span class="badge bg-danger">Tipo desconocido</span>
+                                                    {% elif request.reason.startswith("tipo_no_implementado:") %}
+                                                        <span class="badge bg-warning">No implementado: {{ request.reason.split(':')[1] }}</span>
+                                                    {% else %}
+                                                        {{ request.reason }}
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if request.status == "pending" %}
+                                                        <span class="badge bg-danger">Pendiente</span>
+                                                    {% elif request.status == "in_progress" %}
+                                                        <span class="badge bg-warning">En progreso</span>
+                                                        {% if request.started_at %}
+                                                            <small class="d-block text-muted mt-1">Desde: {{ request.started_at }}</small>
+                                                        {% endif %}
+                                                    {% elif request.status == "implemented" %}
+                                                        <span class="badge bg-success">Implementado</span>
+                                                        {% if request.implemented_at %}
+                                                            <small class="d-block text-muted mt-1">{{ request.implemented_at }}</small>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton{{ loop.index }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            Actualizar
+                                                        </button>
+                                                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{ loop.index }}">
+                                                            <form action="{{ url_for('update_request_status', filename=request.filename) }}" method="post">
+                                                                <li><button class="dropdown-item" type="submit" name="status" value="pending">Marcar como pendiente</button></li>
+                                                                <li><button class="dropdown-item" type="submit" name="status" value="in_progress">Marcar en progreso</button></li>
+                                                                <li><button class="dropdown-item" type="submit" name="status" value="implemented">Marcar como implementado</button></li>
+                                                            </form>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                <h3 class="h5">¡No hay peticiones pendientes!</h3>
+                                <p>Todas las solicitudes han sido procesadas correctamente.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-success text-white py-3">
+                        <h2 class="h5 mb-0">Guía para Implementación</h2>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="h6 mb-3">Instrucciones para añadir nuevos tipos de recetas:</h3>
+                        <ol class="mb-0">
+                            <li class="mb-2">Añadir el nuevo tipo al diccionario <code>KNOWN_RECIPE_TYPES</code> en <code>app.py</code>.</li>
+                            <li class="mb-2">Actualizar la función <code>can_process_request</code> para permitir el nuevo tipo.</li>
+                            <li class="mb-2">Crear una clase de procesamiento específica o extender la existente.</li>
+                            <li class="mb-2">Actualizar la interfaz para mostrar el nuevo tipo disponible.</li>
+                            <li class="mb-2">Implementar instrucciones específicas en <code>generate_instructions</code>.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-pizza-slice me-2"></i>TRIVO-AI</h5>
+                    <p class="small">Sistema de recomendación y optimización de recetas de masa con inteligencia artificial.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <ul class="list-inline mb-0">
+                        <li class="list-inline-item">
+                            <a href="https://github.com/Maurosg78/TRIVO-AI" class="text-white" target="_blank" rel="noopener">
+                                <i class="fab fa-github fa-fw"></i> GitHub
+                            </a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="/about" class="text-white">
+                                <i class="fas fa-info-circle fa-fw"></i> Acerca de
+                            </a>
+                        </li>
+                    </ul>
+                    <p class="small mt-2 mb-0">© 2024 TRIVO-AI. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botón para cambiar tema -->
+    <div class="theme-toggle" id="theme-toggle">
+        <i class="fas fa-sun"></i>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const body = document.body;
+            const icon = themeToggle.querySelector('i');
+            
+            themeToggle.addEventListener('click', function() {
+                body.classList.toggle('dark-mode');
+                
+                if (body.classList.contains('dark-mode')) {
+                    icon.className = 'fas fa-sun';
+                } else {
+                    icon.className = 'fas fa-moon';
+                }
+                
+                // Guardar preferencia en localStorage
+                localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
+            });
+            
+            // Comprobar preferencia guardada
+            const darkModeSaved = localStorage.getItem('darkMode') === 'true';
+            if (darkModeSaved) {
+                body.classList.add('dark-mode');
+                icon.className = 'fas fa-sun';
+            } else {
+                body.classList.remove('dark-mode');
+                icon.className = 'fas fa-moon';
+            }
+        });
+    </script>
+</body>
+</html> 

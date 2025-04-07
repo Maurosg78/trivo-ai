@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acerca de - TRIVO-AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body class="theme-trivo dark-mode">
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-pizza-slice me-2"></i>TRIVO-AI</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Menú de navegación">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i> Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/optimize"><i class="fas fa-wand-magic-sparkles me-1"></i> Crear Receta</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/validate"><i class="fas fa-check-circle me-1"></i> Validar Receta</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/cache-intelligence"><i class="fas fa-brain me-1"></i> Caché Inteligente</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/about"><i class="fas fa-info-circle me-1"></i> Acerca de</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-sm mb-5">
+                    <div class="card-body p-5">
+                        <h1 class="display-5 fw-bold mb-4 text-center">Acerca de TRIVO-AI</h1>
+                        <p class="lead mb-4 text-center">
+                            Sistema inteligente de formulación y optimización de recetas de masa con comprensión de lenguaje natural
+                        </p>
+                        
+                        <hr class="my-5">
+                        
+                        <h2 class="h4 mb-4">Nuestra Misión</h2>
+                        <p>
+                            TRIVO-AI está diseñado para revolucionar la forma en que se formulan y optimizan las recetas de masa. Utilizando interpretación de lenguaje natural y algoritmos genéticos avanzados, 
+                            nuestro sistema comprende tus necesidades específicas y busca la combinación óptima de ingredientes para lograr las mejores propiedades físicas, nutricionales y organolépticas en distintas escalas de producción.
+                        </p>
+                        
+                        <h2 class="h4 mt-5 mb-4">Tecnología</h2>
+                        <p>
+                            Nuestro sistema utiliza varias tecnologías innovadoras:
+                        </p>
+                        <ul class="list-group mb-4">
+                            <li class="list-group-item">
+                                <i class="fas fa-brain text-primary me-2"></i>
+                                <strong>Procesamiento de Lenguaje Natural:</strong> Comprensión contextual de solicitudes en lenguaje humano.
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-dna text-primary me-2"></i>
+                                <strong>Algoritmos Genéticos:</strong> Optimización avanzada para encontrar la mejor combinación de ingredientes.
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-check-double text-primary me-2"></i>
+                                <strong>Sistema de Validación Crítica:</strong> Verificación científica y técnica de viabilidad en distintas escalas.
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-database text-primary me-2"></i>
+                                <strong>Datos Nutricionales USDA:</strong> Integración con la base de datos de alimentos del USDA para datos precisos.
+                            </li>
+                            <li class="list-group-item">
+                                <i class="fas fa-flask text-primary me-2"></i>
+                                <strong>Propiedades Físicas:</strong> Análisis de densidad, elasticidad y comportamiento reológico.
+                            </li>
+                        </ul>
+                        
+                        <h2 class="h4 mt-5 mb-4">Características Principales</h2>
+                        <div class="row g-4 mb-5">
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body p-4">
+                                        <h3 class="h5 mb-3"><i class="fas fa-comment text-primary me-2"></i>Lenguaje Natural</h3>
+                                        <p class="card-text">
+                                            Interpretación de solicitudes expresadas en lenguaje natural para traducirlas en recetas técnicamente viables.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body p-4">
+                                        <h3 class="h5 mb-3"><i class="fas fa-pizza-slice text-primary me-2"></i>Formulación Inteligente</h3>
+                                        <p class="card-text">
+                                            Optimización de recetas de masa utilizando algoritmos avanzados para lograr la mejor combinación de ingredientes.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body p-4">
+                                        <h3 class="h5 mb-3"><i class="fas fa-seedling text-primary me-2"></i>Soporte para Vegetales</h3>
+                                        <p class="card-text">
+                                            Análisis nutricional y recomendaciones para masas con base de vegetales como coliflor, calabacín y remolacha.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body p-4">
+                                        <h3 class="h5 mb-3"><i class="fas fa-chart-pie text-primary me-2"></i>Análisis Nutricional</h3>
+                                        <p class="card-text">
+                                            Evaluación de perfiles nutricionales e índice glucémico para crear masas más saludables.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body p-4">
+                                        <h3 class="h5 mb-3"><i class="fas fa-vial text-primary me-2"></i>Propiedades Físicas</h3>
+                                        <p class="card-text">
+                                            Simulación de propiedades reológicas y físicas para garantizar el comportamiento correcto de la masa.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-body p-4">
+                                        <h3 class="h5 mb-3"><i class="fas fa-tint text-primary me-2"></i>Personalización de Color</h3>
+                                        <p class="card-text">
+                                            Adaptación de ingredientes para lograr colores específicos en la masa, como rojos, verdes o naranjas.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h2 class="h4 mt-5 mb-4">Equipo de Desarrollo</h2>
+                        <p>
+                            TRIVO-AI es desarrollado por un equipo interdisciplinario de científicos de alimentos, lingüistas computacionales, ingenieros y especialistas en inteligencia artificial,
+                            todos comprometidos con la creación de mejores formulaciones de masa a través de la ciencia y la tecnología.
+                        </p>
+                        
+                        <div class="text-center mt-5">
+                            <a href="https://github.com/Maurosg78/TRIVO-AI" class="btn btn-outline-primary" target="_blank" rel="noopener">
+                                <i class="fab fa-github me-2"></i>Ver en GitHub
+                            </a>
+                            <a href="/" class="btn btn-primary ms-2">
+                                <i class="fas fa-home me-2"></i>Volver al Inicio
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-pizza-slice me-2"></i>TRIVO-AI</h5>
+                    <p class="small">Sistema de recomendación y optimización de recetas de masa con inteligencia artificial.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <ul class="list-inline mb-0">
+                        <li class="list-inline-item">
+                            <a href="https://github.com/Maurosg78/TRIVO-AI" class="text-white" target="_blank" rel="noopener">
+                                <i class="fab fa-github fa-fw"></i> GitHub
+                            </a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="/about" class="text-white">
+                                <i class="fas fa-info-circle fa-fw"></i> Acerca de
+                            </a>
+                        </li>
+                    </ul>
+                    <p class="small mt-2 mb-0">© 2024 TRIVO-AI. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botón para cambiar tema -->
+    <div class="theme-toggle" id="theme-toggle">
+        <i class="fas fa-sun"></i>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const body = document.body;
+            const icon = themeToggle.querySelector('i');
+            
+            themeToggle.addEventListener('click', function() {
+                body.classList.toggle('dark-mode');
+                
+                if (body.classList.contains('dark-mode')) {
+                    icon.className = 'fas fa-sun';
+                } else {
+                    icon.className = 'fas fa-moon';
+                }
+                
+                // Guardar preferencia en localStorage
+                localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
+            });
+            
+            // Comprobar preferencia guardada
+            const darkModeSaved = localStorage.getItem('darkMode') === 'true';
+            if (darkModeSaved) {
+                body.classList.add('dark-mode');
+                icon.className = 'fas fa-sun';
+            } else {
+                body.classList.remove('dark-mode');
+                icon.className = 'fas fa-moon';
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,15 @@
+rules:
+  - author: mauriciosobarzo
+    conditions:
+      - base=main
+      - label=ready-to-merge
+      - check-success=test
+      - check-success=lint
+      - check-success=security
+      - check-success=build
+    actions:
+      queue:
+        method: rebase
+      merge:
+        method: squash
+        commitMessageTemplate: "{{ title }} (#{{ number }})" 

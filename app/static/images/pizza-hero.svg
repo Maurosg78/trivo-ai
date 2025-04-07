@@ -1,0 +1,106 @@
+<svg width="500" height="400" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo con gradiente -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8f9fa" />
+      <stop offset="100%" stop-color="#e9ecef" />
+    </linearGradient>
+    
+    <!-- Gradiente para la pizza -->
+    <linearGradient id="pizza-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5bd1f" />
+      <stop offset="100%" stop-color="#e59400" />
+    </linearGradient>
+    
+    <!-- Gradiente para la salsa -->
+    <linearGradient id="sauce-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e74c3c" />
+      <stop offset="100%" stop-color="#c0392b" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Fondo -->
+  <rect width="100%" height="100%" fill="url(#bg-gradient)" rx="20" ry="20" />
+  
+  <!-- Plato -->
+  <circle cx="250" cy="250" r="170" fill="#f8f9fa" stroke="#dee2e6" stroke-width="4"/>
+  
+  <!-- Pizza base -->
+  <circle cx="250" cy="250" r="150" fill="url(#pizza-gradient)" />
+  
+  <!-- Salsa de tomate -->
+  <circle cx="250" cy="250" r="140" fill="url(#sauce-gradient)" />
+  
+  <!-- Queso -->
+  <circle cx="250" cy="250" r="135" fill="#f8d7a4" />
+  
+  <!-- Pepperoni -->
+  <circle cx="210" cy="210" r="15" fill="#c0392b" />
+  <circle cx="290" cy="190" r="15" fill="#c0392b" />
+  <circle cx="250" cy="290" r="15" fill="#c0392b" />
+  <circle cx="180" cy="260" r="15" fill="#c0392b" />
+  <circle cx="310" cy="270" r="15" fill="#c0392b" />
+  <circle cx="200" cy="320" r="15" fill="#c0392b" />
+  <circle cx="330" cy="230" r="15" fill="#c0392b" />
+  
+  <!-- Albahaca -->
+  <g transform="translate(220, 230) rotate(30)">
+    <ellipse cx="0" cy="0" rx="12" ry="8" fill="#27ae60" />
+    <ellipse cx="0" cy="0" rx="8" ry="5" fill="#2ecc71" />
+  </g>
+  
+  <g transform="translate(260, 210) rotate(-20)">
+    <ellipse cx="0" cy="0" rx="12" ry="8" fill="#27ae60" />
+    <ellipse cx="0" cy="0" rx="8" ry="5" fill="#2ecc71" />
+  </g>
+  
+  <g transform="translate(270, 260) rotate(45)">
+    <ellipse cx="0" cy="0" rx="12" ry="8" fill="#27ae60" />
+    <ellipse cx="0" cy="0" rx="8" ry="5" fill="#2ecc71" />
+  </g>
+  
+  <!-- Texto IA -->
+  <text x="240" y="120" font-family="Arial, sans-serif" font-size="60" font-weight="bold" fill="#0d6efd">IA</text>
+  
+  <!-- Icono de engranaje -->
+  <g transform="translate(350, 100) rotate(30)">
+    <circle cx="0" cy="0" r="25" fill="#6c757d" />
+    <circle cx="0" cy="0" r="15" fill="#f8f9fa" />
+    
+    <!-- Dientes del engranaje -->
+    <g stroke="#6c757d" stroke-width="8">
+      <line x1="0" y1="-30" x2="0" y2="-40" />
+      <line x1="21.2" y1="-21.2" x2="28.3" y2="-28.3" />
+      <line x1="30" y1="0" x2="40" y2="0" />
+      <line x1="21.2" y1="21.2" x2="28.3" y2="28.3" />
+      <line x1="0" y1="30" x2="0" y2="40" />
+      <line x1="-21.2" y1="21.2" x2="-28.3" y2="28.3" />
+      <line x1="-30" y1="0" x2="-40" y2="0" />
+      <line x1="-21.2" y1="-21.2" x2="-28.3" y2="-28.3" />
+    </g>
+  </g>
+  
+  <!-- Icono de cerebro -->
+  <g transform="translate(130, 120)">
+    <ellipse cx="0" cy="0" rx="30" ry="25" fill="#9b59b6" />
+    
+    <!-- Lóbulos del cerebro -->
+    <path d="M-15,-5 C-20,5 -10,15 0,10 C10,15 20,5 15,-5 Z" fill="#8e44ad" />
+    <path d="M-10,-15 C-15,-5 -5,5 0,0 C5,5 15,-5 10,-15 Z" fill="#8e44ad" />
+    
+    <!-- Conexiones neurales -->
+    <circle cx="-15" cy="-5" r="3" fill="#ecf0f1" />
+    <circle cx="15" cy="-5" r="3" fill="#ecf0f1" />
+    <circle cx="0" cy="10" r="3" fill="#ecf0f1" />
+    <line x1="-15" y1="-5" x2="15" y2="-5" stroke="#ecf0f1" stroke-width="1.5" />
+    <line x1="-15" y1="-5" x2="0" y2="10" stroke="#ecf0f1" stroke-width="1.5" />
+    <line x1="15" y1="-5" x2="0" y2="10" stroke="#ecf0f1" stroke-width="1.5" />
+  </g>
+  
+  <!-- Vapor -->
+  <path d="M240,160 C250,140 265,150 260,130 M270,160 C280,140 295,150 290,130 M300,160 C310,140 325,150 320,130" 
+        fill="none" stroke="#adb5bd" stroke-width="3" stroke-linecap="round" />
+  
+  <!-- Firma -->
+  <text x="340" y="380" font-family="Arial, sans-serif" font-size="12" fill="#6c757d">PizzaAI © 2024</text>
+</svg> 

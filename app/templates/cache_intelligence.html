@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block title %}TRIVO-AI - Sistema de Caché Inteligente{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4 mb-3">Sistema de Caché Inteligente</h1>
+            <p class="lead">
+                TRIVO-AI utiliza un sistema de caché inteligente para optimizar las consultas a APIs externas,
+                reducir el tiempo de respuesta y adaptar recetas existentes a nuevas necesidades.
+            </p>
+        </div>
+    </div>
+
+    <!-- Estadísticas del caché -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-dark text-light border-success">
+                <div class="card-header bg-success text-light">
+                    <h3 class="card-title mb-0">Estadísticas del Caché</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card h-100 bg-dark border-success">
+                                <div class="card-body text-center">
+                                    <h4 class="card-title text-success">Total de Recetas</h4>
+                                    <h2 class="display-4 mb-0">{{ stats.total_recipes }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% for type, count in stats.recipe_types.items() %}
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card h-100 bg-dark border-success">
+                                <div class="card-body text-center">
+                                    <h4 class="card-title text-success">{{ type|capitalize }}</h4>
+                                    <h2 class="display-4 mb-0">{{ count }}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button id="refresh-stats" class="btn btn-outline-success"><i class="fas fa-sync-alt"></i> Actualizar estadísticas</button>
+                    <button id="clear-cache" class="btn btn-outline-danger float-right"><i class="fas fa-trash-alt"></i> Limpiar caché</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Consulta de receta de cheesecake -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">Consulta de Receta de Cheesecake</h3>
+                </div>
+                <div class="card-body">
+                    <form id="cheesecake-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="fruit">Fruta:</label>
+                                    <input type="text" id="fruit" class="form-control" placeholder="Ej: frambuesa, fresa, arándano">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Opciones:</label>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="gluten_free">
+                                        <label class="custom-control-label" for="gluten_free">Sin gluten</label>
+                                    </div>
+                                    <div class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" id="dairy_free">
+                                        <label class="custom-control-label" for="dairy_free">Sin lácteos</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Obtener receta</button>
+                    </form>
+                    
+                    <div id="recipe-result" class="mt-4" style="display: none;">
+                        <h4>Resultado:</h4>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <pre id="recipe-json" class="mb-0" style="white-space: pre-wrap;"></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Consulta en lenguaje natural -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h3 class="card-title mb-0">Consulta en Lenguaje Natural</h3>
+                </div>
+                <div class="card-body">
+                    <form id="nlp-form">
+                        <div class="form-group">
+                            <label for="nlp-text">Describe lo que necesitas:</label>
+                            <textarea id="nlp-text" class="form-control" rows="4" placeholder="Ej: Quiero un cheesecake de fresa sin gluten"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-warning">Procesar</button>
+                    </form>
+                    
+                    <div id="nlp-result" class="mt-4" style="display: none;">
+                        <h4>Resultado:</h4>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <pre id="nlp-json" class="mb-0" style="white-space: pre-wrap;"></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Formulario de cheesecake
+    document.getElementById('cheesecake-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const fruit = document.getElementById('fruit').value;
+        const glutenFree = document.getElementById('gluten_free').checked;
+        const dairyFree = document.getElementById('dairy_free').checked;
+        
+        const url = `/api/recipes/cheesecake?fruit=${encodeURIComponent(fruit)}&gluten_free=${glutenFree}&dairy_free=${dairyFree}`;
+        
+        // Mostrar spinner o mensaje de carga
+        document.getElementById('recipe-json').textContent = 'Cargando...';
+        document.getElementById('recipe-result').style.display = 'block';
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('recipe-json').textContent = JSON.stringify(data.recipe, null, 2);
+                } else {
+                    document.getElementById('recipe-json').textContent = `Error: ${data.error}`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('recipe-json').textContent = `Error: ${error.message}`;
+            });
+    });
+    
+    // Formulario de lenguaje natural
+    document.getElementById('nlp-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const text = document.getElementById('nlp-text').value;
+        
+        // Mostrar spinner o mensaje de carga
+        document.getElementById('nlp-json').textContent = 'Cargando...';
+        document.getElementById('nlp-result').style.display = 'block';
+        
+        fetch('/api/natural-language', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('nlp-json').textContent = JSON.stringify(data.recipe, null, 2);
+                } else {
+                    document.getElementById('nlp-json').textContent = `Error: ${data.error}`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('nlp-json').textContent = `Error: ${error.message}`;
+            });
+    });
+    
+    // Actualizar estadísticas
+    document.getElementById('refresh-stats').addEventListener('click', function() {
+        fetch('/api/cache/stats')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Recargar la página para mostrar las estadísticas actualizadas
+                    location.reload();
+                } else {
+                    alert(`Error al actualizar estadísticas: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                alert(`Error: ${error.message}`);
+            });
+    });
+    
+    // Limpiar caché
+    document.getElementById('clear-cache').addEventListener('click', function() {
+        if (confirm('¿Estás seguro de que deseas limpiar el caché? Esta acción no se puede deshacer.')) {
+            fetch('/api/cache/clear', {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        // Recargar la página para actualizar estadísticas
+                        location.reload();
+                    } else {
+                        alert(`Error: ${data.error}`);
+                    }
+                })
+                .catch(error => {
+                    alert(`Error: ${error.message}`);
+                });
+        }
+    });
+</script>
+{% endblock %} 

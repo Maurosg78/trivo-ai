@@ -1,0 +1,68 @@
+site_name: PizzaAI
+site_description: Sistema inteligente para la formulación y optimización de masas sin gluten
+repo_url: https://github.com/Maurosg78/PizzaAI
+theme:
+  name: material
+  palette:
+    primary: green
+    accent: orange
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+
+nav:
+  - Inicio: index.md
+  - Guía de Usuario:
+    - Introducción: user-guide/introduction.md
+    - Instalación: user-guide/installation.md
+    - Uso Básico: user-guide/basic-usage.md
+    - Configuración: user-guide/configuration.md
+  - Guía de Desarrollo:
+    - Estructura del Proyecto: dev-guide/project-structure.md
+    - Contribuir: dev-guide/contributing.md
+    - Tests: dev-guide/testing.md
+    - Despliegue: dev-guide/deployment.md
+  - API:
+    - Endpoints: api/endpoints.md
+    - Autenticación: api/authentication.md
+    - Modelos: api/models.md
+  - About:
+    - Roadmap: about/roadmap.md
+    - Changelog: about/changelog.md
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.magiclink
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true 

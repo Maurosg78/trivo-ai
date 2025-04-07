@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TRIVO-AI - Sistema de Caché Inteligente</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #333;
+        }
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #219653;
+        }
+        .result {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 20px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TRIVO-AI - Sistema de Caché Inteligente</h1>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Recetas en caché</h3>
+                <div class="stat-number">{{ stats.total_recipes }}</div>
+            </div>
+            {% for type, count in stats.recipe_types.items() %}
+            <div class="stat-card">
+                <h3>{{ type }}</h3>
+                <div class="stat-number">{{ count }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="card">
+            <h2>Consulta de receta de cheesecake</h2>
+            <div class="form-group">
+                <label for="fruit">Fruta:</label>
+                <input type="text" id="fruit" placeholder="Ej: frambuesa, fresa, arándano">
+            </div>
+            <div class="form-group">
+                <label>Opciones:</label>
+                <div>
+                    <input type="checkbox" id="gluten_free"> <label for="gluten_free">Sin gluten</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="dairy_free"> <label for="dairy_free">Sin lácteos</label>
+                </div>
+            </div>
+            <button onclick="getRecipe()">Obtener receta</button>
+            <div id="recipe-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="card">
+            <h2>Consulta en lenguaje natural</h2>
+            <div class="form-group">
+                <label for="nlp-text">Describe lo que necesitas:</label>
+                <textarea id="nlp-text" rows="4" placeholder="Ej: Quiero un cheesecake de fresa sin gluten"></textarea>
+            </div>
+            <button onclick="processNaturalLanguage()">Procesar</button>
+            <div id="nlp-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="card">
+            <h2>Administración del caché</h2>
+            <button onclick="clearCache()">Limpiar caché</button>
+            <div id="cache-result" class="result" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <script>
+        function getRecipe() {
+            const fruit = document.getElementById('fruit').value;
+            const glutenFree = document.getElementById('gluten_free').checked;
+            const dairyFree = document.getElementById('dairy_free').checked;
+            
+            const url = `/api/recipes/cheesecake?fruit=${encodeURIComponent(fruit)}&gluten_free=${glutenFree}&dairy_free=${dairyFree}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const resultElement = document.getElementById('recipe-result');
+                    if (data.success) {
+                        resultElement.textContent = JSON.stringify(data.recipe, null, 2);
+                    } else {
+                        resultElement.textContent = `Error: ${data.error}`;
+                    }
+                    resultElement.style.display = 'block';
+                })
+                .catch(error => {
+                    document.getElementById('recipe-result').textContent = `Error: ${error.message}`;
+                    document.getElementById('recipe-result').style.display = 'block';
+                });
+        }
+        
+        function processNaturalLanguage() {
+            const text = document.getElementById('nlp-text').value;
+            
+            fetch('/api/natural-language', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const resultElement = document.getElementById('nlp-result');
+                    if (data.success) {
+                        resultElement.textContent = JSON.stringify(data.recipe, null, 2);
+                    } else {
+                        resultElement.textContent = `Error: ${data.error}`;
+                    }
+                    resultElement.style.display = 'block';
+                })
+                .catch(error => {
+                    document.getElementById('nlp-result').textContent = `Error: ${error.message}`;
+                    document.getElementById('nlp-result').style.display = 'block';
+                });
+        }
+        
+        function clearCache() {
+            fetch('/api/cache/clear', {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const resultElement = document.getElementById('cache-result');
+                    if (data.success) {
+                        resultElement.textContent = data.message;
+                        // Recargar la página para actualizar estadísticas
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        resultElement.textContent = `Error: ${data.error}`;
+                    }
+                    resultElement.style.display = 'block';
+                })
+                .catch(error => {
+                    document.getElementById('cache-result').textContent = `Error: ${error.message}`;
+                    document.getElementById('cache-result').style.display = 'block';
+                });
+        }
+    </script>
+</body>
+</html>
+            

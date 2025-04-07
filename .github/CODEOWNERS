@@ -1,0 +1,16 @@
+# Este archivo define los propietarios de código para diferentes partes del proyecto
+
+# Propietarios por defecto para todo el proyecto
+* @mauriciosobarzo
+
+# Propietarios específicos por directorio
+/src/core/ @mauriciosobarzo
+/src/features/ @mauriciosobarzo
+/tests/ @mauriciosobarzo
+/docs/ @mauriciosobarzo
+
+# Propietarios por tipo de archivo
+*.py @mauriciosobarzo
+*.md @mauriciosobarzo
+*.yml @mauriciosobarzo
+*.yaml @mauriciosobarzo 

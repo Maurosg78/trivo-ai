@@ -1,0 +1,11 @@
+--- Resumen de Optimización para G12 ---
+Water: 48.9%
+Chickpea_flour: 22.5%
+Rice_flour: -9.4%
+Potato_flour: -33.6%
+Corn starch: 35.7%
+Olive_oil: -27.9%
+Xanthan gum: 2.1%
+Sugar: -16.5%
+Salt: -13.3%
+Vinegar: -1.3%

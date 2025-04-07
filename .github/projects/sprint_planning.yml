@@ -1,0 +1,124 @@
+name: Sprint Planning
+description: Planificación de sprints para PizzaAI
+
+sprints:
+  - name: Sprint 1 - Configuración Inicial
+    start_date: 2024-03-01
+    end_date: 2024-03-14
+    goals:
+      - Configurar entorno de desarrollo
+      - Establecer estructura del proyecto
+      - Configurar CI/CD
+      - Implementar pruebas básicas
+    tasks:
+      - Configuración inicial del proyecto
+      - Configuración de CI/CD
+      - Estructura base del proyecto
+      - Tests unitarios básicos
+    velocity: 8
+    status: completed
+    
+  - name: Sprint 2 - Core Features
+    start_date: 2024-03-15
+    end_date: 2024-03-28
+    goals:
+      - Implementar modelos base
+      - Integrar USDA API
+      - Desarrollar sistema de recomendaciones
+      - Implementar tests unitarios
+    tasks:
+      - Integración con USDA API ✅
+      - Sistema de recomendaciones ✅
+      - Tests de integración USDA 🔄
+      - Refactorizar servicio USDA 🔄
+    velocity: 12
+    status: in-progress
+    progress: 50%
+    
+  - name: Sprint 3 - Análisis de Costos
+    start_date: 2024-03-29
+    end_date: 2024-04-11
+    goals:
+      - Implementar sistema de cálculo de costos
+      - Desarrollar precios dinámicos
+      - Integrar con proveedores
+      - Optimizar recursos
+    tasks:
+      - Sistema de cálculo de costos
+      - Precios dinámicos
+      - Integración con proveedores
+      - Optimización de recursos
+    velocity: 10
+    status: planned
+    
+  - name: Sprint 4 - Producción y Logística
+    start_date: 2024-04-12
+    end_date: 2024-04-25
+    goals:
+      - Implementar planificación de producción
+      - Desarrollar sistema de logística
+      - Integrar con sistemas de entrega
+      - Monitoreo de operaciones
+    tasks:
+      - Planificación de producción
+      - Sistema de logística
+      - Integración con delivery
+      - Monitoreo de operaciones
+    velocity: 10
+    status: planned
+
+metrics:
+  - name: Sprint Velocity
+    type: points
+    target: 10
+    current: 12
+    
+  - name: Code Coverage
+    type: percentage
+    target: 80
+    current: 85
+    
+  - name: Bug Resolution Time
+    type: days
+    target: 2
+    current: 1
+    
+  - name: Technical Debt
+    type: percentage
+    target: 10
+    current: 5
+
+dependencies:
+  - from: Sprint 1
+    to: Sprint 2
+    type: sequential
+    status: completed
+    
+  - from: Sprint 2
+    to: Sprint 3
+    type: sequential
+    status: pending
+    
+  - from: Sprint 3
+    to: Sprint 4
+    type: sequential
+    status: pending
+
+risks:
+  - name: Integración USDA API
+    impact: high
+    probability: medium
+    mitigation: Implementar caché y manejo de errores robusto
+    status: resolved
+    
+  - name: Rendimiento del Sistema
+    impact: high
+    probability: low
+    mitigation: Monitoreo continuo y optimización temprana
+    status: monitored
+    
+  - name: Disponibilidad de Datos
+    impact: medium
+    probability: medium
+    mitigation: Sistema de respaldo y validación de datos
+    status: in-progress 

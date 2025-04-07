@@ -1,0 +1,92 @@
+ingredient,calories,protein,carbs,fat,fiber,sodium,contains_gluten,contains_allergens
+chickpea flour,400.0,16.67,70.0,5.0,16.7,0.0,No,No
+white rice flour,375.0,7.5,82.5,0.0,0.0,0.0,No,No
+brown rice flour,350.0,7.5,77.5,2.5,5.0,12.0,No,No
+tapioca starch,375.0,0.0,87.5,0.0,,300.0,No,No
+potato starch,333.0,0.0,83.33,0.0,0.0,0.0,No,No
+corn starch,350.0,0.0,90.0,0.0,,0.0,No,No
+xanthan gum,625.0,0.0,125.0,0.0,,3125.0,No,No
+guar gum,357.0,0.0,71.43,0.0,71.4,0.0,No,No
+water,42.0,0.0,10.83,0.0,,8.0,No,No
+olive oil,900.0,0.0,0.0,100.0,0.0,2.0,No,No
+coconut oil,895.0,0.0,0.84,99.1,0.0,0.0,No,No
+sunflower oil,900.0,0.0,0.0,100.0,0.0,0.0,No,No
+sea salt,0.0,0.0,0.0,0.0,,40000.0,No,No
+cane sugar,375.0,0.0,100.0,0.0,0.0,0.0,No,No
+coconut sugar,375.0,0.0,100.0,0.0,0.0,125.0,No,No
+honey,1272.0,0.3,82.4,0.0,0.2,4.0,No,No
+maple syrup,333.0,0.0,86.67,0.0,,2.0,No,No
+apple cider vinegar,20.0,0.0,0.0,0.0,,0.0,No,No
+dry yeast,1361.0,40.44,41.22,7.61,26.9,51.0,No,No
+baking powder,0.0,0.0,0.0,0.0,,10000.0,No,No
+baking soda,0.0,0.0,0.0,0.0,,26667.0,No,No
+chia seeds,486.0,16.5,42.1,30.7,34.4,16.0,No,No
+flaxseed meal,500.0,21.43,28.57,42.86,28.6,0.0,No,No
+psyllium husk,,0.0,88.89,0.0,,111.0,No,No
+almond flour,600.0,20.0,20.0,53.33,6.7,0.0,No,Sí
+coconut flour,400.0,13.33,60.0,13.33,33.3,200.0,No,No
+quinoa flour,,11.92235,69.52465,6.601,6.295,6.321,No,No
+buckwheat flour,333.0,6.67,73.33,3.33,10.0,0.0,No,No
+sorghum flour,371.0,8.57,80.0,1.43,5.7,0.0,No,No
+teff flour,371.0,11.43,77.14,2.86,5.7,0.0,No,No
+millet flour,1597.0,10.75,75.12,4.25,3.5,4.0,No,No
+arrowroot starch,344.0,0.0,87.5,0.0,3.1,0.0,No,No
+sweet potato starch,1297.0,7.99,55.1,6.4,3.6,707.0,No,No
+cassava starch,191.0,1.42,39.6,3.03,1.9,145.0,No,No
+agar agar,1282.0,6.21,80.88,0.3,7.7,102.0,No,No
+pectin,46.0,0.0,2.1,0.0,2.1,0.0,No,No
+lemon juice,0.0,0.0,0.0,0.0,,0.0,No,No
+orange juice,46.0,0.83,10.83,0.0,,0.0,No,No
+carrot juice,29.0,0.83,5.83,0.0,,100.0,No,No
+beet juice,25.0,0.72,5.91,0.06,1.1,19.0,No,No
+spinach juice,90.0,2.39,6.11,6.09,1.2,450.0,No,No
+tomato juice,21.0,0.83,4.58,0.0,1.2,283.0,No,No
+turmeric powder,625.0,0.0,75.0,0.0,50.0,0.0,No,No
+cinnamon,0.0,0.0,0.0,0.0,,0.0,No,No
+ginger powder,1045.0,3.69,79.65,0.47,44.5,10.0,No,No
+paprika,0.0,0.0,0.0,0.0,,0.0,No,No
+cumin,1567.0,17.81,44.24,22.27,10.5,168.0,No,No
+coriander,1245.0,12.37,54.99,17.77,41.9,35.0,No,No
+oregano,0.0,0.0,0.0,0.0,,0.0,No,No
+thyme,0.0,0.0,0.0,0.0,,0.0,No,No
+basil,0.0,0.0,0.0,0.0,,0.0,No,No
+rosemary,0.0,0.0,0.0,0.0,,0.0,No,No
+garlic powder,333.0,0.0,166.67,0.0,0.0,0.0,No,No
+onion powder,556.0,0.0,111.11,0.0,0.0,0.0,No,No
+black pepper,0.0,0.0,166.67,0.0,41.7,0.0,No,No
+vanilla extract,1205.0,0.06,12.65,0.06,0.0,9.0,No,No
+cocoa powder,250.0,25.0,50.0,12.5,50.0,0.0,No,No
+carob powder,200.0,0.0,80.0,0.0,40.0,0.0,No,No
+nutritional yeast,333.0,50.0,33.33,0.0,,83.0,No,No
+pumpkin puree,305.0,4.97,43.2,12.9,1.4,285.0,No,No
+sweet potato puree,191.0,2.26,37.3,9.35,6.0,315.0,No,No
+zucchini puree,306.0,5.05,42.6,13.1,0.9,290.0,No,No
+carrot puree,106.0,0.81,8.94,7.32,2.4,317.0,No,No
+spinach puree,90.0,2.39,6.11,6.09,1.2,450.0,No,No
+beet puree,65.0,0.8,16.3,0.08,0.8,149.0,No,No
+tomato puree,25.0,1.67,5.0,0.0,1.7,17.0,No,No
+cauliflower puree,74.0,1.65,4.96,6.61,1.7,273.0,No,No
+broccoli puree,223.0,4.28,22.4,12.9,1.7,329.0,No,No
+kale puree,148.0,2.92,4.42,1.49,4.1,53.0,No,No
+pea flour,333.0,33.33,60.0,0.0,26.7,13.0,No,No
+lentil flour,111.0,3.68,12.3,5.65,3.4,383.0,No,No
+fava bean flour,161.0,7.06,18.3,6.88,5.0,220.0,No,No
+amaranth flour,,13.2093,68.7787,6.236,7.209,0.0,No,No
+flaxseed flour,884.0,0.11,0.0,100.0,0.0,0.0,No,No
+sunflower seed flour,1364.0,48.06,35.83,1.61,5.2,3.0,No,No
+pumpkin seed flour,567.0,29.5,14.5,48.5,6.4,477.0,No,No
+sesame seed flour,2201.0,30.78,26.62,37.1,,41.0,No,No
+hemp seed flour,2313.0,31.56,8.67,48.75,4.0,5.0,No,No
+oat bran,400.0,20.0,57.5,7.5,17.5,0.0,No (certificado),No
+rice bran,400.0,13.33,60.0,13.33,20.0,0.0,No,No
+millet bran,118.0,3.5,23.6,1.0,1.3,168.0,No,No
+coconut water,21.0,0.0,,0.0,,27.0,No,No
+apple sauce,81.0,0.0,18.55,0.0,0.8,12.0,No,No
+aquafaba,304.0,0.0,3.57,32.14,0.0,500.0,No,No
+mashed banana,114.0,2.15,17.6,4.07,1.2,210.0,No,No
+spirulina powder,400.0,60.0,20.0,0.0,0.0,900.0,No,No
+chlorella powder,300.0,60.0,40.0,0.0,0.0,0.0,No,No
+wheat flour,467.0,6.67,66.67,20.0,6.7,800.0,Sí,No
+rye flour,300.0,10.0,73.33,3.33,16.7,0.0,Sí,No
+barley flour,367.0,10.0,76.67,0.0,16.7,10.0,Sí,No
+spelt flour,0.0,13.33,76.67,0.0,13.3,0.0,Sí,No
