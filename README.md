@@ -150,4 +150,35 @@ git push origin feature/nueva-funcionalidad
 
 ## Licencia
 
-Este proyecto está licenciado bajo los términos de la licencia MIT. Ver el archivo LICENSE para más detalles. 
+Este proyecto está licenciado bajo los términos de la licencia MIT. Ver el archivo LICENSE para más detalles.
+
+## Cambios Recientes: Seguridad y Rebranding
+
+### Mejoras de Seguridad Implementadas
+
+- **Eliminación de credenciales hardcodeadas**: Se han eliminado todas las API keys y tokens que estaban incluidos directamente en el código.
+- **Gestión segura de secretos**: Se ha mejorado la configuración para obtener credenciales desde variables de entorno.
+- **Verificaciones de seguridad**: Se agregaron comprobaciones para validar la presencia de variables de entorno necesarias.
+
+### Rebranding de PizzaAI a TRIVO-AI
+
+Se ha completado la migración del nombre del proyecto de PizzaAI a TRIVO-AI, actualizando:
+- Nombres de archivos, módulos y configuraciones
+- Referencias internas en el código
+- Documentación y mensajes de usuario
+
+### Configuración del Entorno
+
+Para una configuración correcta del entorno después de estos cambios:
+
+1. Asegúrate de especificar las siguientes variables en tu archivo `.env`:
+   ```
+   USDA_API_KEY=tu_clave_api_aqui
+   GITHUB_TOKEN=tu_token_github_aqui
+   ```
+
+2. Si necesitas obtener estas credenciales:
+   - USDA FoodData Central: https://fdc.nal.usda.gov/api-key-signup.html
+   - GitHub: https://github.com/settings/tokens
+
+Para más información detallada sobre estos cambios, consulta el archivo [SECURITY_CHANGES.md](SECURITY_CHANGES.md). 
