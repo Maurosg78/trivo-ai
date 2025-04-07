@@ -1,4 +1,6 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict, Any
+import os
+from dotenv import load_dotenv
 
 from pydantic import Field, SecretStr, PostgresDsn, validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -99,3 +101,51 @@ class Settings(BaseSettings):
 @lru_cache()
 def get_settings() -> Settings:
     return Settings()
+
+
+class Config:
+    def __init__(self):
+        load_dotenv()
+        self._config = {
+            "database": {
+                "url": os.getenv("DATABASE_URL", "sqlite:///pizzaai.db")
+            },
+            "api": {
+                "spoonacular_key": os.getenv("SPOONACULAR_API_KEY", ""),
+                "openai_key": os.getenv("OPENAI_API_KEY", "")
+            },
+            "validation": {
+                "strict_mode": os.getenv("VALIDATION_STRICT_MODE", "true").lower() == "true"
+            },
+            "optimization": {
+                "max_iterations": int(os.getenv("OPTIMIZATION_MAX_ITERATIONS", "100")),
+                "population_size": int(os.getenv("OPTIMIZATION_POPULATION_SIZE", "50"))
+            }
+        }
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """Obtiene un valor de configuración por su clave."""
+        keys = key.split(".")
+        value = self._config
+        for k in keys:
+            if isinstance(value, dict):
+                value = value.get(k, default)
+            else:
+                return default
+        return value
+
+    def set(self, key: str, value: Any) -> None:
+        """Establece un valor de configuración."""
+        keys = key.split(".")
+        current = self._config
+        for k in keys[:-1]:
+            if k not in current:
+                current[k] = {}
+            current = current[k]
+        current[keys[-1]] = value
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Devuelve la configuración como un diccionario."""
+        return self._config.copy()
+
+config = Config()

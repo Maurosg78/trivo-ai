@@ -11,9 +11,153 @@ de masa, escala de producción y restricciones especiales.
 import os
 from typing import Dict, List, Any, Tuple, Callable, Optional
 from dotenv import load_dotenv
+from dataclasses import dataclass
+from enum import Enum
 
 # Cargar variables de entorno
 load_dotenv()
+
+class ValidationLevel(Enum):
+    CRITICAL = "critical"
+    MEDIUM = "medium"
+    LOW = "low"
+
+@dataclass
+class ValidationRule:
+    name: str
+    description: str
+    level: ValidationLevel
+    check_function: callable
+    error_message: str
+
+class ValidationSystem:
+    def __init__(self):
+        self.rules: List[ValidationRule] = []
+        self.ingredient_limits: Dict[str, Dict[str, float]] = {
+            "flour": {"min": 0.5, "max": 1.0},
+            "water": {"min": 0.4, "max": 0.7},
+            "yeast": {"min": 0.001, "max": 0.03},
+            "salt": {"min": 0.01, "max": 0.03},
+            "oil": {"min": 0.0, "max": 0.1}
+        }
+        self.process_parameters: Dict[str, Dict[str, float]] = {
+            "fermentation_time": {"min": 1, "max": 48},
+            "baking_temperature": {"min": 180, "max": 250},
+            "baking_time": {"min": 5, "max": 20}
+        }
+        
+        self._initialize_rules()
+
+    def _initialize_rules(self):
+        # Regla 1: Proporción de harina
+        self.rules.append(ValidationRule(
+            name="flour_proportion",
+            description="Verifica que la proporción de harina esté dentro de los límites",
+            level=ValidationLevel.CRITICAL,
+            check_function=self._check_flour_proportion,
+            error_message="La proporción de harina debe estar entre 0.5 y 1.0"
+        ))
+
+        # Regla 2: Proporción de agua
+        self.rules.append(ValidationRule(
+            name="water_proportion",
+            description="Verifica que la proporción de agua esté dentro de los límites",
+            level=ValidationLevel.CRITICAL,
+            check_function=self._check_water_proportion,
+            error_message="La proporción de agua debe estar entre 0.4 y 0.7"
+        ))
+
+        # Regla 3: Proporción de levadura
+        self.rules.append(ValidationRule(
+            name="yeast_proportion",
+            description="Verifica que la proporción de levadura esté dentro de los límites",
+            level=ValidationLevel.CRITICAL,
+            check_function=self._check_yeast_proportion,
+            error_message="La proporción de levadura debe estar entre 0.001 y 0.03"
+        ))
+
+        # Regla 4: Proporción de sal
+        self.rules.append(ValidationRule(
+            name="salt_proportion",
+            description="Verifica que la proporción de sal esté dentro de los límites",
+            level=ValidationLevel.CRITICAL,
+            check_function=self._check_salt_proportion,
+            error_message="La proporción de sal debe estar entre 0.01 y 0.03"
+        ))
+
+        # Regla 5: Proporción de aceite
+        self.rules.append(ValidationRule(
+            name="oil_proportion",
+            description="Verifica que la proporción de aceite esté dentro de los límites",
+            level=ValidationLevel.MEDIUM,
+            check_function=self._check_oil_proportion,
+            error_message="La proporción de aceite debe estar entre 0.0 y 0.1"
+        ))
+
+    def _check_flour_proportion(self, recipe: Dict) -> bool:
+        total = sum(ingredient["quantity"] for ingredient in recipe["ingredients"])
+        flour = next((ingredient["quantity"] for ingredient in recipe["ingredients"] 
+                     if ingredient["name"].lower() in ["harina", "flour"]), 0)
+        proportion = flour / total if total > 0 else 0
+        return self.ingredient_limits["flour"]["min"] <= proportion <= self.ingredient_limits["flour"]["max"]
+
+    def _check_water_proportion(self, recipe: Dict) -> bool:
+        total = sum(ingredient["quantity"] for ingredient in recipe["ingredients"])
+        water = next((ingredient["quantity"] for ingredient in recipe["ingredients"] 
+                     if ingredient["name"].lower() in ["agua", "water"]), 0)
+        proportion = water / total if total > 0 else 0
+        return self.ingredient_limits["water"]["min"] <= proportion <= self.ingredient_limits["water"]["max"]
+
+    def _check_yeast_proportion(self, recipe: Dict) -> bool:
+        total = sum(ingredient["quantity"] for ingredient in recipe["ingredients"])
+        yeast = next((ingredient["quantity"] for ingredient in recipe["ingredients"] 
+                     if ingredient["name"].lower() in ["levadura", "yeast"]), 0)
+        proportion = yeast / total if total > 0 else 0
+        return self.ingredient_limits["yeast"]["min"] <= proportion <= self.ingredient_limits["yeast"]["max"]
+
+    def _check_salt_proportion(self, recipe: Dict) -> bool:
+        total = sum(ingredient["quantity"] for ingredient in recipe["ingredients"])
+        salt = next((ingredient["quantity"] for ingredient in recipe["ingredients"] 
+                    if ingredient["name"].lower() in ["sal", "salt"]), 0)
+        proportion = salt / total if total > 0 else 0
+        return self.ingredient_limits["salt"]["min"] <= proportion <= self.ingredient_limits["salt"]["max"]
+
+    def _check_oil_proportion(self, recipe: Dict) -> bool:
+        total = sum(ingredient["quantity"] for ingredient in recipe["ingredients"])
+        oil = next((ingredient["quantity"] for ingredient in recipe["ingredients"] 
+                   if ingredient["name"].lower() in ["aceite", "oil"]), 0)
+        proportion = oil / total if total > 0 else 0
+        return self.ingredient_limits["oil"]["min"] <= proportion <= self.ingredient_limits["oil"]["max"]
+
+    def validate_recipe(self, recipe: Dict) -> Dict:
+        results = {
+            "passed": True,
+            "errors": [],
+            "warnings": []
+        }
+
+        for rule in self.rules:
+            try:
+                if not rule.check_function(recipe):
+                    if rule.level == ValidationLevel.CRITICAL:
+                        results["passed"] = False
+                        results["errors"].append({
+                            "rule": rule.name,
+                            "message": rule.error_message
+                        })
+                    else:
+                        results["warnings"].append({
+                            "rule": rule.name,
+                            "message": rule.error_message
+                        })
+            except Exception as e:
+                results["passed"] = False
+                results["errors"].append({
+                    "rule": rule.name,
+                    "message": f"Error al validar la regla: {str(e)}"
+                })
+
+        return results
 
 # Categorías de severidad para errores de validación
 SEVERITY = {

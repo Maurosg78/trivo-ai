@@ -1,16 +1,50 @@
-# Política de Seguridad
+# Política de Seguridad de TRIVO-AI
 
 ## Reporte de Vulnerabilidades
 
-Si descubres una vulnerabilidad de seguridad, por favor:
+Si descubre una vulnerabilidad de seguridad en TRIVO-AI, le agradecemos que nos lo notifique de manera responsable. Por favor, envíe un correo electrónico a security@trivo-ai.com con los siguientes detalles:
 
-1. No divulgar públicamente la vulnerabilidad
-2. Enviar un email a security@pizzaai.com
-3. Incluir:
-   - Descripción detallada
-   - Pasos para reproducir
-   - Impacto potencial
-   - Solución propuesta (si aplica)
+- Descripción detallada de la vulnerabilidad
+- Pasos para reproducir el problema
+- Impacto potencial
+- Sugerencias de mitigación (si las tiene)
+
+## Proceso de Reporte
+
+1. No divulgue públicamente la vulnerabilidad hasta que hayamos tenido la oportunidad de investigar y corregir el problema.
+2. Proporcione suficiente información para que podamos reproducir y validar el problema.
+3. Permítanos un tiempo razonable para responder antes de hacer pública la vulnerabilidad.
+
+## Respuesta
+
+- Confirmaremos la recepción de su reporte dentro de las 48 horas.
+- Le mantendremos informado sobre nuestro progreso en la resolución del problema.
+- Una vez que se haya implementado una solución, le notificaremos y le agradeceremos públicamente (si lo desea).
+
+## Ámbito
+
+Esta política se aplica a todos los componentes de TRIVO-AI, incluyendo:
+- API de formulación de masas
+- Sistema de validación
+- Motor de recomendaciones
+- Interfaz de usuario web
+
+## Compromiso
+
+Nos comprometemos a:
+- Investigar todos los reportes de manera oportuna
+- Mantener informado al reportero sobre el progreso
+- Publicar actualizaciones de seguridad cuando sea necesario
+- Reconocer las contribuciones de los investigadores de seguridad
+
+## Contacto
+
+Para reportar vulnerabilidades de seguridad:
+- Email: security@trivo-ai.com
+- Asunto: [VULNERABILIDAD] Descripción breve
+
+Para consultas generales de seguridad:
+- Email: info@trivo-ai.com
 
 ## Proceso de Respuesta
 

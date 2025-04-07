@@ -1,7 +1,9 @@
-from typing import Dict, List
-
+from typing import Dict, List, Any, Optional
+from dataclasses import dataclass
 import numpy as np
 from pydantic import BaseModel
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 from src.core.services.usda_service import FoodItem, USDAService
 from src.features.nutrition.nutrition_analyzer import NutritionAnalyzer
@@ -14,17 +16,21 @@ class UserPreferences(BaseModel):
     disliked_ingredients: List[str] = []
 
 
-class Recommendation(BaseModel):
-    food_item: FoodItem
+@dataclass
+class Recommendation:
+    recipe_id: str
     score: float
-    reasons: List[str]
-    nutritional_benefits: Dict[str, float]
+    reason: str
+    improvements: List[str]
 
 
 class RecommendationEngine:
     def __init__(self):
         self.usda_service = USDAService()
         self.nutrition_analyzer = NutritionAnalyzer()
+        self.vectorizer = TfidfVectorizer()
+        self.recipe_features: Dict[str, List[float]] = {}
+        self.recipe_metadata: Dict[str, Dict[str, Any]] = {}
 
     async def get_recommendations(
         self, user_prefs: UserPreferences, current_diet: List[FoodItem], limit: int = 5
@@ -43,10 +49,10 @@ class RecommendationEngine:
 
                 scored_foods.append(
                     Recommendation(
-                        food_item=food,
+                        recipe_id=food.id,
                         score=score,
-                        reasons=reasons,
-                        nutritional_benefits=nutritional_benefits,
+                        reason=reasons[0],
+                        improvements=reasons[1:]
                     )
                 )
 
@@ -174,19 +180,95 @@ class RecommendationEngine:
 
     def _calculate_nutritional_benefits(
         self, food: FoodItem, current_diet: List[FoodItem]
-    ) -> Dict[str, float]:
+    ) -> List[str]:
         """Calcula beneficios nutricionales al añadir el alimento."""
         if not current_diet:
-            return {nutrient.name: nutrient.amount for nutrient in food.nutrients}
+            return []
 
         current_profile = self.nutrition_analyzer.analyze_nutritional_profile(current_diet)
         new_profile = self.nutrition_analyzer.analyze_nutritional_profile(current_diet + [food])
 
-        benefits = {}
+        improvements = []
         for nutrient in new_profile.macronutrients:
             current = current_profile.macronutrients[nutrient]
             new = new_profile.macronutrients[nutrient]
             if new > current:
-                benefits[nutrient] = new - current
+                improvements.append(f"Aumento en {nutrient}: {new - current:.2f} g")
 
-        return benefits
+        return improvements
+
+    def add_recipe(self, recipe_id: str, ingredients: List[str], metadata: Dict[str, Any]) -> None:
+        """Agrega una receta al motor de recomendaciones."""
+        # Vectorizar ingredientes
+        ingredients_text = " ".join(ingredients)
+        if not self.recipe_features:
+            # Primera receta, inicializar vectorizador
+            self.recipe_features[recipe_id] = self.vectorizer.fit_transform([ingredients_text]).toarray()[0]
+        else:
+            # Recetas subsiguientes, usar vectorizador existente
+            self.recipe_features[recipe_id] = self.vectorizer.transform([ingredients_text]).toarray()[0]
+        
+        self.recipe_metadata[recipe_id] = metadata
+
+    def get_recommendations(self, recipe_id: str, n_recommendations: int = 5) -> List[Recommendation]:
+        """Obtiene recomendaciones para una receta específica."""
+        if recipe_id not in self.recipe_features:
+            raise ValueError(f"Recipe {recipe_id} not found in recommendation engine")
+
+        # Calcular similitud con todas las recetas
+        similarities = {}
+        target_vector = self.recipe_features[recipe_id].reshape(1, -1)
+        
+        for other_id, other_vector in self.recipe_features.items():
+            if other_id != recipe_id:
+                other_vector = other_vector.reshape(1, -1)
+                similarity = cosine_similarity(target_vector, other_vector)[0][0]
+                similarities[other_id] = similarity
+
+        # Ordenar por similitud
+        sorted_recipes = sorted(similarities.items(), key=lambda x: x[1], reverse=True)
+        
+        # Generar recomendaciones
+        recommendations = []
+        for other_id, similarity in sorted_recipes[:n_recommendations]:
+            improvements = self._generate_improvements(recipe_id, other_id)
+            recommendations.append(Recommendation(
+                recipe_id=other_id,
+                score=similarity,
+                reason=self._generate_reason(recipe_id, other_id, similarity),
+                improvements=improvements
+            ))
+
+        return recommendations
+
+    def _generate_improvements(self, recipe_id: str, other_id: str) -> List[str]:
+        """Genera sugerencias de mejora basadas en las diferencias entre recetas."""
+        improvements = []
+        target_metadata = self.recipe_metadata[recipe_id]
+        other_metadata = self.recipe_metadata[other_id]
+
+        # Comparar tiempos de fermentación
+        if target_metadata.get("fermentation_time", 0) < other_metadata.get("fermentation_time", 0):
+            improvements.append("Considera aumentar el tiempo de fermentación para mejorar el sabor")
+
+        # Comparar temperaturas de horneado
+        if target_metadata.get("baking_temperature", 0) < other_metadata.get("baking_temperature", 0):
+            improvements.append("Una temperatura de horneado más alta podría mejorar la textura")
+
+        return improvements
+
+    def _generate_reason(self, recipe_id: str, other_id: str, similarity: float) -> str:
+        """Genera una explicación para la recomendación."""
+        target_metadata = self.recipe_metadata[recipe_id]
+        other_metadata = self.recipe_metadata[other_id]
+
+        reasons = []
+        if abs(target_metadata.get("fermentation_time", 0) - other_metadata.get("fermentation_time", 0)) < 2:
+            reasons.append("tiempos de fermentación similares")
+        if abs(target_metadata.get("baking_temperature", 0) - other_metadata.get("baking_temperature", 0)) < 10:
+            reasons.append("temperaturas de horneado similares")
+
+        if reasons:
+            return f"Recomendada por tener {', '.join(reasons)}"
+        else:
+            return f"Recomendada por similitud general (score: {similarity:.2f})"
