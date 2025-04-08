@@ -126,6 +126,42 @@ def natural_language():
         # Procesar la consulta
         result = processor.process_request(user_query)
         
+        # Comprobar si es una receta sin gluten con propiedades específicas
+        if ("sin gluten" in result.get("properties", {}).get("restrictions", []) and 
+            "gluten_free_properties" in result.get("properties", {})):
+            try:
+                # Intentar importar y utilizar el optimizador específico para sin gluten
+                from src.features.optimizer.gluten_free_optimizer import GlutenFreeOptimizer
+                
+                # Determinar tipo de producto (por defecto pizza)
+                product_type = "pizza"
+                if result["properties"].get("pizza_type"):
+                    product_type = "pizza"
+                
+                # Extraer propiedades específicas para sin gluten
+                gluten_free_props = result["properties"].get("gluten_free_properties", {})
+                
+                # Crear instancia del optimizador
+                optimizer = GlutenFreeOptimizer()
+                
+                # Ejecutar optimización
+                optimized_result = optimizer.optimize(
+                    product_type=product_type,
+                    desired_properties=gluten_free_props
+                )
+                
+                # Integrar resultado optimizado con resultado original
+                result["recipe"]["ingredients"] = optimized_result["ingredients"]
+                result["recipe"]["instructions"] = optimized_result["instructions"]
+                
+                # Añadir recomendaciones
+                result["recommendations"] = optimized_result["recommendations"]
+                
+                logger.info("Receta sin gluten optimizada con algoritmo genético")
+            except ImportError as e:
+                logger.warning(f"No se pudo importar el optimizador sin gluten: {e}")
+                logger.info("Usando receta sin gluten estándar")
+        
         # Generar instrucciones basadas en las propiedades detectadas
         instructions = generate_instructions(result)
         

@@ -162,6 +162,19 @@
                         {% endif %}
                     </div>
                     {% endif %}
+                    
+                    {% if recipe_data and recipe_data.recommendations %}
+                    <div class="mt-4">
+                        <h5 class="card-title text-success border-bottom pb-2">Recomendaciones específicas para esta receta</h5>
+                        <ul class="list-group list-group-flush">
+                            {% for recommendation in recipe_data.recommendations %}
+                            <li class="list-group-item bg-transparent border-0 ps-0 py-1">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i> {{ recommendation }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
                 </div>
                 <div class="card-footer">
                     <a href="/optimize" class="btn btn-outline-primary">Crear nueva receta</a>
