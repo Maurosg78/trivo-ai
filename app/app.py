@@ -15,9 +15,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 # Importar componentes del sistema
 try:
-    from src.features.optimizer.optimizer import RecipeOptimizer
-    from src.features.validator.validator import RecipeValidator
-    from src.features.nlp.language_processor import LanguageProcessor
+    from trivo.features.optimizer.optimizer import RecipeOptimizer
+    from trivo.features.validator.validator import RecipeValidator
+    from trivo.features.nlp.language_processor import LanguageProcessor
 except ImportError as e:
     print(f"Error al importar módulos: {e}")
 
@@ -117,7 +117,7 @@ def natural_language():
         
         # Intentar importar el procesador de lenguaje natural
         try:
-            from src.features.nlp.language_processor import LanguageProcessor
+            from trivo.features.nlp.language_processor import LanguageProcessor
             processor = LanguageProcessor()
         except ImportError as e:
             logger.warning(f"No se pudo importar el procesador de lenguaje natural: {e}")
@@ -132,7 +132,7 @@ def natural_language():
             "gluten_free_properties" in result.get("properties", {})):
             try:
                 # Intentar importar y utilizar el optimizador específico para sin gluten
-                from src.features.optimizer.gluten_free_optimizer import GlutenFreeOptimizer
+                from trivo.features.optimizer.gluten_free_optimizer import GlutenFreeOptimizer
                 
                 # Determinar tipo de producto (por defecto pizza)
                 product_type = "pizza"
