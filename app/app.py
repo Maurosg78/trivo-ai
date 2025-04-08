@@ -402,4 +402,10 @@ class MockLanguageProcessor:
 if __name__ == '__main__':
     # Cambiar el puerto a 8080 para evitar conflictos
     port = int(os.environ.get('PORT', 8080))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=True)
+
+def main():
+    """Función principal para el punto de entrada."""
+    # Obtener puerto desde variables de entorno o usar el valor predeterminado
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port, debug=False)
