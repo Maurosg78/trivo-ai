@@ -1,119 +1,103 @@
-# TRIVO-AI: PLM para PYMEs Alimentarias
+# TRIVO-AI: Sistema de Formulación Inteligente de Masas
 
-TRIVO-AI es una plataforma de gestión del ciclo de vida del producto (PLM) especializada para pequeñas y medianas empresas del sector alimentario, comenzando con un MVP enfocado en la optimización de masas para panaderías y pizzerías.
+## Descripción
 
-## Características Principales
+TRIVO-AI es un sistema avanzado de formulación inteligente para masas de pizza, que utiliza algoritmos genéticos y procesamiento de lenguaje natural para optimizar recetas según requisitos específicos. El sistema permite:
 
-- **Optimización de Recetas**: Algoritmo genético para optimizar recetas según costos y calidad
-- **Validación de Producción**: Sistema de validación con reglas críticas para diferentes escalas
-- **Procesamiento de Lenguaje Natural**: Creación de recetas a partir de descripciones en lenguaje natural
-- **Interfaz Web Moderna**: Diseño intuitivo con colores corporativos (verde, naranja y negro)
+- **Creación de recetas mediante lenguaje natural**: Describe lo que necesitas y el sistema genera una receta optimizada.
+- **Optimización de recetas**: Utiliza algoritmos genéticos para encontrar la combinación perfecta de ingredientes.
+- **Validación de recetas**: Verifica que las recetas sean viables para diferentes escalas de producción.
+- **Generación de instrucciones**: Proporciona instrucciones paso a paso para la preparación de las masas.
+
+La principal innovación es la combinación de algoritmos genéticos y procesamiento de lenguaje natural, permitiendo a usuarios de todos los niveles obtener recetas profesionales optimizadas sin necesidad de conocimientos avanzados.
 
 ## Estructura del Proyecto
 
 ```
-TRIVO-AI/
-├── app/                  # Aplicación web
-│   ├── static/           # Archivos estáticos (CSS, JS)
-│   └── templates/        # Plantillas HTML
-├── docs/                 # Documentación
-│   ├── KANBAN.md         # Tablero Kanban del proyecto
-│   ├── TRIVO-PLM_KANBAN.md  # Tablero Kanban detallado con sprints 
-│   └── TRIVO-PLM_ROADMAP.md # Roadmap completo del producto
-├── scripts/              # Scripts de utilidad
-│   ├── validation_system/  # Sistema de validación
-│   └── create_github_issues.py  # Script para crear issues en GitHub
-└── src/                  # Código fuente principal
-    ├── features/         # Características principales
-    │   ├── optimizer/    # Algoritmo genético
-    │   ├── validator/    # Sistema de validación
-    │   └── nlp/          # Procesamiento de lenguaje natural
-    └── utils/            # Utilidades
+trivo-ai/
+├── app/                    # Aplicación web principal
+│   ├── app.py                 # Punto de entrada de la aplicación Flask
+│   ├── recipe_optimizer.py    # Interfaz para el optimizador de recetas
+│   ├── templates/             # Plantillas HTML
+│   └── static/                # Archivos estáticos (CSS, JS, imágenes)
+├── src/                    # Código fuente principal
+│   ├── features/              # Características principales
+│   │   ├── nlp/                  # Procesamiento de lenguaje natural
+│   │   ├── optimizer/            # Optimizadores de recetas
+│   │   └── validator/            # Validación de recetas
+│   ├── core/                  # Componentes fundamentales
+│   └── data/                  # Datos y configuraciones
+├── scripts/                # Scripts de utilidad
+└── tests/                  # Pruebas automatizadas
 ```
 
-## Configuración del Entorno de Desarrollo
+## Características Principales
 
-### Requisitos Previos
+1. **Procesamiento de Lenguaje Natural**: Interpreta descripciones en lenguaje natural para generar recetas.
+2. **Optimización Genética**: Utiliza algoritmos genéticos para encontrar la combinación óptima de ingredientes.
+3. **Sistema de Validación Crítico**: Verifica que las recetas sean válidas para diferentes escalas de producción.
+4. **Soporte para Masas Sin Gluten**: Optimización especializada para recetas sin gluten.
+5. **Interfaz Web Intuitiva**: Interfaz moderna y fácil de usar para interactuar con el sistema.
+
+## Comenzando
+
+### Prerrequisitos
 
 - Python 3.8+
-- pip
-- Git
+- Flask
+- NumPy
+- Pandas
+- SciKit-Learn
 
 ### Instalación
 
-1. Clonar el repositorio:
-   ```bash
-   git clone https://github.com/Maurosg78/trivo-ai.git
-   cd trivo-ai
-   ```
+```bash
+# Clonar el repositorio
+git clone https://github.com/usuario/trivo-ai.git
+cd trivo-ai
 
-2. Crear un entorno virtual:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # En Windows: venv\Scripts\activate
-   ```
+# Instalar dependencias
+pip install -r requirements.txt
+```
 
-3. Instalar dependencias:
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Ejecución
 
-## Ejecución de la Aplicación
+Para iniciar la aplicación web:
 
-Iniciar la aplicación web:
 ```bash
 python -m app.app
 ```
 
-Acceder a la aplicación en http://localhost:8000
+Visita `http://localhost:8080` en tu navegador para acceder a la interfaz.
 
-## Creación de Issues en GitHub
+## Ejemplos de Uso
 
-Para crear automáticamente issues en GitHub basados en los archivos KANBAN:
+### Creación de recetas mediante lenguaje natural
 
-1. Instalar la dependencia necesaria:
-   ```bash
-   pip install PyGithub
-   ```
+Puedes ingresar descripciones como:
 
-2. Configurar token de GitHub:
-   ```bash
-   export GITHUB_TOKEN=tu_token_personal  # En Windows: set GITHUB_TOKEN=tu_token_personal
-   ```
+- "Quiero una masa de pizza familiar, de color rojo, sin gluten, nutricionalmente optimizada para mis hijos. Tipo margarita."
+- "Necesito una masa pequeña, crujiente y ligera para pizza de pepperoni."
+- "Masa para pizza vegana con sabores mediterráneos."
 
-3. Ejecutar el script:
-   ```bash
-   python scripts/create_github_issues.py
-   ```
+### Optimización manual
 
-## Roadmap
+También puedes especificar manualmente los ingredientes y parámetros para que el sistema los optimice según tus preferencias.
 
-El proyecto está organizado en las siguientes fases:
+## Contribuciones
 
-1. **MVP "Masas Express" (8 semanas)**
-   - Implementación inicial enfocada en optimización de costos
-   - Interfaz de usuario simplificada
-   - Validación básica de viabilidad
+Las contribuciones son bienvenidas. Por favor, siga estos pasos:
 
-2. **Consolidación (3 meses)**
-   - Ampliación de capacidades a diferentes tipos de masas
-   - Herramientas específicas para PYMEs
-   - Documentación de casos de éxito
-
-3. **Expansión (6 meses)**
-   - Soporte para nuevos segmentos alimentarios (lácteos, embutidos)
-   - Integración con sistemas de gestión
-   - Conexión con proveedores
-
-4. **PLM Completa (12 meses)**
-   - Gestión completa del ciclo de vida del producto
-   - Inteligencia de negocio avanzada
-   - Marketplace de fórmulas verificadas
+1. Fork del repositorio
+2. Crear una rama (`git checkout -b feature/mejora`)
+3. Commit de cambios (`git commit -m 'Añadir mejora'`)
+4. Push a la rama (`git push origin feature/mejora`)
+5. Crear Pull Request
 
 ## Licencia
 
-Este proyecto está licenciado bajo [Licencia Propietaria] - ver el archivo LICENSE para más detalles.
+Este proyecto está licenciado bajo [MIT License](LICENSE).
 
 ## Contacto
 
-Para más información, contactar con info@trivo-ai.com 
+Para soporte y consultas, contacte a [info@trivo-ai.com](mailto:info@trivo-ai.com). 
