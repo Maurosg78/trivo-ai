@@ -1,0 +1,80 @@
+{
+    "vegetables": {
+        "beetroot": {
+            "name": "Remolacha",
+            "color": "red",
+            "nutritional_value": {
+                "protein": 1.6,
+                "fiber": 2.8,
+                "fat": 0.2,
+                "carbohydrates": 9.6
+            },
+            "cost": 2.5,
+            "availability": 0.9,
+            "sustainability_score": 0.8,
+            "texture_properties": {
+                "elasticity": 0.3,
+                "firmness": 0.7,
+                "moisture": 0.8
+            }
+        },
+        "cauliflower": {
+            "name": "Coliflor",
+            "color": "white",
+            "nutritional_value": {
+                "protein": 1.9,
+                "fiber": 2.5,
+                "fat": 0.3,
+                "carbohydrates": 4.9
+            },
+            "cost": 3.0,
+            "availability": 0.85,
+            "sustainability_score": 0.75,
+            "texture_properties": {
+                "elasticity": 0.4,
+                "firmness": 0.6,
+                "moisture": 0.7
+            }
+        }
+    },
+    "legumes": {
+        "chickpea": {
+            "name": "Garbanzo",
+            "color": "beige",
+            "nutritional_value": {
+                "protein": 19.0,
+                "fiber": 7.6,
+                "fat": 6.0,
+                "carbohydrates": 61.0
+            },
+            "cost": 4.0,
+            "availability": 0.95,
+            "sustainability_score": 0.9,
+            "texture_properties": {
+                "elasticity": 0.6,
+                "firmness": 0.8,
+                "moisture": 0.5
+            }
+        }
+    },
+    "grains": {
+        "quinoa": {
+            "name": "Quinoa",
+            "color": "white",
+            "nutritional_value": {
+                "protein": 14.1,
+                "fiber": 7.0,
+                "fat": 6.1,
+                "carbohydrates": 64.2
+            },
+            "cost": 8.0,
+            "availability": 0.8,
+            "sustainability_score": 0.85,
+            "texture_properties": {
+                "elasticity": 0.5,
+                "firmness": 0.7,
+                "moisture": 0.6
+            }
+        }
+    }
+} 
