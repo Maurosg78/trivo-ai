@@ -1,0 +1,139 @@
+{
+  "scales": {
+    "individual": {
+      "batch_size": {"min": 0.1, "max": 2.0, "unit": "kg"},
+      "equipment": {
+        "mixer": {"required": false, "type": "home/hand"},
+        "oven": {"required": true, "type": "home"}
+      },
+      "process_time": {
+        "mixing": {"min": 8, "max": 15, "unit": "min"},
+        "resting": {"min": 45, "max": 90, "unit": "min"},
+        "baking": {"min": 12, "max": 25, "unit": "min"}
+      },
+      "temperatures": {
+        "dough": {"min": 22, "max": 28, "unit": "C"},
+        "baking": {"min": 200, "max": 250, "unit": "C"}
+      },
+      "tolerances": {
+        "hydration": {"range": 5, "unit": "%"},
+        "salt": {"range": 0.5, "unit": "%"},
+        "temperature": {"range": 3, "unit": "C"}
+      }
+    },
+    "small_business": {
+      "batch_size": {"min": 2.0, "max": 20.0, "unit": "kg"},
+      "equipment": {
+        "mixer": {"required": true, "type": "professional"},
+        "oven": {"required": true, "type": "professional"},
+        "fermentation_chamber": {"required": false}
+      },
+      "process_time": {
+        "mixing": {"min": 5, "max": 12, "unit": "min"},
+        "resting": {"min": 40, "max": 60, "unit": "min"},
+        "baking": {"min": 8, "max": 20, "unit": "min"}
+      },
+      "temperatures": {
+        "dough": {"min": 23, "max": 26, "unit": "C"},
+        "baking": {"min": 200, "max": 240, "unit": "C"}
+      },
+      "tolerances": {
+        "hydration": {"range": 3, "unit": "%"},
+        "salt": {"range": 0.3, "unit": "%"},
+        "temperature": {"range": 2, "unit": "C"}
+      }
+    },
+    "industrial": {
+      "batch_size": {"min": 20.0, "max": 500.0, "unit": "kg"},
+      "equipment": {
+        "mixer": {"required": true, "type": "industrial"},
+        "oven": {"required": true, "type": "tunnel/industrial"},
+        "fermentation_chamber": {"required": true},
+        "sheeter": {"required": true},
+        "divider": {"required": true}
+      },
+      "process_time": {
+        "mixing": {"min": 4, "max": 10, "unit": "min"},
+        "resting": {"min": 30, "max": 45, "unit": "min"},
+        "baking": {"min": 5, "max": 15, "unit": "min"}
+      },
+      "temperatures": {
+        "dough": {"min": 22, "max": 25, "unit": "C"},
+        "water": {"min": 4, "max": 15, "unit": "C"},
+        "baking": {"min": 190, "max": 230, "unit": "C"}
+      },
+      "tolerances": {
+        "hydration": {"range": 1, "unit": "%"},
+        "salt": {"range": 0.1, "unit": "%"},
+        "temperature": {"range": 1, "unit": "C"}
+      },
+      "quality_control": {
+        "check_points": ["mixing", "fermentation", "baking", "cooling"],
+        "parameters": [
+          {"name": "dough_temperature", "tolerance": 1.0},
+          {"name": "dough_pH", "tolerance": 0.2},
+          {"name": "moisture_content", "tolerance": 1.0},
+          {"name": "dough_consistency", "tolerance": 20, "unit": "BU"}
+        ]
+      }
+    }
+  },
+  "recipe_types": {
+    "pizza": {
+      "hydration_range": {"min": 55, "max": 70, "unit": "%"},
+      "fermentation_time": {"min": 30, "max": 120, "unit": "min"},
+      "thickness": {"min": 2, "max": 10, "unit": "mm"},
+      "baking_temperature": {"min": 200, "max": 350, "unit": "C"}
+    },
+    "bread": {
+      "hydration_range": {"min": 65, "max": 80, "unit": "%"},
+      "fermentation_time": {"min": 60, "max": 180, "unit": "min"},
+      "baking_temperature": {"min": 180, "max": 240, "unit": "C"}
+    },
+    "gluten_free": {
+      "hydration_range": {"min": 70, "max": 100, "unit": "%"},
+      "binding_agents": {"required": true},
+      "resting_time": {"min": 20, "max": 60, "unit": "min"},
+      "baking_temperature": {"min": 180, "max": 220, "unit": "C"}
+    },
+    "vegetable_base": {
+      "vegetable_content": {"min": 30, "max": 70, "unit": "%"},
+      "moisture_control": {"required": true},
+      "binding_agents": {"required": true},
+      "pre_cooking": {"required": false, "recommended": true}
+    }
+  },
+  "special_requirements": {
+    "colored_dough": {
+      "natural_colorants": {
+        "red": ["beetroot", "red bell pepper", "tomato"],
+        "yellow": ["turmeric", "saffron", "yellow bell pepper"],
+        "green": ["spinach", "matcha", "parsley"],
+        "purple": ["purple cabbage", "blackberry", "blueberry"],
+        "orange": ["carrot", "pumpkin", "paprika"],
+        "black": ["activated charcoal", "black sesame"],
+        "dosage_range": {"min": 5, "max": 20, "unit": "%"}
+      },
+      "color_stability": {
+        "heat_sensitive": ["beetroot", "spinach", "purple cabbage"],
+        "pH_sensitive": ["red cabbage", "beetroot", "turmeric"],
+        "temperature_adjustments": {"reduce_by": 10, "unit": "C"}
+      }
+    },
+    "texture_control": {
+      "elastic": {
+        "key_ingredients": ["gluten", "psyllium", "xanthan_gum"],
+        "mixing_requirements": {"longer": true, "temperature_sensitive": true}
+      },
+      "crispy": {
+        "key_ingredients": ["starch", "low_hydration"],
+        "baking_requirements": {"higher_temperature": true, "longer_time": false}
+      },
+      "fluffy": {
+        "key_ingredients": ["high_hydration", "proper_leavening"],
+        "mixing_requirements": {"gentler": true},
+        "fermentation_requirements": {"longer": true}
+      }
+    }
+  }
+} 

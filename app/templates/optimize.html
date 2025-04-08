@@ -1,525 +1,271 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Receta - TRIVO-AI</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body class="theme-trivo dark-mode">
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container">
-            <a class="navbar-brand" href="/"><i class="fas fa-pizza-slice me-2"></i>TRIVO-AI</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Menú de navegación">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i> Inicio</a>
+{% extends 'base.html' %}
+
+{% block title %}Crear Receta - TRIVO-AI{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Crear y Optimizar Receta</h1>
+    
+    <!-- Natural Language Result -->
+    {% if nlp_request %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Tu solicitud</h5>
+        </div>
+        <div class="card-body">
+            <p class="lead">{{ nlp_request }}</p>
+            
+            {% if nlp_result %}
+            <div class="mt-3">
+                <h6>Propiedades detectadas:</h6>
+                <ul class="list-group list-group-flush">
+                    {% if nlp_result.properties.pizza_type %}
+                    <li class="list-group-item">Tipo de pizza: <span class="badge bg-primary">{{ nlp_result.properties.pizza_type }}</span></li>
+                    {% endif %}
+                    
+                    {% if nlp_result.properties.dough_type %}
+                    <li class="list-group-item">Tipo de masa: <span class="badge bg-primary">{{ nlp_result.properties.dough_type }}</span></li>
+                    {% endif %}
+                    
+                    {% if nlp_result.properties.size %}
+                    <li class="list-group-item">Tamaño: <span class="badge bg-primary">{{ nlp_result.properties.size }}</span></li>
+                    {% endif %}
+                    
+                    {% if nlp_result.properties.restrictions %}
+                    <li class="list-group-item">Restricciones:
+                        {% for restriction in nlp_result.properties.restrictions %}
+                        <span class="badge bg-warning text-dark me-1">{{ restriction }}</span>
+                        {% endfor %}
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/optimize"><i class="fas fa-wand-magic-sparkles me-1"></i> Crear Receta</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/validate"><i class="fas fa-check-circle me-1"></i> Validar Receta</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/about"><i class="fas fa-info-circle me-1"></i> Acerca de</a>
-                    </li>
+                    {% endif %}
+                    
+                    {% if nlp_result.properties.color %}
+                    <li class="list-group-item">Color: <span class="badge bg-primary">{{ nlp_result.properties.color }}</span></li>
+                    {% endif %}
                 </ul>
             </div>
-        </div>
-    </nav>
-
-    <div class="container py-5">
-        <h1 class="text-center mb-4">Creador de Recetas</h1>
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                    </div>
-                {% endfor %}
             {% endif %}
-        {% endwith %}
-        
-        {% if optimized_recipe %}
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <h2 class="h5 mb-0"><i class="fas fa-check-circle me-2"></i>Receta Optimizada</h2>
-                </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="row">
+        <!-- Form for manual optimization -->
+        {% if not optimized_recipe %}
+        <div class="col-lg-12">
+            <div class="card shadow-sm mb-4">
                 <div class="card-body">
-                    {% if nl_info %}
-                    <div class="alert alert-info mb-4">
-                        <h3 class="h6 mb-2"><i class="fas fa-comment me-2"></i>Solicitud original:</h3>
-                        <p class="mb-3">{{ nl_info.original_request }}</p>
-                        <h4 class="h6 mb-2">Características detectadas:</h4>
-                        <ul class="mb-0">{% if nl_info.detected_properties.es_sin_gluten %}
-                                <li>Receta sin gluten</li>
-                            {% endif %}
-                            {% if nl_info.detected_properties.es_nutricional %}
-                                <li>Optimizada nutricionalmente</li>
-                            {% endif %}
-                            {% if nl_info.detected_properties.tipo_pizza == "margarita" %}
-                                <li>Pizza tipo Margarita</li>
-                            {% endif %}
-                            {% if nl_info.detected_properties.colores %}
-                                {% if nl_info.detected_properties.colores.rojo %}
-                                    <li>Color: Rojo (con remolacha)</li>
-                                {% endif %}
-                                {% if nl_info.detected_properties.colores.verde %}
-                                    <li>Color: Verde (con espinaca)</li>
-                                {% endif %}
-                                {% if nl_info.detected_properties.colores.negro %}
-                                    <li>Color: Negro (con carbón activado)</li>
-                                {% endif %}
-                            {% endif %}</ul>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h3 class="h6 mb-3">Receta Optimizada</h3>
-                            <div class="alert alert-info mb-3 small">
-                                <i class="fas fa-info-circle me-2"></i> Nota sobre unidades:
-                                <ul class="mb-0 mt-1"><li>Ingredientes líquidos: se muestran en mililitros (ml)</li>
-                                    <li>Ingredientes sólidos: se muestran en gramos (g)</li>
-                                    <li>1 ml de agua = 1 g. Para aceites y otros líquidos, la equivalencia puede variar.</li></ul>
-                            </div>
-                            <ul class="list-group list-group-flush mb-3">
-                                {% for ingredient, amount in optimized_recipe.items() %}
-                                    {% if ingredient not in ['recipe_name', 'recipe_id'] %}
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        {{ ingredient.replace('_', ' ').capitalize() }}
-                                        <span class="badge bg-success rounded-pill">
-                                            {% if amount is number %}
-                                                {% if ingredient.lower().replace(' ', '_') in ['agua', 'water', 'leche', 'milk', 'aceite_de_oliva', 'olive_oil', 'aceite_vegetal', 'vegetable_oil', 'aceite_de_coco', 'coconut_oil', 'vinagre', 'vinegar', 'cerveza', 'beer', 'vino', 'wine', 'miel', 'honey', 'jarabe', 'syrup', 'yogur', 'yogurt', 'nata', 'cream'] %}
-                                                    {{ "%.2f"|format(amount) }} ml
-                                                {% else %}
-                                                    {{ "%.2f"|format(amount) }} g
-                                                {% endif %}
-                                            {% else %}
-                                                {{ amount }} g
-                                            {% endif %}
-                                        </span>
-                                    </li>
-                                    {% endif %}
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <h3 class="h6 mt-4 mb-3">Estado de Validación:</h3>
-                    {% if validation_result.valid %}
-                        <div class="alert alert-success mb-3">
-                            <i class="fas fa-check-circle me-2"></i> La receta es válida para la escala <strong>{{ scale }}</strong>.
-                        </div>
-                    {% else %}
-                        <div class="alert alert-warning mb-3">
-                            <i class="fas fa-exclamation-triangle me-2"></i> La receta tiene problemas de validación para la escala <strong>{{ scale }}</strong>.
-                        </div>
-                        <h4 class="h6 mb-2">Errores encontrados:</h4>
-                        <ul class="list-group mb-3">{% for error in validation_result.errors %}
-                                <li class="list-group-item list-group-item-{{ 'danger' if error.severity == 'critical' else 'warning' }}">
-                                    <strong>{{ error.code }}</strong>: {{ error.message }}
-                                    {% if error.recommendations %}
-                                        <div class="mt-1">
-                                            <small><strong>Recomendación:</strong> {{ error.recommendations }}</small>
-                                        </div>
-                                    {% endif %}
-                                </li>
-                            {% endfor %}</ul>
-                    {% endif %}
-                    
-                    <h3 class="h6 mb-3">Recomendaciones:</h3>
-                    <ul class="list-group mb-3">{% for recommendation in recommendations %}
-                            <li class="list-group-item">{{ recommendation }}</li>
-                        {% endfor %}</ul>
-                    
-                    {% if instructions %}
-                    <h3 class="h6 mb-3">Instrucciones de preparación:</h3>
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <div class="instructions-list">
-                                {% for step in instructions %}
-                                    {% if step.startswith('   -') %}
-                                        <div class="ps-4 mb-2">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="step-{{ loop.index }}">
-                                                <label class="form-check-label" for="step-{{ loop.index }}">
-                                                    {{ step[4:] }}
-                                                </label>
-                                            </div>
-                                        </div>
-                                    {% elif step.startswith('   ') %}
-                                        <div class="ps-4 mb-2">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="step-{{ loop.index }}">
-                                                <label class="form-check-label" for="step-{{ loop.index }}">
-                                                    {{ step[3:] }}
-                                                </label>
-                                            </div>
-                                        </div>
-                                    {% else %}
-                                        {% if not loop.first %}</div>{% endif %}
-                                        <div class="mb-3">
-                                            <h5 class="h6 text-primary">{{ step }}</h5>
-                                    {% endif %}
-                                {% endfor %}
-                                {% if instructions %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <button id="resetCheckboxes" class="btn btn-sm btn-outline-secondary mt-2">
-                                <i class="fas fa-redo-alt me-1"></i> Reiniciar progreso
-                            </button>
-                        </div>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="mt-3">
-                        <a href="/optimize" class="btn btn-outline-primary"><i class="fas fa-redo me-1"></i> Crear Nueva Receta</a>
-                        <button class="btn btn-outline-secondary" onclick="window.print()"><i class="fas fa-print me-1"></i> Imprimir Resultados</button>
-                    </div>
-                </div>
-            </div>
-        {% else %}
-            <div class="row mb-4">
-                <div class="col-lg-12">
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-success text-white">
-                            <h2 class="h5 mb-0"><i class="fas fa-comment me-2"></i>Crear con Lenguaje Natural</h2>
-                        </div>
-                        <div class="card-body">
-                            <p>Describe lo que deseas y TRIVO-AI creará una formulación personalizada:</p>
-                            
-                            <div class="alert alert-success mb-3">
-                                <h6 class="alert-heading"><i class="fas fa-lightbulb me-2"></i>Valor añadido de TRIVO-AI</h6>
-                                <div class="small">
-                                    <p class="mb-2">A diferencia de modelos genéricos de IA, TRIVO-AI ofrece:</p>
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="mb-2">
-                                                <i class="fas fa-check-circle text-success me-1"></i> Validación técnica industrial
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="mb-2">
-                                                <i class="fas fa-check-circle text-success me-1"></i> Optimización para producción
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="mb-2">
-                                                <i class="fas fa-check-circle text-success me-1"></i> Adaptación a diferentes escalas
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="mb-2">
-                                                <i class="fas fa-check-circle text-success me-1"></i> Detección de problemas técnicos
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="mb-2">
-                                                <i class="fas fa-check-circle text-success me-1"></i> Equilibrio nutricional especializado
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="mb-2">
-                                                <i class="fas fa-check-circle text-success me-1"></i> Análisis de fermentación
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <form method="POST" action="/natural-language">
-                                <div class="mb-3">
-                                    <textarea class="form-control natural-language-input" name="request" rows="3" placeholder="Ejemplo: Quiero una masa de pizza familiar, de color rojo, sin gluten, nutricionalmente optimizada, porque deseo que mis hijos se alimenten de manera sana comiendo pizza que les encanta." required></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <input type="hidden" id="natural_language_request" name="nl_request_id">
-                                    <label for="natural_language_request" class="form-label">Escala de producción:</label>
-                                    <div class="d-flex gap-3">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="production_scale" id="nl_scale_individual" value="individual" checked>
-                                            <label class="form-check-label" for="nl_scale_individual">Individual</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="production_scale" id="nl_scale_business" value="small_business">
-                                            <label class="form-check-label" for="nl_scale_business">Pequeño Negocio</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="production_scale" id="nl_scale_industrial" value="industrial">
-                                            <label class="form-check-label" for="nl_scale_industrial">Industrial</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="d-grid gap-2">
-                                    <button type="submit" class="btn natural-language-submit text-white"><i class="fas fa-magic me-1"></i> Crear mi receta personalizada</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="h5 mb-0"><i class="fas fa-sliders-h me-2"></i>Modo Avanzado - Crear Manualmente</h2>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="/optimize">
-                        <div class="row mb-4">
-                            <div class="col-md-6 mb-3">
-                                <label for="recipe_type" class="form-label">Tipo de Receta</label>
-                                <select class="form-select" name="recipe_type" id="recipe_type">
-                                    <option value="pizza">Pizza</option>
-                                    <option value="pan">Pan</option>
-                                    <option value="flatbread">Pan plano</option>
-                                    <option value="brioche">Brioche</option>
-                                    <option value="croissant">Croissant</option>
-                                    <option value="masa_filo">Masa Filo</option>
-                                    <option value="pasta_fresca">Pasta Fresca</option>
-                                    <option value="masa_strudel">Strudel</option>
-                                    <option value="kouign_amann">Kouign-Amann</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="scale" class="form-label">Escala de Producción</label>
-                                <select class="form-select" name="scale" id="scale">
-                                    <option value="individual">Individual (hasta 2 kg)</option>
-                                    <option value="small_business">Pequeño Negocio (2-20 kg)</option>
-                                    <option value="industrial">Industrial (20-500 kg)</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <h3 class="h5 mb-3">Ingredientes</h3>
-                        
-                        <div id="ingredients-container">
-                            <div class="row ingredient-row mb-3">
-                                <div class="col-md-6">
-                                    <input type="text" class="form-control" name="ingredient_1" placeholder="Nombre del ingrediente" required>
-                                </div>
+                    <h4 class="card-title">Modo avanzado: Crear receta manualmente</h4>
+                    <form method="post" action="/optimize">
+                        <div class="ingredients-container">
+                            <div class="row mb-2">
                                 <div class="col-md-5">
-                                    <div class="input-group">
-                                        <input type="number" class="form-control" name="amount_1" placeholder="Cantidad" min="0" step="0.01" required>
-                                        <span class="input-group-text">g</span>
-                                    </div>
+                                    <label for="ingredient1" class="form-label">Ingrediente</label>
                                 </div>
-                                <div class="col-md-1 d-flex align-items-center">
-                                    <button type="button" class="btn btn-outline-danger btn-sm remove-ingredient" disabled aria-label="Eliminar ingrediente"><i class="fas fa-times"></i></button>
+                                <div class="col-md-4">
+                                    <label for="quantity1" class="form-label">Cantidad (g/ml)</label>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-2 ingredient-row">
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control" name="ingredient[]" placeholder="Ej: harina">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="number" class="form-control" name="quantity[]" placeholder="Ej: 1000">
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="button" class="btn btn-outline-danger remove-ingredient">Eliminar</button>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="mb-4">
-                            <button type="button" id="add-ingredient" class="btn btn-outline-primary btn-sm"><i class="fas fa-plus me-1"></i> Agregar Ingrediente</button>
+                        <div class="mb-3">
+                            <button type="button" id="add-ingredient" class="btn btn-outline-primary">+ Añadir ingrediente</button>
                         </div>
                         
-                        <h3 class="h5 mb-3">Opciones Adicionales</h3>
-                        <div class="row mb-4">
-                            <div class="col-md-6 mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="gluten_free" id="gluten_free">
-                                    <label class="form-check-label" for="gluten_free">Sin Gluten</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="vegan" id="vegan">
-                                    <label class="form-check-label" for="vegan">Vegano</label>
-                                </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="max_cost" class="form-label">Costo máximo (€/kg)</label>
+                                <input type="number" step="0.01" class="form-control" id="max_cost" name="max_cost" value="5.0">
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="low_carb" id="low_carb">
-                                    <label class="form-check-label" for="low_carb">Bajo en Carbohidratos</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="high_protein" id="high_protein">
-                                    <label class="form-check-label" for="high_protein">Alto en Proteínas</label>
-                                </div>
+                            <div class="col-md-6">
+                                <label for="min_quality" class="form-label">Calidad mínima (0-100)</label>
+                                <input type="number" class="form-control" id="min_quality" name="min_quality" value="80">
                             </div>
                         </div>
                         
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-wand-magic-sparkles me-1"></i> Optimizar Receta</button>
+                        <div class="mb-3">
+                            <label for="scale" class="form-label">Escala de producción</label>
+                            <select class="form-select" id="scale" name="scale">
+                                <option value="small_business">Pequeño negocio (menos de 50kg/día)</option>
+                                <option value="restaurant">Restaurante (50-200kg/día)</option>
+                                <option value="industrial">Industrial (más de 200kg/día)</option>
+                            </select>
                         </div>
+                        
+                        <button type="submit" class="btn btn-primary">Optimizar receta</button>
                     </form>
                 </div>
             </div>
-        {% endif %}
-    </div>
-
-    <footer class="text-white py-4 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5><i class="fas fa-pizza-slice me-2"></i>TRIVO-AI</h5>
-                    <p class="small">Sistema de recomendación y optimización de recetas de masa con inteligencia artificial.</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <ul class="list-inline mb-0">
-                        <li class="list-inline-item">
-                            <a href="https://github.com/Maurosg78/TRIVO-AI" class="text-white" target="_blank" rel="noopener">
-                                <i class="fab fa-github fa-fw"></i> GitHub
-                            </a>
-                        </li>
-                        <li class="list-inline-item">
-                            <a href="/about" class="text-white">
-                                <i class="fas fa-info-circle fa-fw"></i> Acerca de
-                            </a>
-                        </li>
-                    </ul>
-                    <p class="small mt-2 mb-0">© 2024 TRIVO-AI. Todos los derechos reservados.</p>
+            
+            <!-- Start with Natural Language -->
+            <div class="card shadow-sm natural-language-input mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">Modo simple: Describe lo que necesitas</h4>
+                    <form action="/natural-language" method="post">
+                        <div class="mb-3">
+                            <textarea class="form-control" name="text" rows="3" placeholder="Ej: Quiero una masa de pizza familiar, de color rojo, sin gluten, nutricionalmente optimizada para niños"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Crear con IA</button>
+                    </form>
                 </div>
             </div>
         </div>
-    </footer>
-
-    <!-- Botón para cambiar tema -->
-    <div class="theme-toggle" id="theme-toggle">
-        <i class="fas fa-sun"></i>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const themeToggle = document.getElementById('theme-toggle');
-            const body = document.body;
-            const icon = themeToggle.querySelector('i');
-            
-            themeToggle.addEventListener('click', function() {
-                body.classList.toggle('dark-mode');
-                
-                if (body.classList.contains('dark-mode')) {
-                    icon.className = 'fas fa-sun';
-                } else {
-                    icon.className = 'fas fa-moon';
-                }
-                
-                // Guardar preferencia en localStorage
-                localStorage.setItem('darkMode', body.classList.contains('dark-mode'));
-            });
-            
-            // Comprobar preferencia guardada
-            const darkModeSaved = localStorage.getItem('darkMode') === 'true';
-            if (darkModeSaved) {
-                body.classList.add('dark-mode');
-                icon.className = 'fas fa-sun';
-            } else {
-                body.classList.remove('dark-mode');
-                icon.className = 'fas fa-moon';
-            }
-            
-            // Gestión de checkboxes para instrucciones
-            const checkboxes = document.querySelectorAll('.instructions-list input[type="checkbox"]');
-            const resetButton = document.getElementById('resetCheckboxes');
-            
-            if (checkboxes.length > 0) {
-                // Identificador único para esta receta basado en los ingredientes
-                const recipeId = window.location.pathname + '-' + 
-                                (document.querySelector('.nl_info') ? 
-                                 document.querySelector('.nl_info').innerText.substring(0, 20) : 
-                                 new Date().toISOString().split('T')[0]);
-                
-                // Cargar estado guardado de checkboxes
-                const savedSteps = JSON.parse(localStorage.getItem('recipe-steps-' + recipeId) || '{}');
-                
-                // Aplicar estado guardado
-                checkboxes.forEach((checkbox, index) => {
-                    // Asignar ID único
-                    const stepId = 'step-' + index;
-                    checkbox.id = stepId;
-                    checkbox.nextElementSibling.setAttribute('for', stepId);
+        {% endif %}
+        
+        <!-- Display optimized recipe -->
+        {% if optimized_recipe %}
+        <div class="col-lg-7">
+            <div class="card shadow-sm mb-4 recipe-container">
+                <div class="card-header">
+                    <h4>Receta optimizada: {{ optimized_recipe.name }}</h4>
+                </div>
+                <div class="card-body">
+                    <h5>Ingredientes:</h5>
+                    <ul class="ingredient-list">
+                        {% for ingredient, quantity in optimized_recipe.ingredients.items() %}
+                        <li><strong>{{ ingredient }}</strong>: {{ quantity }}{{ 'g' if ingredient != 'agua' and ingredient != 'aceite de oliva' else 'ml' }}</li>
+                        {% endfor %}
+                    </ul>
                     
-                    // Restaurar estado
-                    if (savedSteps[stepId]) {
-                        checkbox.checked = true;
-                    }
+                    {% if optimized_recipe.instructions %}
+                    <h5 class="mt-4">Instrucciones:</h5>
+                    <ol>
+                        {% for instruction in optimized_recipe.instructions %}
+                        <li>{{ instruction }}</li>
+                        {% endfor %}
+                    </ol>
+                    {% endif %}
                     
-                    // Guardar cambios al marcar/desmarcar
-                    checkbox.addEventListener('change', function() {
-                        const currentState = JSON.parse(localStorage.getItem('recipe-steps-' + recipeId) || '{}');
-                        currentState[this.id] = this.checked;
-                        localStorage.setItem('recipe-steps-' + recipeId, JSON.stringify(currentState));
+                    {% if optimized_recipe.cost %}
+                    <div class="mt-4">
+                        <h5>Características:</h5>
+                        <p><strong>Costo estimado:</strong> {{ optimized_recipe.cost }}€/kg</p>
                         
-                        // Cambiar estilo del texto
-                        if (this.checked) {
-                            this.nextElementSibling.classList.add('text-decoration-line-through', 'text-muted');
-                        } else {
-                            this.nextElementSibling.classList.remove('text-decoration-line-through', 'text-muted');
-                        }
-                    });
+                        {% if optimized_recipe.hydration %}
+                        <p><strong>Hidratación:</strong> {{ optimized_recipe.hydration }}%</p>
+                        {% endif %}
+                        
+                        {% if optimized_recipe.estimated_quality %}
+                        <p><strong>Calidad estimada:</strong> {{ optimized_recipe.estimated_quality }}/100</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <a href="/optimize" class="btn btn-outline-primary">Crear nueva receta</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Display validation results -->
+        <div class="col-lg-5">
+            {% if validation_result %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h4>Resultados de validación</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <span class="validation-badge {{ 'validation-valid' if validation_result.valid else 'validation-invalid' }}">
+                            {{ 'Válida' if validation_result.valid else 'No válida' }} para escala: {{ validation_result.scale }}
+                        </span>
+                    </div>
                     
-                    // Aplicar estilo inicial
-                    if (checkbox.checked) {
-                        checkbox.nextElementSibling.classList.add('text-decoration-line-through', 'text-muted');
-                    }
-                });
-                
-                // Botón para reiniciar todos los checkboxes
-                if (resetButton) {
-                    resetButton.addEventListener('click', function() {
-                        checkboxes.forEach(checkbox => {
-                            checkbox.checked = false;
-                            checkbox.nextElementSibling.classList.remove('text-decoration-line-through', 'text-muted');
-                        });
-                        localStorage.removeItem('recipe-steps-' + recipeId);
-                    });
+                    {% if validation_result.issues %}
+                    <div class="mt-3">
+                        <h5 class="text-danger">Problemas críticos:</h5>
+                        <ul class="list-group">
+                            {% for issue in validation_result.issues %}
+                            <li class="list-group-item list-group-item-danger">{{ issue }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    
+                    {% if validation_result.warnings %}
+                    <div class="mt-3">
+                        <h5 class="text-warning">Advertencias:</h5>
+                        <ul class="list-group">
+                            {% for warning in validation_result.warnings %}
+                            <li class="list-group-item list-group-item-warning">{{ warning }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    
+                    {% if validation_result.suggestions %}
+                    <div class="mt-3">
+                        <h5 class="text-info">Sugerencias:</h5>
+                        <ul class="list-group">
+                            {% for suggestion in validation_result.suggestions %}
+                            <li class="list-group-item list-group-item-info">{{ suggestion }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    
+                    {% if not validation_result.issues and not validation_result.warnings and not validation_result.suggestions %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill me-2"></i> No se detectaron problemas en la receta.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add ingredient row
+        const addIngredientBtn = document.getElementById('add-ingredient');
+        if (addIngredientBtn) {
+            addIngredientBtn.addEventListener('click', function() {
+                const container = document.querySelector('.ingredients-container');
+                const newRow = document.createElement('div');
+                newRow.className = 'row mb-2 ingredient-row';
+                newRow.innerHTML = `
+                    <div class="col-md-5">
+                        <input type="text" class="form-control" name="ingredient[]" placeholder="Ej: harina">
+                    </div>
+                    <div class="col-md-4">
+                        <input type="number" class="form-control" name="quantity[]" placeholder="Ej: 1000">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-outline-danger remove-ingredient">Eliminar</button>
+                    </div>
+                `;
+                container.appendChild(newRow);
+            });
+        }
+        
+        // Remove ingredient row
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.classList.contains('remove-ingredient')) {
+                const row = e.target.closest('.ingredient-row');
+                if (document.querySelectorAll('.ingredient-row').length > 1) {
+                    row.remove();
+                } else {
+                    alert('Debe haber al menos un ingrediente');
                 }
-            }
-            
-            // Código original para el manejo de ingredientes
-            const ingredientsContainer = document.getElementById('ingredients-container');
-            const addIngredientBtn = document.getElementById('add-ingredient');
-            
-            if (addIngredientBtn) {
-                let ingredientCounter = 1;
-                
-                addIngredientBtn.addEventListener('click', function() {
-                    ingredientCounter++;
-                    
-                    const newRow = document.createElement('div');
-                    newRow.className = 'row ingredient-row mb-3';
-                    newRow.innerHTML = `
-                        <div class="col-md-6">
-                            <input type="text" class="form-control" name="ingredient_${ingredientCounter}" placeholder="Nombre del ingrediente" required>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="input-group">
-                                <input type="number" class="form-control" name="amount_${ingredientCounter}" placeholder="Cantidad" min="0" step="0.01" required>
-                                <span class="input-group-text">g</span>
-                            </div>
-                        </div>
-                        <div class="col-md-1 d-flex align-items-center">
-                            <button type="button" class="btn btn-outline-danger btn-sm remove-ingredient" aria-label="Eliminar ingrediente"><i class="fas fa-times"></i></button>
-                        </div>
-                    `;
-                    
-                    ingredientsContainer.appendChild(newRow);
-                    
-                    // Add event listener to the new remove button
-                    const removeButtons = document.querySelectorAll('.remove-ingredient');
-                    removeButtons.forEach(button => {
-                        if (!button.hasAttribute('listener')) {
-                            button.setAttribute('listener', 'true');
-                            button.addEventListener('click', function() {
-                                if (ingredientsContainer.children.length > 1) {
-                                    this.closest('.ingredient-row').remove();
-                                }
-                            });
-                        }
-                    });
-                });
             }
         });
-    </script>
-</body>
-</html> 
+    });
+</script>
+{% endblock %} 

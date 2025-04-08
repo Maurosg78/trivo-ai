@@ -1,0 +1,82 @@
+{
+  "harina": {
+    "price": 0.8,
+    "properties": {
+      "protein": 10.5,
+      "fiber": 2.7,
+      "category": "flour"
+    }
+  },
+  "agua": {
+    "price": 0.001,
+    "properties": {
+      "category": "liquid"
+    }
+  },
+  "sal": {
+    "price": 0.5,
+    "properties": {
+      "category": "salt"
+    }
+  },
+  "levadura fresca": {
+    "price": 4.0,
+    "properties": {
+      "category": "leavening"
+    }
+  },
+  "levadura seca": {
+    "price": 12.0,
+    "properties": {
+      "category": "leavening",
+      "conversion_factor": 0.33
+    }
+  },
+  "aceite de oliva": {
+    "price": 5.0,
+    "properties": {
+      "category": "fat"
+    }
+  },
+  "harina de fuerza": {
+    "price": 1.2,
+    "properties": {
+      "protein": 13.5,
+      "fiber": 2.5,
+      "category": "flour"
+    }
+  },
+  "harina integral": {
+    "price": 1.5,
+    "properties": {
+      "protein": 12.0,
+      "fiber": 10.5,
+      "category": "flour"
+    }
+  },
+  "harina de arroz": {
+    "price": 2.5,
+    "properties": {
+      "protein": 7.0,
+      "fiber": 1.4,
+      "category": "flour",
+      "gluten_free": true
+    }
+  },
+  "almid\u00f3n de ma\u00edz": {
+    "price": 2.0,
+    "properties": {
+      "protein": 0.3,
+      "fiber": 0.1,
+      "category": "flour",
+      "gluten_free": true
+    }
+  },
+  "goma xantana": {
+    "price": 25.0,
+    "properties": {
+      "category": "additive",
+      "gluten_free": true
+    }
+  }
+}

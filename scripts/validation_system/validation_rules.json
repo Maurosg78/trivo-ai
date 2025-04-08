@@ -1,0 +1,176 @@
+{
+  "critical_rules": [
+    {
+      "code": "CR001",
+      "name": "hydration_range",
+      "description": "Verifica que la hidratación esté dentro del rango adecuado",
+      "min": 0.45,
+      "max": 0.75,
+      "affected_parameters": ["flour", "water", "liquid_ingredients"]
+    },
+    {
+      "code": "CR002",
+      "name": "salt_percentage",
+      "description": "Verifica la proporción de sal respecto a la harina",
+      "min": 0.01,
+      "max": 0.03,
+      "affected_parameters": ["salt", "flour"]
+    },
+    {
+      "code": "CR003",
+      "name": "temperature_process_compatibility",
+      "description": "Verifica la compatibilidad entre temperatura y procesos",
+      "affected_parameters": ["dough_temperature", "fermentation", "baking"]
+    },
+    {
+      "code": "CR004",
+      "name": "equipment_capacity",
+      "description": "Verifica que los equipos pueden manejar el volumen especificado",
+      "affected_parameters": ["batch_size", "equipment"]
+    },
+    {
+      "code": "CR005",
+      "name": "ingredient_compatibility",
+      "description": "Verifica que los ingredientes sean compatibles entre sí",
+      "affected_parameters": ["ingredients"]
+    }
+  ],
+  "medium_rules": [
+    {
+      "code": "MR001",
+      "name": "mixing_time_consistency",
+      "description": "Verifica que el tiempo de amasado sea adecuado",
+      "affected_parameters": ["mixing_time", "flour_type", "hydration"]
+    },
+    {
+      "code": "MR002",
+      "name": "fermentation_conditions",
+      "description": "Verifica condiciones óptimas de fermentación",
+      "affected_parameters": ["fermentation_time", "fermentation_temperature", "yeast_amount"]
+    },
+    {
+      "code": "MR003",
+      "name": "gluten_free_composition",
+      "description": "Verifica la composición adecuada para masas sin gluten",
+      "affected_parameters": ["gluten_free_flours", "binding_agents"]
+    }
+  ],
+  "ingredient_limits": {
+    "flour": {
+      "min_protein": 9.0,
+      "max_protein": 14.0,
+      "min_hydration": 0.5,
+      "max_hydration": 0.65
+    },
+    "rice_flour": {
+      "min_hydration": 0.6,
+      "max_hydration": 0.8
+    },
+    "salt": {
+      "min_percentage": 1.0,
+      "max_percentage": 2.5
+    },
+    "yeast": {
+      "min_percentage": 0.5,
+      "max_percentage": 3.0,
+      "max_temp": 50
+    },
+    "psyllium": {
+      "min_percentage": 1.0,
+      "max_percentage": 5.0
+    },
+    "xanthan_gum": {
+      "min_percentage": 0.2,
+      "max_percentage": 1.0
+    }
+  },
+  "process_parameters": {
+    "dough_temperature": {
+      "min": 22,
+      "max": 26,
+      "unit": "C",
+      "affected_by": [
+        "water_temperature",
+        "ambient_temperature",
+        "friction_factor"
+      ]
+    },
+    "fermentation": {
+      "time": {
+        "min": 30,
+        "max": 180,
+        "unit": "min"
+      },
+      "temperature": {
+        "min": 20,
+        "max": 32,
+        "unit": "C"
+      },
+      "humidity": {
+        "min": 65,
+        "max": 85,
+        "unit": "%"
+      }
+    },
+    "mixing": {
+      "time": {
+        "min": 5,
+        "max": 15,
+        "unit": "min"
+      },
+      "speed": {
+        "min": 20,
+        "max": 60,
+        "unit": "RPM"
+      }
+    },
+    "baking": {
+      "temperature": {
+        "min": 180,
+        "max": 250,
+        "unit": "C"
+      },
+      "time": {
+        "min": 5,
+        "max": 30,
+        "unit": "min"
+      }
+    }
+  },
+  "industrial_parameters": {
+    "batch_size": {
+      "min": 10,
+      "max": 500,
+      "unit": "kg"
+    },
+    "equipment_requirements": {
+      "mixer": {
+        "required": true,
+        "capacity_factor": 1.5
+      },
+      "sheeter": {
+        "required": true,
+        "min_width": 60,
+        "unit": "cm"
+      },
+      "fermentation_chamber": {
+        "required": true,
+        "temperature_stability": 1,
+        "humidity_control": true
+      },
+      "tunnel_oven": {
+        "required": true,
+        "temperature_zones": 2
+      }
+    },
+    "quality_control": {
+      "required_checks": [
+        "pH",
+        "moisture",
+        "texture",
+        "color",
+        "internal_temperature"
+      ]
+    }
+  }
+} 

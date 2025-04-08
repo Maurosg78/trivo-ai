@@ -1,0 +1,132 @@
+{
+  "id": "pizza_margherita_industrial",
+  "name": "Pizza Margherita - Producción Industrial",
+  "type": "pizza",
+  "scale": "industrial",
+  "batch_size": 150,
+  "ingredients": {
+    "flour": {
+      "type": "wheat_flour",
+      "quantity": 100,
+      "unit": "kg",
+      "protein_content": 12.5,
+      "moisture": 13.2,
+      "properties": {
+        "w_value": 280,
+        "p/l_ratio": 0.55
+      }
+    },
+    "water": {
+      "quantity": 65,
+      "unit": "kg",
+      "temperature": 8,
+      "hardness": 120,
+      "pH": 7.0
+    },
+    "salt": {
+      "quantity": 2.5,
+      "unit": "kg",
+      "iodized": true
+    },
+    "yeast": {
+      "type": "dry",
+      "quantity": 1.2,
+      "unit": "kg"
+    },
+    "oil": {
+      "type": "olive_oil",
+      "quantity": 3,
+      "unit": "kg"
+    }
+  },
+  "process": {
+    "mixing": {
+      "type": "spiral_mixer",
+      "capacity": 160,
+      "time": 8,
+      "time_unit": "min",
+      "speed_sequence": [
+        {"speed": "low", "time": 3, "time_unit": "min"},
+        {"speed": "medium", "time": 5, "time_unit": "min"}
+      ],
+      "target_temperature": 24,
+      "temperature_unit": "C"
+    },
+    "bulk_fermentation": {
+      "time": 30,
+      "time_unit": "min",
+      "temperature": 25,
+      "temperature_unit": "C",
+      "humidity": 75,
+      "humidity_unit": "%"
+    },
+    "dividing": {
+      "weight": 180,
+      "weight_unit": "g",
+      "equipment": "industrial_divider",
+      "capacity": 36
+    },
+    "final_proofing": {
+      "time": 60,
+      "time_unit": "min",
+      "temperature": 28,
+      "temperature_unit": "C",
+      "humidity": 80,
+      "humidity_unit": "%"
+    },
+    "forming": {
+      "equipment": "sheeter",
+      "width": 70,
+      "width_unit": "cm",
+      "thickness": 3,
+      "thickness_unit": "mm"
+    },
+    "baking": {
+      "equipment": "tunnel_oven",
+      "temperature": 320,
+      "temperature_unit": "C",
+      "time": 90,
+      "time_unit": "sec",
+      "zones": [
+        {"zone": 1, "temperature": 350, "temperature_unit": "C"},
+        {"zone": 2, "temperature": 300, "temperature_unit": "C"}
+      ]
+    }
+  },
+  "technical_specs": {
+    "equipment": {
+      "mixer": {
+        "type": "spiral",
+        "available": true,
+        "capacity": 160,
+        "power": 11,
+        "power_unit": "kW"
+      },
+      "sheeter": {
+        "available": true,
+        "width": 70,
+        "width_unit": "cm"
+      },
+      "oven": {
+        "type": "tunnel",
+        "zones": 2
+      }
+    },
+    "raw_materials": {
+      "flour": {
+        "protein_content": 12.5,
+        "moisture": 13.2,
+        "ash": 0.65
+      }
+    },
+    "environment": {
+      "temperature": 22,
+      "humidity": 65
+    },
+    "quality_control": {
+      "enabled": true,
+      "critical_points": ["mixing", "fermentation", "baking"],
+      "measurements": ["temperature", "pH", "moisture", "weight"]
+    }
+  }
+} 

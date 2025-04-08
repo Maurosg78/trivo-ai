@@ -1,0 +1,21 @@
+{
+  "name": "Masa de Pizza Napolitana B\u00e1sica",
+  "ingredients": {
+    "harina de fuerza": 1000,
+    "agua": 650,
+    "sal": 25,
+    "levadura fresca": 20
+  },
+  "process": {
+    "fermentation_time": 24,
+    "fermentation_temp": 4,
+    "proofing_time": 2
+  },
+  "metadata": {
+    "author": "TRIVO-AI",
+    "created": "2024-03-21",
+    "version": 1.0,
+    "type": "pizza",
+    "category": "napolitana"
+  }
+}

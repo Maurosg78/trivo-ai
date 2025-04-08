@@ -1,0 +1,11 @@
+{
+  "harina": 1000,
+  "huevo": 200,
+  "mantequilla": 200,
+  "azucar": 100,
+  "leche": 300,
+  "sal": 18,
+  "levadura": 20,
+  "recipe_type": "brioche",
+  "production_scale": "individual"
+}

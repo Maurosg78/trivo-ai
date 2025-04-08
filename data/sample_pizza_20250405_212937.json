@@ -1,0 +1,10 @@
+{
+  "harina": 1000,
+  "agua": 620,
+  "sal": 20,
+  "levadura": 5,
+  "aceite_oliva": 30,
+  "recipe_type": "pizza",
+  "production_scale": "individual",
+  "tipo_napolitana": true
+}
