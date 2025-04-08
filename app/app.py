@@ -111,7 +111,8 @@ def validate():
 def natural_language():
     """Procesa solicitudes en lenguaje natural."""
     try:
-        user_query = request.form.get('query', '')
+        # Obtener el texto de la consulta - Corregido para usar el nombre correcto del campo
+        user_query = request.form.get('user_request', '')
         logger.info(f"Solicitud de lenguaje natural recibida: {user_query}")
         
         # Intentar importar el procesador de lenguaje natural
@@ -399,5 +400,6 @@ class MockLanguageProcessor:
         return recipe
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8000))
+    # Cambiar el puerto a 8080 para evitar conflictos
+    port = int(os.environ.get('PORT', 8080))
     app.run(debug=True, host='0.0.0.0', port=port)
