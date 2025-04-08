@@ -1,184 +1,119 @@
-# TRIVO-AI
+# TRIVO-AI: PLM para PYMEs Alimentarias
 
-Sistema inteligente para formulación y validación de recetas de masas.
+TRIVO-AI es una plataforma de gestión del ciclo de vida del producto (PLM) especializada para pequeñas y medianas empresas del sector alimentario, comenzando con un MVP enfocado en la optimización de masas para panaderías y pizzerías.
 
-## Descripción
+## Características Principales
 
-TRIVO-AI es un sistema avanzado que utiliza algoritmos genéticos e inteligencia artificial para optimizar recetas de pizza y otros productos a base de masa. El sistema permite:
+- **Optimización de Recetas**: Algoritmo genético para optimizar recetas según costos y calidad
+- **Validación de Producción**: Sistema de validación con reglas críticas para diferentes escalas
+- **Procesamiento de Lenguaje Natural**: Creación de recetas a partir de descripciones en lenguaje natural
+- **Interfaz Web Moderna**: Diseño intuitivo con colores corporativos (verde, naranja y negro)
 
-- Crear recetas óptimas según parámetros específicos
-- Validar recetas existentes según estándares industriales
-- Adaptar recetas a diferentes escalas de producción
-- Procesar peticiones en lenguaje natural para interpretar requisitos de recetas
-
-## Características principales
-
-- **Algoritmo genético** para optimización de recetas
-- **Sistema de validación crítica** para garantizar viabilidad industrial
-- **Procesador de lenguaje natural** para interpretar requisitos en texto libre
-- **Interfaz web** intuitiva y moderna
-- **API RESTful** para integración con otros sistemas
-
-## Estructura del proyecto
+## Estructura del Proyecto
 
 ```
 TRIVO-AI/
-├── app/                    # Aplicación web
-│   ├── templates/          # Plantillas HTML
-│   ├── static/             # Archivos estáticos (CSS, JS)
-│   └── app.py              # Servidor web Flask
-├── data/                   # Datos y recetas de ejemplo
-├── models/                 # Modelos entrenados
-├── notebooks/              # Jupyter notebooks para prototipado
-├── reports/                # Informes y resultados de validación
-├── src/                    # Código fuente principal
-│   ├── data/               # Procesamiento de datos
-│   ├── features/           # Características y funcionalidades
-│   │   ├── genetic/        # Algoritmo genético
-│   │   ├── nlp/            # Procesamiento de lenguaje natural
-│   │   └── validation/     # Sistema de validación
-│   ├── models/             # Implementación de modelos
-│   └── visualization/      # Visualización de datos y resultados
-├── scripts/                # Scripts de utilidad
-│   └── validation_system/  # Scripts para validación independiente
-├── tests/                  # Pruebas automatizadas
-├── .env                    # Variables de entorno
-├── requirements.txt        # Dependencias
-└── README.md               # Este archivo
+├── app/                  # Aplicación web
+│   ├── static/           # Archivos estáticos (CSS, JS)
+│   └── templates/        # Plantillas HTML
+├── docs/                 # Documentación
+│   ├── KANBAN.md         # Tablero Kanban del proyecto
+│   ├── TRIVO-PLM_KANBAN.md  # Tablero Kanban detallado con sprints 
+│   └── TRIVO-PLM_ROADMAP.md # Roadmap completo del producto
+├── scripts/              # Scripts de utilidad
+│   ├── validation_system/  # Sistema de validación
+│   └── create_github_issues.py  # Script para crear issues en GitHub
+└── src/                  # Código fuente principal
+    ├── features/         # Características principales
+    │   ├── optimizer/    # Algoritmo genético
+    │   ├── validator/    # Sistema de validación
+    │   └── nlp/          # Procesamiento de lenguaje natural
+    └── utils/            # Utilidades
 ```
 
-## Sistema de Validación (Sprint 4)
+## Configuración del Entorno de Desarrollo
 
-El Sistema de Validación implementado en el Sprint 4 permite verificar que las recetas cumplen con los estándares industriales y son viables para su producción. El sistema incluye:
+### Requisitos Previos
 
-### Reglas de Validación
+- Python 3.8+
+- pip
+- Git
 
-- **Ratio de hidratación**: Verifica que la proporción de líquidos respecto a la harina sea adecuada según el tipo de masa.
-- **Proporción de sal**: Asegura que la cantidad de sal está dentro de los límites aceptables.
-- **Proporción de levadura**: Valida que la cantidad de levadura sea correcta según el tipo de masa y escala.
-- **Ingredientes esenciales**: Confirma que las masas especiales incluyen todos los ingredientes necesarios.
-- **Límites de escala**: Verifica que los volúmenes son adecuados para la escala de producción.
-- **Parámetros de fermentación**: Comprueba que los tiempos y temperaturas de fermentación son adecuados para el tipo de masa.
-
-### Niveles de Severidad
-
-- **Crítico**: Problemas que hacen la receta inviable para producción.
-- **Medio**: Problemas importantes que pueden afectar la calidad del producto.
-- **Bajo**: Sugerencias para mejorar la receta.
-
-### Uso desde línea de comandos
-
-```bash
-# Verificar la integridad del sistema
-python run_validation.py check
-
-# Crear una receta de ejemplo
-python run_validation.py sample --recipe-type pizza --production-scale small_business
-
-# Validar una receta
-python run_validation.py validate path/to/recipe.json --production-scale industrial
-```
-
-### Integración con la interfaz web
-
-El sistema de validación está completamente integrado con la interfaz web, permitiendo a los usuarios:
-
-- Validar recetas subiendo archivos JSON
-- Crear y validar recetas directamente desde el navegador
-- Visualizar resultados detallados con recomendaciones específicas
-- Identificar problemas categorizados por severidad
-
-Para acceder a la interfaz de validación, simplemente dirígete a la sección "Validar Receta" en la aplicación web.
-
-## Instalación
+### Instalación
 
 1. Clonar el repositorio:
-```bash
-git clone https://github.com/tu-usuario/TRIVO-AI.git
-cd TRIVO-AI
-```
+   ```bash
+   git clone https://github.com/Maurosg78/trivo-ai.git
+   cd trivo-ai
+   ```
 
-2. Crear un entorno virtual e instalar dependencias:
-```bash
-python -m venv venv
-source venv/bin/activate  # En Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
+2. Crear un entorno virtual:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # En Windows: venv\Scripts\activate
+   ```
 
-3. Configurar variables de entorno:
-```bash
-cp .env.example .env
-# Editar .env con los valores apropiados
-```
+3. Instalar dependencias:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## Uso
+## Ejecución de la Aplicación
 
-### Iniciar la interfaz web:
-
+Iniciar la aplicación web:
 ```bash
 python -m app.app
 ```
 
-Acceder a `http://localhost:8000` en el navegador.
+Acceder a la aplicación en http://localhost:8000
 
-### Ejecutar el algoritmo genético desde la línea de comandos:
+## Creación de Issues en GitHub
 
-```bash
-python -m src.features.genetic.optimizer --ingredients data/ingredients.json --generations 100
-```
+Para crear automáticamente issues en GitHub basados en los archivos KANBAN:
 
-## Desarrollo
+1. Instalar la dependencia necesaria:
+   ```bash
+   pip install PyGithub
+   ```
 
-Para contribuir al proyecto:
+2. Configurar token de GitHub:
+   ```bash
+   export GITHUB_TOKEN=tu_token_personal  # En Windows: set GITHUB_TOKEN=tu_token_personal
+   ```
 
-1. Crea una rama para tu funcionalidad:
-```bash
-git checkout -b feature/nueva-funcionalidad
-```
+3. Ejecutar el script:
+   ```bash
+   python scripts/create_github_issues.py
+   ```
 
-2. Realiza tus cambios y comitea:
-```bash
-git commit -am "Añadir nueva funcionalidad"
-```
+## Roadmap
 
-3. Envía tu rama al repositorio:
-```bash
-git push origin feature/nueva-funcionalidad
-```
+El proyecto está organizado en las siguientes fases:
 
-4. Crea un Pull Request para revisión.
+1. **MVP "Masas Express" (8 semanas)**
+   - Implementación inicial enfocada en optimización de costos
+   - Interfaz de usuario simplificada
+   - Validación básica de viabilidad
+
+2. **Consolidación (3 meses)**
+   - Ampliación de capacidades a diferentes tipos de masas
+   - Herramientas específicas para PYMEs
+   - Documentación de casos de éxito
+
+3. **Expansión (6 meses)**
+   - Soporte para nuevos segmentos alimentarios (lácteos, embutidos)
+   - Integración con sistemas de gestión
+   - Conexión con proveedores
+
+4. **PLM Completa (12 meses)**
+   - Gestión completa del ciclo de vida del producto
+   - Inteligencia de negocio avanzada
+   - Marketplace de fórmulas verificadas
 
 ## Licencia
 
-Este proyecto está licenciado bajo los términos de la licencia MIT. Ver el archivo LICENSE para más detalles.
+Este proyecto está licenciado bajo [Licencia Propietaria] - ver el archivo LICENSE para más detalles.
 
-## Cambios Recientes: Seguridad y Rebranding
+## Contacto
 
-### Mejoras de Seguridad Implementadas
-
-- **Eliminación de credenciales hardcodeadas**: Se han eliminado todas las API keys y tokens que estaban incluidos directamente en el código.
-- **Gestión segura de secretos**: Se ha mejorado la configuración para obtener credenciales desde variables de entorno.
-- **Verificaciones de seguridad**: Se agregaron comprobaciones para validar la presencia de variables de entorno necesarias.
-
-### Rebranding de PizzaAI a TRIVO-AI
-
-Se ha completado la migración del nombre del proyecto de PizzaAI a TRIVO-AI, actualizando:
-- Nombres de archivos, módulos y configuraciones
-- Referencias internas en el código
-- Documentación y mensajes de usuario
-
-### Configuración del Entorno
-
-Para una configuración correcta del entorno después de estos cambios:
-
-1. Asegúrate de especificar las siguientes variables en tu archivo `.env`:
-   ```
-   USDA_API_KEY=tu_clave_api_aqui
-   GITHUB_TOKEN=tu_token_github_aqui
-   ```
-
-2. Si necesitas obtener estas credenciales:
-   - USDA FoodData Central: https://fdc.nal.usda.gov/api-key-signup.html
-   - GitHub: https://github.com/settings/tokens
-
-Para más información detallada sobre estos cambios, consulta el archivo [SECURITY_CHANGES.md](SECURITY_CHANGES.md). 
+Para más información, contactar con info@trivo-ai.com 
