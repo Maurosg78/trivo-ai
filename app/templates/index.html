@@ -1,113 +1,239 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRIVO-AI - Formulación Inteligente de Masas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="tech-grid"></div>
+    
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-robot me-2"></i>TRIVO-AI</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/"><i class="fas fa-home me-1"></i> Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/optimize"><i class="fas fa-magic me-1"></i> Crear Receta</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/validate"><i class="fas fa-check-circle me-1"></i> Validar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about"><i class="fas fa-info-circle me-1"></i> Acerca de</a>
+                    </li>
+                </ul>
+                <div class="ms-3 d-flex align-items-center">
+                    <label class="theme-switch" for="theme-toggle">
+                        <input type="checkbox" id="theme-toggle" aria-label="Cambiar tema">
+                        <span class="slider"></span>
+                    </label>
+                    <span id="theme-label" class="ms-2">Tema</span>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-{% block title %}TRIVO-AI - Formulación Inteligente de Masas{% endblock %}
+    <section class="hero text-center">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <h1 class="slide-in-up">TRIVO-AI</h1>
+                    <p class="lead slide-in-up">Sistema inteligente de formulación y validación de masas, potenciado por algoritmos genéticos avanzados y procesamiento de lenguaje natural.</p>
+                    <div class="slide-in-up">
+                        <a href="/optimize" class="btn btn-primary btn-lg me-2"><i class="fas fa-magic me-1"></i> Crear Receta</a>
+                        <a href="/validate" class="btn btn-outline-primary btn-lg"><i class="fas fa-check-circle me-1"></i> Validar Receta</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-{% block content %}
-<section class="hero py-5 mb-5">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-4">TRIVO-AI</h1>
-                <p class="lead mb-4">Sistema de formulación inteligente para masas de pizza utilizando algoritmos genéticos avanzados y procesamiento de lenguaje natural.</p>
-                
-                <div class="natural-language-input glass-card mb-4">
-                    <h3 class="mb-3">Describe tu pizza ideal</h3>
-                    <form action="/natural-language" method="post" id="nlForm">
-                        <div class="mb-3">
-                            <textarea name="user_request" class="form-control" placeholder="Ej: Quiero una masa de pizza familiar, de color rojo, sin gluten, nutricionalmente optimizada para mis hijos. Tipo margarita." rows="3" required></textarea>
+    <section class="py-5">
+        <div class="container">
+            <div class="row justify-content-center mb-5">
+                <div class="col-lg-8 text-center">
+                    <h2 class="section-title">Describe tu receta ideal</h2>
+                    <p class="section-subtitle">Utiliza lenguaje natural para crear tu masa perfecta</p>
+                    
+                    <form action="/natural-language" method="post" class="mt-4">
+                        <div class="mb-4">
+                            <textarea class="form-control natural-language-input" name="natural_text" rows="3" placeholder="Ej: Quiero una masa de pizza familiar, de color rojo, sin gluten, nutricionalmente optimizada para niños. Tipo margarita."></textarea>
                         </div>
-                        <div class="d-grid gap-2 d-md-flex">
-                            <button type="submit" class="btn nl-submit-btn">
-                                <i class="bi bi-magic"></i> Generar receta con IA
-                            </button>
-                        </div>
+                        <button type="submit" class="natural-language-submit mb-4"><i class="fas fa-wand-magic-sparkles me-2"></i>Generar Receta</button>
                     </form>
                 </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="tech-feature card h-100">
+                        <div class="card-body text-center">
+                            <div class="feature-icon mx-auto">
+                                <i class="fas fa-dna"></i>
+                            </div>
+                            <h3>Algoritmos Genéticos</h3>
+                            <p>Optimización avanzada que simula evolución natural para encontrar la fórmula perfecta para tus necesidades específicas.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="tech-feature card h-100">
+                        <div class="card-body text-center">
+                            <div class="feature-icon mx-auto">
+                                <i class="fas fa-seedling"></i>
+                            </div>
+                            <h3>Masas Plant-Based</h3>
+                            <p>Soporte completo para ingredientes vegetales y alternativas a la harina tradicional, con ajustes precisos para resultados perfectos.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="tech-feature card h-100">
+                        <div class="card-body text-center">
+                            <div class="feature-icon mx-auto">
+                                <i class="fas fa-clipboard-check"></i>
+                            </div>
+                            <h3>Sistema de Validación</h3>
+                            <p>Evaluación crítica basada en parámetros de producción industrial para asegurar que tus recetas sean viables en cualquier escala.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4">
-                    <a href="{{ url_for('optimize') }}" class="btn btn-primary me-md-2">
-                        <i class="bi bi-sliders"></i> Crear receta manualmente
-                    </a>
-                    <a href="{{ url_for('validate') }}" class="btn btn-outline-primary">
-                        <i class="bi bi-check-circle"></i> Validar receta existente
-                    </a>
+    <section class="py-5 bg-gradient">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <h2 class="section-title">Tecnología de vanguardia</h2>
+                    <p>TRIVO-AI utiliza algoritmos de aprendizaje automático para analizar miles de combinaciones posibles y encontrar la mezcla óptima para tu receta específica.</p>
+                    <ul class="list-group list-group-flush bg-transparent mb-4">
+                        <li class="list-group-item bg-transparent border-0"><i class="fas fa-check-circle text-primary me-2"></i> Procesamiento de lenguaje natural</li>
+                        <li class="list-group-item bg-transparent border-0"><i class="fas fa-check-circle text-primary me-2"></i> Optimización multiobjetivo</li>
+                        <li class="list-group-item bg-transparent border-0"><i class="fas fa-check-circle text-primary me-2"></i> Validación basada en reglas industriales</li>
+                        <li class="list-group-item bg-transparent border-0"><i class="fas fa-check-circle text-primary me-2"></i> Adaptación nutricional automática</li>
+                    </ul>
+                    <a href="/about" class="btn btn-outline-primary">Más información</a>
                 </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card glass-card">
-                    <div class="card-body p-4">
-                        <h3 class="card-title">Características principales</h3>
-                        <div class="d-flex align-items-start mb-3">
-                            <div class="feature-icon me-3">
-                                <i class="bi bi-cpu"></i>
-                            </div>
-                            <div>
-                                <h5>Algoritmos genéticos</h5>
-                                <p class="card-text">Optimización avanzada para crear la masa perfecta según tus requisitos específicos.</p>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-start mb-3">
-                            <div class="feature-icon me-3">
-                                <i class="bi bi-chat-text"></i>
-                            </div>
-                            <div>
-                                <h5>Procesamiento de lenguaje natural</h5>
-                                <p class="card-text">Describe tu pizza ideal en lenguaje natural y nuestro sistema generará la receta perfecta.</p>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-start mb-3">
-                            <div class="feature-icon me-3">
-                                <i class="bi bi-shield-check"></i>
-                            </div>
-                            <div>
-                                <h5>Sistema de validación crítico</h5>
-                                <p class="card-text">Verifica que tus recetas cumplan con los estándares de producción y calidad.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+                <div class="col-lg-6">
+                    <div class="card bg-dark">
+                        <div class="card-body">
+                            <pre class="text-success mb-0" style="overflow-x: auto;">
+<code># Ejemplo de optimización genética
+population = create_initial_population()
+for generation in range(MAX_GENERATIONS):
+    fitness_scores = evaluate_fitness(population)
+    parents = select_parents(population, fitness_scores)
+    offspring = crossover(parents)
+    offspring = mutate(offspring)
+    population = offspring
 
-<section class="py-5 bg-secondary">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center mb-5">
-                <h2 class="section-title">¿Cómo funciona?</h2>
-                <p class="section-subtitle">Un vistazo al proceso de creación de recetas con TRIVO-AI</p>
-            </div>
-        </div>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body p-4">
-                        <div class="step-number">1</div>
-                        <h4 class="card-title">Describe o configura</h4>
-                        <p class="card-text">Describe tu pizza ideal en lenguaje natural o configura manualmente los ingredientes y parámetros para tu receta.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body p-4">
-                        <div class="step-number">2</div>
-                        <h4 class="card-title">Optimización inteligente</h4>
-                        <p class="card-text">Nuestros algoritmos genéticos evolucionan la receta hasta encontrar la combinación óptima que cumpla con tus requisitos.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body p-4">
-                        <div class="step-number">3</div>
-                        <h4 class="card-title">Validación y ajustes</h4>
-                        <p class="card-text">El sistema valida la receta y proporciona ajustes necesarios para garantizar que sea viable para producción a la escala deseada.</p>
+best_recipe = get_best_individual(population)
+# Resultado: Fórmula perfectamente balanceada</code>
+                            </pre>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
-{% endblock %}
+    </section>
+
+    <section class="py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 text-center">
+                    <h2 class="section-title">¿Listo para revolucionar tus recetas?</h2>
+                    <p class="mb-4">Comienza ahora a utilizar la inteligencia artificial para crear masas innovadoras y perfectamente adaptadas a tus necesidades.</p>
+                    <a href="/optimize" class="btn btn-primary btn-lg"><i class="fas fa-rocket me-2"></i>Empezar ahora</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>&copy; 2023 TRIVO-AI. Todos los derechos reservados.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="https://github.com/usuario/trivo-ai" target="_blank" rel="noopener" class="text-secondary me-3">
+                        <i class="fab fa-github"></i> GitHub
+                    </a>
+                    <a href="#" class="text-secondary me-3">
+                        <i class="fas fa-book"></i> Documentación
+                    </a>
+                    <a href="#" class="text-secondary">
+                        <i class="fas fa-envelope"></i> Contacto
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeLabel = document.getElementById('theme-label');
+        
+        // Check for saved theme preference or prefer-color-scheme
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        const currentTheme = localStorage.getItem('theme');
+        
+        if (currentTheme === 'light') {
+            document.body.classList.add('light-mode');
+            themeToggle.checked = false;
+            themeLabel.textContent = 'Claro';
+        } else {
+            themeToggle.checked = true;
+            themeLabel.textContent = 'Oscuro';
+        }
+        
+        // Toggle theme when the switch is clicked
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                document.body.classList.remove('light-mode');
+                localStorage.setItem('theme', 'dark');
+                themeLabel.textContent = 'Oscuro';
+            } else {
+                document.body.classList.add('light-mode');
+                localStorage.setItem('theme', 'light');
+                themeLabel.textContent = 'Claro';
+            }
+        });
+        
+        // Animate elements on scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationDelay = (entry.target.dataset.delay || 0) + 's';
+                        entry.target.style.animationPlayState = 'running';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            fadeElements.forEach(element => {
+                observer.observe(element);
+            });
+        });
+    </script>
+</body>
+</html>
