@@ -1,0 +1,111 @@
+<!-- Panel de Preferencias de Accesibilidad -->
+<div class="a11y-container" aria-label="Panel de preferencias de accesibilidad">
+    <button class="a11y-toggle-btn" aria-label="Abrir preferencias de accesibilidad" aria-expanded="false" aria-controls="a11y-prefs-panel">
+        <i class="fas fa-universal-access" aria-hidden="true"></i>
+        <span class="visually-hidden">Preferencias de accesibilidad</span>
+    </button>
+    
+    <div id="a11y-prefs-panel" class="a11y-prefs-panel" role="dialog" aria-labelledby="a11y-panel-title">
+        <div class="a11y-panel-header">
+            <h2 id="a11y-panel-title">Preferencias de accesibilidad</h2>
+            <button class="a11y-close-btn" aria-label="Cerrar panel de preferencias">
+                <i class="fas fa-times" aria-hidden="true"></i>
+                <span class="visually-hidden">Cerrar</span>
+            </button>
+        </div>
+        
+        <div class="a11y-panel-body">
+            <!-- Tamaño de texto -->
+            <section class="a11y-panel-section">
+                <h3 id="text-size-heading">Tamaño de texto</h3>
+                <div class="a11y-options-group" role="radiogroup" aria-labelledby="text-size-heading">
+                    <button class="a11y-option" data-a11y-feature="text-size" data-a11y-value="default" role="radio" aria-checked="true">
+                        Normal
+                    </button>
+                    <button class="a11y-option" data-a11y-feature="text-size" data-a11y-value="large" role="radio" aria-checked="false">
+                        Grande
+                    </button>
+                    <button class="a11y-option" data-a11y-feature="text-size" data-a11y-value="xlarge" role="radio" aria-checked="false">
+                        Muy grande
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Contraste -->
+            <section class="a11y-panel-section">
+                <h3 id="contrast-heading">Contraste</h3>
+                <div class="a11y-options-group" role="radiogroup" aria-labelledby="contrast-heading">
+                    <button class="a11y-option" data-a11y-feature="contrast" data-a11y-value="default" role="radio" aria-checked="true">
+                        Normal
+                    </button>
+                    <button class="a11y-option" data-a11y-feature="contrast" data-a11y-value="high" role="radio" aria-checked="false">
+                        Alto contraste
+                    </button>
+                    <button class="a11y-option" data-a11y-feature="contrast" data-a11y-value="inverted" role="radio" aria-checked="false">
+                        Invertido
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Espaciado de letras -->
+            <section class="a11y-panel-section">
+                <h3 id="letter-spacing-heading">Espaciado de letras</h3>
+                <div class="a11y-options-group" role="radiogroup" aria-labelledby="letter-spacing-heading">
+                    <button class="a11y-option" data-a11y-feature="letter-spacing" data-a11y-value="default" role="radio" aria-checked="true">
+                        Normal
+                    </button>
+                    <button class="a11y-option" data-a11y-feature="letter-spacing" data-a11y-value="increased" role="radio" aria-checked="false">
+                        Aumentado
+                    </button>
+                    <button class="a11y-option" data-a11y-feature="letter-spacing" data-a11y-value="wide" role="radio" aria-checked="false">
+                        Amplio
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Altura de línea -->
+            <section class="a11y-panel-section">
+                <h3 id="line-height-heading">Altura de línea</h3>
+                <div class="a11y-options-group" role="radiogroup" aria-labelledby="line-height-heading">
+                    <button class="a11y-option" data-a11y-feature="line-height" data-a11y-value="default" role="radio" aria-checked="true">
+                        Normal
+                    </button>
+                    <button class="a11y-option" data-a11y-feature="line-height" data-a11y-value="increased" role="radio" aria-checked="false">
+                        Aumentada
+                    </button>
+                    <button class="a11y-option" data-a11y-feature="line-height" data-a11y-value="wide" role="radio" aria-checked="false">
+                        Amplia
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Opciones adicionales -->
+            <section class="a11y-panel-section">
+                <h3>Opciones adicionales</h3>
+                
+                <div class="a11y-toggle-option">
+                    <input type="checkbox" id="reduce-motion-toggle" class="a11y-toggle-input">
+                    <label for="reduce-motion-toggle" class="a11y-toggle-label">
+                        Reducir animaciones
+                    </label>
+                </div>
+                
+                <div class="a11y-toggle-option">
+                    <input type="checkbox" id="enhance-focus-toggle" class="a11y-toggle-input">
+                    <label for="enhance-focus-toggle" class="a11y-toggle-label">
+                        Mejorar indicadores de foco
+                    </label>
+                </div>
+            </section>
+        </div>
+        
+        <div class="a11y-panel-footer">
+            <button class="a11y-reset-btn" type="button">
+                Restablecer
+            </button>
+            <button class="a11y-save-btn" type="button">
+                Guardar preferencias
+            </button>
+        </div>
+    </div>
+</div> 

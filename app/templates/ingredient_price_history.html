@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Historial de Precios - {{ ingredient }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('cost_analysis') }}">Análisis de Costos</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Historial de {{ ingredient }}</li>
+                </ol>
+            </nav>
+            <h1>Historial de Precios: {{ ingredient }}</h1>
+            <p class="lead">Seguimiento de precios a lo largo del tiempo</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h2 class="card-title h5 mb-0">Tendencia de Precios</h2>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" role="img" aria-label="Gráfico de tendencia de precios de {{ ingredient }}">
+                        <canvas id="priceChart" height="300"></canvas>
+                    </div>
+                    <div class="visually-hidden" id="chartSummary">
+                        {% if price_history %}
+                            <p>Resumen de tendencia de precios para {{ ingredient }}:</p>
+                            <ul>
+                                {% for entry in price_history %}
+                                <li>{{ entry.date }}: {{ entry.price }} {{ entry.unit }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No hay datos históricos de precios disponibles para {{ ingredient }}.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h2 class="card-title h5 mb-0">Información Actual</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span id="current-price-label">Precio Actual</span>
+                            <span class="badge bg-primary rounded-pill" aria-labelledby="current-price-label">{{ current_price }} {{ current_unit }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span id="current-supplier-label">Proveedor Actual</span>
+                            <span class="badge bg-secondary rounded-pill" aria-labelledby="current-supplier-label">{{ current_supplier|default('No especificado') }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span id="last-updated-label">Última Actualización</span>
+                            <span class="text-muted" aria-labelledby="last-updated-label">{{ last_updated|default('N/A') }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span id="min-price-label">Precio Mínimo</span>
+                            <span class="badge bg-success rounded-pill" aria-labelledby="min-price-label">{{ min_price }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span id="max-price-label">Precio Máximo</span>
+                            <span class="badge bg-danger rounded-pill" aria-labelledby="max-price-label">{{ max_price }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span id="avg-price-label">Promedio</span>
+                            <span class="badge bg-info text-dark rounded-pill" aria-labelledby="avg-price-label">{{ avg_price }}</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPriceModal">
+                            <i class="fas fa-plus" aria-hidden="true"></i> Actualizar Precio
+                        </button>
+                        <a href="{{ url_for('update_price_from_api', ingredient=ingredient) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-sync" aria-hidden="true"></i> Consultar API
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-light">
+                    <h2 class="card-title h5 mb-0">Registro Histórico de Precios</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" aria-labelledby="history-title">
+                            <caption id="history-title" class="visually-hidden">Historial de precios de {{ ingredient }}</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Fecha</th>
+                                    <th scope="col">Precio</th>
+                                    <th scope="col">Unidad</th>
+                                    <th scope="col">Proveedor</th>
+                                    <th scope="col">Notas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if price_history %}
+                                    {% for entry in price_history %}
+                                    <tr>
+                                        <td>{{ entry.date }}</td>
+                                        <td>{{ entry.price }}</td>
+                                        <td>{{ entry.unit }}</td>
+                                        <td>{{ entry.supplier|default('No especificado') }}</td>
+                                        <td>
+                                            {% if entry.source == 'api' %}
+                                                <span class="badge bg-info text-dark">API</span>
+                                            {% elif entry.source == 'import' %}
+                                                <span class="badge bg-secondary">Importado</span>
+                                            {% else %}
+                                                <span class="badge bg-primary">Manual</span>
+                                            {% endif %}
+                                            {{ entry.notes|default('') }}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">No hay registros históricos disponibles.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para agregar precio -->
+<div class="modal fade" id="addPriceModal" tabindex="-1" aria-labelledby="addPriceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5" id="addPriceModalLabel">Actualizar Precio de {{ ingredient }}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form action="{{ url_for('update_ingredient_price') }}" method="post" id="updatePriceForm">
+                <div class="modal-body">
+                    <input type="hidden" name="ingredient" value="{{ ingredient }}">
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Nuevo Precio</label>
+                        <input type="number" class="form-control" id="price" name="price" step="0.01" min="0.01" value="{{ current_price }}" required aria-describedby="priceHelp">
+                        <div id="priceHelp" class="form-text">Ingrese el nuevo precio para {{ ingredient }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="unit" class="form-label">Unidad</label>
+                        <select class="form-select" id="unit" name="unit" required>
+                            <option value="kg" {% if current_unit == 'kg' %}selected{% endif %}>Kilogramo (kg)</option>
+                            <option value="g" {% if current_unit == 'g' %}selected{% endif %}>Gramo (g)</option>
+                            <option value="l" {% if current_unit == 'l' %}selected{% endif %}>Litro (l)</option>
+                            <option value="ml" {% if current_unit == 'ml' %}selected{% endif %}>Mililitro (ml)</option>
+                            <option value="unidad" {% if current_unit == 'unidad' %}selected{% endif %}>Unidad</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="supplier_id" class="form-label">Proveedor</label>
+                        <select class="form-select" id="supplier_id" name="supplier_id">
+                            <option value="">Seleccionar proveedor</option>
+                            {% for supplier_id, supplier in suppliers.items() %}
+                                <option value="{{ supplier_id }}" {% if current_supplier_id == supplier_id %}selected{% endif %}>{{ supplier.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notas (opcional)</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="2" aria-describedby="notesHelp"></textarea>
+                        <div id="notesHelp" class="form-text">Añada notas adicionales sobre esta actualización de precio</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Incluir Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Incluir nuestro archivo JS personalizado -->
+<script src="{{ url_for('static', filename='js/price-history-chart.js') }}"></script>
+
+<!-- Datos Jinja pasados a JavaScript -->
+<script id="chart-data" type="application/json">
+{
+    "labels": {{ price_history_dates|tojson|safe }},
+    "values": {{ price_history_prices|tojson|safe }},
+    "unit": {{ current_unit|tojson|safe }}
+}
+</script>
+
+<!-- Código JavaScript puro -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Cargar datos desde el elemento JSON
+    const chartConfig = JSON.parse(document.getElementById('chart-data').textContent);
+    
+    // Preparar los datos para el gráfico
+    const chartData = {
+        labels: chartConfig.labels,
+        datasets: [{
+            label: 'Precio (' + chartConfig.unit + ')',
+            data: chartConfig.values,
+            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderWidth: 2,
+            tension: 0.1,
+            fill: true
+        }]
+    };
+    
+    // Inicializar el gráfico usando la función del archivo externo
+    initPriceHistoryChart(chartData);
+});
+</script>
+{% endblock %} 

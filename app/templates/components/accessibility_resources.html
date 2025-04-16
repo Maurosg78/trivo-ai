@@ -1,0 +1,6 @@
+<!-- Recursos de accesibilidad para incluir en el layout base -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/accessibility-panel.css') }}">
+<script src="{{ url_for('static', filename='js/accessibility-panel.js') }}" defer></script>
+
+<!-- Incluye el panel de preferencias de accesibilidad -->
+{% include 'components/accessibility_panel.html' %} 
