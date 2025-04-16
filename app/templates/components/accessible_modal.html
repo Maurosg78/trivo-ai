@@ -1,0 +1,192 @@
+{% macro modal(id, title, close_label="Cerrar", size="", backdrop="true", keyboard="true", focus="true", static_backdrop=false) %}
+<!-- 
+    Macro para crear un modal accesible
+    
+    Parámetros:
+    - id: ID único del modal (obligatorio)
+    - title: Título del modal (obligatorio)
+    - close_label: Texto para el botón de cerrar (opcional, predeterminado: "Cerrar")
+    - size: Tamaño del modal ("sm", "lg", "xl" o vacío para tamaño predeterminado)
+    - backdrop: Si el modal tiene un fondo oscuro (opcional, predeterminado: "true")
+    - keyboard: Si el modal se puede cerrar con la tecla ESC (opcional, predeterminado: "true")
+    - focus: Si el modal debe recibir el foco al abrirse (opcional, predeterminado: "true")
+    - static_backdrop: Si el fondo del modal es estático (no se cierra al hacer clic fuera) (opcional, predeterminado: false)
+    
+    Uso:
+    {% from "components/accessible_modal.html" import modal %}
+    
+    {% call modal("myModal", "Título del Modal", size="lg") %}
+        <div class="modal-body">
+            Contenido del modal
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary">Guardar</button>
+        </div>
+    {% endcall %}
+-->
+<div class="modal fade" 
+     id="{{ id }}" 
+     tabindex="-1" 
+     aria-labelledby="{{ id }}Label" 
+     aria-hidden="true"
+     aria-modal="true"
+     role="dialog"
+     data-bs-backdrop="{% if static_backdrop %}static{% else %}{{ backdrop }}{% endif %}"
+     data-bs-keyboard="{{ keyboard }}"
+     {% if focus == "false" %}data-bs-focus="{{ focus }}"{% endif %}>
+    <div class="modal-dialog{% if size %} modal-{{ size }}{% endif %} modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="{{ id }}Label">{{ title }}</h5>
+                <button type="button" 
+                        class="btn-close" 
+                        data-bs-dismiss="modal" 
+                        aria-label="{{ close_label }}"></button>
+            </div>
+            {{ caller() }}
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro confirm_dialog(id, title, message, confirm_text="Confirmar", cancel_text="Cancelar", confirm_class="btn-danger", close_label="Cerrar") %}
+<!-- 
+    Macro para crear un diálogo de confirmación accesible
+    
+    Parámetros:
+    - id: ID único del modal (obligatorio)
+    - title: Título del modal (obligatorio)
+    - message: Mensaje de confirmación (obligatorio)
+    - confirm_text: Texto para el botón de confirmación (opcional, predeterminado: "Confirmar")
+    - cancel_text: Texto para el botón de cancelar (opcional, predeterminado: "Cancelar")
+    - confirm_class: Clase para el botón de confirmación (opcional, predeterminado: "btn-danger")
+    - close_label: Texto para el botón de cerrar (opcional, predeterminado: "Cerrar")
+    
+    Uso:
+    {% from "components/accessible_modal.html" import confirm_dialog %}
+    
+    {% call confirm_dialog("deleteModal", "Confirmar eliminación", "¿Estás seguro de que deseas eliminar este elemento?", 
+                           confirm_text="Eliminar", confirm_class="btn-danger") %}
+        <form id="my-form" action="/delete" method="post">
+            <input type="hidden" name="id" value="123">
+        </form>
+    {% endcall %}
+-->
+<div class="modal fade" 
+     id="{{ id }}" 
+     tabindex="-1" 
+     aria-labelledby="{{ id }}Label" 
+     aria-hidden="true"
+     aria-modal="true"
+     role="dialog"
+     data-bs-backdrop="static"
+     data-bs-keyboard="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="{{ id }}Label">{{ title }}</h5>
+                <button type="button" 
+                        class="btn-close" 
+                        data-bs-dismiss="modal" 
+                        aria-label="{{ close_label }}"></button>
+            </div>
+            <div class="modal-body">
+                <p>{{ message }}</p>
+                {{ caller() }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ cancel_text }}</button>
+                <button type="submit" class="btn {{ confirm_class }}" form="{{ id }}-form">{{ confirm_text }}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro alert(type="info", dismissible=true, icon=true) %}
+<!-- 
+    Macro para crear una alerta accesible
+    
+    Parámetros:
+    - type: Tipo de alerta ("success", "danger", "warning", "info") (opcional, predeterminado: "info")
+    - dismissible: Si la alerta puede ser cerrada (opcional, predeterminado: true)
+    - icon: Si se muestra un icono (opcional, predeterminado: true)
+    
+    Uso:
+    {% from "components/accessible_modal.html" import alert %}
+    
+    {% call alert("success", dismissible=true) %}
+        Operación completada con éxito
+    {% endcall %}
+-->
+<div class="alert alert-{{ type }}{% if dismissible %} alert-dismissible fade show{% endif %}" role="alert">
+    <div class="d-flex">
+        {% if icon %}
+            {% if type == "success" %}
+                <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
+            {% elif type == "danger" or type == "error" %}
+                <i class="fas fa-exclamation-circle me-2" aria-hidden="true"></i>
+            {% elif type == "warning" %}
+                <i class="fas fa-exclamation-triangle me-2" aria-hidden="true"></i>
+            {% elif type == "info" %}
+                <i class="fas fa-info-circle me-2" aria-hidden="true"></i>
+            {% endif %}
+        {% endif %}
+        <div>{{ caller() }}</div>
+    </div>
+    {% if dismissible %}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro pagination(current_page, total_pages, base_url) %}
+<!-- 
+    Macro para crear una paginación accesible
+    
+    Parámetros:
+    - current_page: Número de página actual (obligatorio)
+    - total_pages: Número total de páginas (obligatorio)
+    - base_url: URL base para las páginas, se agregará "?page=X" (obligatorio)
+    
+    Uso:
+    {% from "components/accessible_modal.html" import pagination %}
+    
+    {{ pagination(2, 5, "/recipe-sheets") }}
+-->
+{% if total_pages > 1 %}
+<nav aria-label="Navegación de páginas">
+    <ul class="pagination justify-content-center">
+        <li class="page-item{% if current_page == 1 %} disabled{% endif %}">
+            <a class="page-link" href="{{ base_url }}?page={{ current_page - 1 }}" {% if current_page == 1 %}tabindex="-1" aria-disabled="true"{% endif %} aria-label="Página anterior">
+                <span aria-hidden="true">&laquo;</span>
+                <span class="visually-hidden">Anterior</span>
+            </a>
+        </li>
+        
+        {% for page in range(1, total_pages + 1) %}
+            {% if page == current_page %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">
+                        {{ page }}
+                        <span class="visually-hidden">(página actual)</span>
+                    </span>
+                </li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ base_url }}?page={{ page }}">{{ page }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        <li class="page-item{% if current_page == total_pages %} disabled{% endif %}">
+            <a class="page-link" href="{{ base_url }}?page={{ current_page + 1 }}" {% if current_page == total_pages %}tabindex="-1" aria-disabled="true"{% endif %} aria-label="Página siguiente">
+                <span aria-hidden="true">&raquo;</span>
+                <span class="visually-hidden">Siguiente</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+{% endmacro %} 

@@ -65,6 +65,16 @@
     --surface: #0a0a0a;
     --surface-light: #1a1a1a;
     --text-tertiary: #757575;
+    --trivo-green: #27ae60;
+    --trivo-green-dark: #219a52;
+    --trivo-orange: #e67e22;
+    --trivo-orange-dark: #d35400;
+    --trivo-black: #222;
+    --trivo-gray: #484848;
+    --trivo-light-gray: #f8f9fa;
+    /* Colores mejorados para accesibilidad */
+    --high-contrast-green: #44D580; /* Verde más brillante para mejor contraste */
+    --high-contrast-gradient: linear-gradient(90deg, #44D580, #FFB74D); /* Gradiente de alta visibilidad */
 }
 
 /* Estilos para modo claro (sobreescritura) */
@@ -90,10 +100,12 @@ body.light-mode {
 
 /* Estilos base */
 body {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s, color 0.3s;
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    transition: background-color 0.3s ease, color 0.3s ease;
     line-height: 1.6;
     min-height: 100vh;
     display: flex;
@@ -148,10 +160,26 @@ h1, h2, h3, h4, h5, h6 {
 .section-title {
     font-size: 2.2rem;
     margin-bottom: 0.5rem;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    background: var(--high-contrast-gradient);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
+    font-weight: 700;
+}
+
+section h2.section-title {
+    color: #f5f5f5; /* Color blanco con alta visibilidad como fallback */
+}
+
+/* Mejora para el título principal de tecnología de vanguardia */
+.py-5.bg-gradient h2.section-title {
+    font-size: 2.4rem;
+    color: #FFFFFF;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    background: none;
+    -webkit-background-clip: initial;
+    background-clip: initial;
 }
 
 .section-subtitle {
@@ -163,7 +191,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Navbar Styles */
 .navbar {
     background-color: var(--surface) !important;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     padding: 1rem 0;
 }
@@ -176,6 +204,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .navbar-brand i {
     color: var(--secondary);
+}
+
+.navbar-brand span.highlight {
+    color: var(--trivo-green);
 }
 
 .navbar-toggler {
@@ -294,42 +326,48 @@ input:checked + .slider:before {
 }
 
 .btn-primary {
-    background: linear-gradient(45deg, var(--primary), var(--primary-dark));
-    border: none;
-    color: white;
-    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+    background-color: var(--trivo-green);
+    border-color: var(--trivo-green);
 }
 
 .btn-primary:hover, .btn-primary:focus {
-    background: linear-gradient(45deg, var(--primary-dark), var(--primary));
-    box-shadow: 0 5px 15px rgba(39, 174, 96, 0.5);
-    transform: translateY(-2px);
+    background-color: var(--trivo-green-dark);
+    border-color: var(--trivo-green-dark);
 }
 
 .btn-secondary {
-    background: linear-gradient(45deg, var(--secondary), var(--secondary-dark));
-    border: none;
-    box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+    background-color: var(--trivo-orange);
+    border-color: var(--trivo-orange);
 }
 
 .btn-secondary:hover,
 .btn-secondary:focus {
-    background: linear-gradient(45deg, var(--secondary-dark), var(--secondary));
-    box-shadow: 0 5px 15px rgba(230, 126, 34, 0.5);
-    transform: translateY(-2px);
+    background-color: var(--trivo-orange-dark);
+    border-color: var(--trivo-orange-dark);
 }
 
 .btn-outline-primary {
-    color: var(--primary);
-    border: 2px solid var(--primary);
-    background: transparent;
+    border-color: var(--high-contrast-green);
+    color: var(--high-contrast-green);
+    font-weight: 500;
 }
 
 .btn-outline-primary:hover,
 .btn-outline-primary:focus {
-    background: var(--primary);
-    color: white;
-    box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+    background-color: var(--high-contrast-green);
+    border-color: var(--high-contrast-green);
+    color: #000;
+}
+
+.btn-outline-secondary {
+    color: var(--trivo-orange);
+    border-color: var(--trivo-orange);
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus {
+    background-color: var(--trivo-orange);
+    color: #fff;
 }
 
 .btn-success {
@@ -378,16 +416,16 @@ input:checked + .slider:before {
 .card {
     background-color: var(--card-bg);
     border: 1px solid rgba(255, 255, 255, 0.03);
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
     margin-bottom: 1.5rem;
     overflow: hidden;
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
@@ -477,10 +515,11 @@ input:checked + .slider:before {
 
 /* Hero Section */
 .hero {
-    padding: 6rem 0;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.95));
+    padding: 80px 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     position: relative;
     overflow: hidden;
+    border-radius: 0 0 50px 50px;
 }
 
 .hero::before {
@@ -525,6 +564,11 @@ input:checked + .slider:before {
     margin: 0 auto 2rem auto;
 }
 
+.hero p {
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
 /* Animaciones */
 .slide-in-up {
     animation: slideInUp 0.8s ease forwards;
@@ -543,12 +587,17 @@ input:checked + .slider:before {
 
 .fade-in {
     opacity: 0;
-    animation: fadeIn 1s ease forwards;
+    animation: fadeIn 0.5s ease-in-out;
 }
 
 @keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
     to {
         opacity: 1;
+        transform: translateY(0);
     }
 }
 
@@ -556,9 +605,40 @@ input:checked + .slider:before {
 footer {
     background-color: var(--surface);
     color: var(--text-secondary);
-    padding: 2rem 0;
+    padding: 30px 0;
     margin-top: auto;
     border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* Mode toggle */
+.mode-toggle {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 20px;
+    transition: all 0.3s;
+}
+
+/* Utility classes */
+.text-success {
+    color: var(--trivo-green) !important;
+}
+
+.text-warning {
+    color: var(--trivo-orange) !important;
+}
+
+.bg-success {
+    background-color: var(--trivo-green) !important;
+}
+
+.bg-warning {
+    background-color: var(--trivo-orange) !important;
+}
+
+.bg-dark {
+    background-color: var(--trivo-black) !important;
 }
 
 /* Media Queries */
@@ -574,7 +654,8 @@ footer {
     }
     
     .hero {
-        padding: 4rem 0;
+        padding: 50px 0;
+        border-radius: 0 0 30px 30px;
     }
     
     .hero h1 {
@@ -587,6 +668,15 @@ footer {
     
     .tech-feature {
         padding: 1.5rem;
+    }
+    
+    .natural-language-input {
+        padding: 12px;
+        font-size: 1rem;
+    }
+    
+    .card {
+        margin-bottom: 20px;
     }
 }
 
@@ -634,37 +724,40 @@ body.light-mode .tech-grid {
 /* Formulario de lenguaje natural */
 .natural-language-input {
     border: 2px solid rgba(39, 174, 96, 0.2);
-    border-radius: 16px;
-    padding: 1.5rem;
+    border-radius: 12px;
+    padding: 15px;
     font-size: 1.1rem;
     background-color: var(--surface-light);
     color: var(--text-primary);
     resize: none;
-    transition: all 0.3s ease;
+    transition: all 0.3s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .natural-language-input:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(39, 174, 96, 0.25);
-    outline: none;
+    border-color: var(--trivo-green);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
 }
 
 .natural-language-submit {
-    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    background: linear-gradient(45deg, var(--trivo-green), var(--trivo-green-dark));
     color: white;
     border: none;
-    border-radius: 10px;
-    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    padding: 12px 30px;
     font-weight: 600;
-    display: inline-block;
-    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
 }
 
 .natural-language-submit:hover {
+    background-color: var(--trivo-green-dark);
+    border-color: var(--trivo-green-dark);
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(39, 174, 96, 0.4);
+    box-shadow: 0 4px 10px rgba(39, 174, 96, 0.4);
 }
 
 /* Indicador de carga */
@@ -682,4 +775,352 @@ body.light-mode .tech-grid {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* Recipe result page specific styling */
+.instruction-list li {
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    background-color: rgba(248, 249, 250, 0.5);
+    border-left: 3px solid var(--trivo-green);
+}
+
+.dark-mode .instruction-list li {
+    background-color: rgba(51, 51, 51, 0.5);
+    border-left: 3px solid var(--trivo-green);
+    color: #fff;
+}
+
+.explanation-box {
+    padding: 15px;
+    border-radius: 8px;
+    background-color: rgba(248, 249, 250, 0.7);
+}
+
+.dark-mode .explanation-box {
+    background-color: rgba(51, 51, 51, 0.7);
+    color: #ddd;
+}
+
+/* Dark mode styling */
+body.dark-mode {
+    background-color: var(--trivo-black);
+    color: #fff;
+}
+
+.dark-mode .navbar {
+    background-color: #111 !important;
+    border-bottom: 1px solid #333;
+}
+
+.dark-mode .navbar-brand,
+.dark-mode .navbar-nav .nav-link {
+    color: #fff;
+}
+
+.dark-mode .navbar-toggler {
+    border-color: #333;
+}
+
+.dark-mode .card {
+    background-color: var(--trivo-gray);
+    border-color: #333;
+}
+
+.dark-mode .card-header {
+    background-color: #333;
+    border-bottom: 1px solid #444;
+}
+
+.dark-mode .card-footer {
+    background-color: #333;
+    border-top: 1px solid #444;
+}
+
+.dark-mode .list-group-item {
+    background-color: var(--trivo-gray);
+    border-color: #444;
+    color: #fff;
+}
+
+.dark-mode .form-control,
+.dark-mode .form-select {
+    background-color: #333;
+    border-color: #444;
+    color: #fff;
+}
+
+.dark-mode .form-control:focus,
+.dark-mode .form-select:focus {
+    background-color: #333;
+    color: #fff;
+}
+
+.dark-mode .form-label {
+    color: #ddd;
+}
+
+.dark-mode .natural-language-input {
+    background-color: #333;
+    border-color: #444;
+    color: #fff;
+}
+
+.dark-mode .footer {
+    background-color: #111;
+    border-top: 1px solid #333;
+    color: #aaa;
+}
+
+.dark-mode .mode-toggle {
+    background-color: #333;
+}
+
+/* Ajuste de contraste para los elementos de la lista de tecnología */
+.list-group-item.bg-transparent i.text-primary {
+    color: var(--high-contrast-green) !important;
+    font-size: 1.2em;
+}
+
+.list-group-item.bg-transparent {
+    color: #FFFFFF;
+    font-weight: 500;
+    font-size: 1.1em;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    padding: 0.7rem 0;
+}
+
+/* Mejora para el texto de la tecnología de vanguardia */
+.py-5.bg-gradient p {
+    color: #FFFFFF;
+    font-size: 1.1em;
+    line-height: 1.6;
+    font-weight: 400;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+    margin-bottom: 1.5rem;
+}
+
+/* Estilos para accesibilidad */
+.skip-link {
+    background: #2c3e50;
+    color: #fff;
+    font-weight: 700;
+    left: 50%;
+    padding: 8px;
+    position: absolute;
+    transform: translateY(-100%);
+    transition: transform 0.3s;
+    z-index: 1070;
+}
+
+.skip-link:focus {
+    transform: translateY(0%);
+}
+
+/* Botón de alternar tema */
+.theme-toggle-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 0.375rem 0.5rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle-btn:hover,
+.theme-toggle-btn:focus {
+    color: #fff;
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: rotate(15deg);
+}
+
+.theme-toggle-btn:focus {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+/* Mejorar visibilidad de enlaces activos */
+.navbar-dark .navbar-nav .nav-link.active {
+    font-weight: 500;
+    position: relative;
+}
+
+.navbar-dark .navbar-nav .nav-link.active:after {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    right: 0.5rem;
+    bottom: 0;
+    height: 2px;
+    background-color: #fff;
+}
+
+/* Mejorar el contraste y la visibilidad de los elementos de navegación */
+.navbar-dark .navbar-nav .nav-link:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+}
+
+/* Mejorar la apariencia de las alertas */
+.alert-container {
+    margin-bottom: 1.5rem;
+}
+
+.alert {
+    border-left-width: 4px;
+}
+
+.alert-success {
+    border-left-color: #198754;
+}
+
+.alert-danger, .alert-error {
+    border-left-color: #dc3545;
+}
+
+.alert-warning {
+    border-left-color: #ffc107;
+}
+
+.alert-info {
+    border-left-color: #0dcaf0;
+}
+
+/* Estilo para formularios */
+.form-label {
+    font-weight: 500;
+}
+
+input:focus, select:focus, textarea:focus, button:focus {
+    box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25) !important;
+}
+
+/* Contraste mejorado para texto de ayuda */
+.form-text {
+    color: #495057;
+}
+
+/* Mejoras para modo oscuro */
+.dark-mode {
+    background-color: #121212;
+    color: #e1e1e1;
+}
+
+.dark-mode .card {
+    background-color: #1e1e1e;
+    border-color: #333;
+}
+
+.dark-mode .form-control,
+.dark-mode .form-select {
+    background-color: #2d2d2d;
+    border-color: #444;
+    color: #e1e1e1;
+}
+
+.dark-mode .form-text {
+    color: #adb5bd;
+}
+
+.dark-mode .table {
+    color: #e1e1e1;
+    border-color: #444;
+}
+
+.dark-mode .table-light {
+    background-color: #2d2d2d;
+    color: #e1e1e1;
+}
+
+.dark-mode .modal-content {
+    background-color: #1e1e1e;
+    color: #e1e1e1;
+    border-color: #333;
+}
+
+.dark-mode .alert-info {
+    background-color: #0d2534;
+    border-color: #0f5884;
+    color: #9eeaf9;
+}
+
+/* Mejoras para lectores de pantalla */
+.visually-hidden {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+.visually-hidden-focusable:not(:focus):not(:focus-within) {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+/* Estilos para paginación */
+.pagination .page-link {
+    padding: 0.5rem 0.75rem;
+    color: #2c3e50;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #2c3e50;
+    border-color: #2c3e50;
+    color: #fff;
+}
+
+.pagination .page-link:focus {
+    box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
+    z-index: 3;
+}
+
+.dark-mode .pagination .page-link {
+    background-color: #2d2d2d;
+    border-color: #444;
+    color: #e1e1e1;
+}
+
+.dark-mode .pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.dark-mode .pagination .page-item.disabled .page-link {
+    background-color: #212121;
+    border-color: #333;
+    color: #6c757d;
+}
+
+/* Mejoras para tablas */
+.table caption {
+    padding: 0.5rem;
+    font-weight: 500;
+    color: #495057;
+}
+
+.dark-mode .table caption {
+    color: #adb5bd;
+}
+
+/* Estilos para mejorar la navegación con teclado */
+a:focus-visible, button:focus-visible, 
+input:focus-visible, select:focus-visible, 
+textarea:focus-visible {
+    outline: 2px solid #0d6efd;
+    outline-offset: 2px;
 }
