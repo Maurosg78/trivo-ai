@@ -1,0 +1,575 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/recipe_sheets.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="/recipe-sheets">Fichas Técnicas</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ title }}</li>
+        </ol>
+    </nav>
+
+    <h1 class="mb-4">{{ title }}</h1>
+
+    <form method="POST" class="needs-validation" novalidate>
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Información general -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Información General</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Nombre de la Receta *</label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{{ recipe.recipe_info.name if recipe else '' }}" required>
+                                <div class="invalid-feedback">Por favor ingrese un nombre para la receta.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="category" class="form-label">Categoría *</label>
+                                <select class="form-select" id="category" name="category" required>
+                                    <option value="" disabled {% if not recipe %}selected{% endif %}>Seleccione una categoría</option>
+                                    <option value="Pan" {% if recipe and recipe.recipe_info.category == 'Pan' %}selected{% endif %}>Pan</option>
+                                    <option value="Pizza" {% if recipe and recipe.recipe_info.category == 'Pizza' %}selected{% endif %}>Pizza</option>
+                                    <option value="Pasta" {% if recipe and recipe.recipe_info.category == 'Pasta' %}selected{% endif %}>Pasta</option>
+                                    <option value="Pastelería" {% if recipe and recipe.recipe_info.category == 'Pastelería' %}selected{% endif %}>Pastelería</option>
+                                    <option value="Galletas" {% if recipe and recipe.recipe_info.category == 'Galletas' %}selected{% endif %}>Galletas</option>
+                                    <option value="Otro" {% if recipe and recipe.recipe_info.category == 'Otro' %}selected{% endif %}>Otro</option>
+                                </select>
+                                <div class="invalid-feedback">Por favor seleccione una categoría.</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Descripción *</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required>{{ recipe.recipe_info.description if recipe else '' }}</textarea>
+                            <div class="invalid-feedback">Por favor ingrese una descripción.</div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="difficulty" class="form-label">Dificultad</label>
+                                <select class="form-select" id="difficulty" name="difficulty">
+                                    <option value="Baja" {% if recipe and recipe.recipe_info.difficulty == 'Baja' %}selected{% endif %}>Baja</option>
+                                    <option value="Media" {% if not recipe or recipe.recipe_info.difficulty == 'Media' %}selected{% endif %}>Media</option>
+                                    <option value="Alta" {% if recipe and recipe.recipe_info.difficulty == 'Alta' %}selected{% endif %}>Alta</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="target_market" class="form-label">Mercado Objetivo</label>
+                                <input type="text" class="form-control" id="target_market" name="target_market" 
+                                       value="{{ recipe.recipe_info.target_market if recipe else 'General' }}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="yield_amount" class="form-label">Rendimiento (cantidad) *</label>
+                                <input type="number" class="form-control" id="yield_amount" name="yield_amount" 
+                                       value="{{ recipe.recipe_info.yield.amount if recipe else '' }}" min="0" step="0.01" required>
+                                <div class="invalid-feedback">Por favor ingrese un valor numérico.</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="yield_unit" class="form-label">Unidad *</label>
+                                <select class="form-select" id="yield_unit" name="yield_unit" required>
+                                    <option value="g" {% if not recipe or recipe.recipe_info.yield.unit == 'g' %}selected{% endif %}>gramos (g)</option>
+                                    <option value="kg" {% if recipe and recipe.recipe_info.yield.unit == 'kg' %}selected{% endif %}>kilogramos (kg)</option>
+                                    <option value="unidades" {% if recipe and recipe.recipe_info.yield.unit == 'unidades' %}selected{% endif %}>unidades</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="serving_size" class="form-label">Tamaño de Porción</label>
+                                <input type="text" class="form-control" id="serving_size" name="serving_size" 
+                                       value="{{ recipe.recipe_info.serving_size if recipe else '' }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tiempos de proceso -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Tiempos del Proceso</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col">
+                                <label for="preparation_time" class="form-label">Preparación (min)</label>
+                                <input type="number" class="form-control process-time" id="preparation_time" name="preparation_time" 
+                                       value="{{ recipe.process.preparation_time if recipe else '0' }}" min="0" aria-describedby="preparation-help">
+                                <small id="preparation-help" class="form-text text-muted">Tiempo de preparación de ingredientes</small>
+                            </div>
+                            <div class="col">
+                                <label for="mixing_time" class="form-label">Mezcla (min)</label>
+                                <input type="number" class="form-control process-time" id="mixing_time" name="mixing_time" 
+                                       value="{{ recipe.process.mixing_time if recipe else '0' }}" min="0" aria-describedby="mixing-help">
+                                <small id="mixing-help" class="form-text text-muted">Tiempo de mezclado</small>
+                            </div>
+                            <div class="col">
+                                <label for="fermentation_time" class="form-label">Fermentación (min)</label>
+                                <input type="number" class="form-control process-time" id="fermentation_time" name="fermentation_time" 
+                                       value="{{ recipe.process.fermentation_time if recipe else '0' }}" min="0" aria-describedby="fermentation-help">
+                                <small id="fermentation-help" class="form-text text-muted">Tiempo de fermentación</small>
+                            </div>
+                            <div class="col">
+                                <label for="baking_time" class="form-label">Horneado (min)</label>
+                                <input type="number" class="form-control process-time" id="baking_time" name="baking_time" 
+                                       value="{{ recipe.process.baking_time if recipe else '0' }}" min="0" aria-describedby="baking-help">
+                                <small id="baking-help" class="form-text text-muted">Tiempo de horneado</small>
+                            </div>
+                            <div class="col">
+                                <label for="cooling_time" class="form-label">Enfriamiento (min)</label>
+                                <input type="number" class="form-control process-time" id="cooling_time" name="cooling_time" 
+                                       value="{{ recipe.process.cooling_time if recipe else '0' }}" min="0" aria-describedby="cooling-help">
+                                <small id="cooling-help" class="form-text text-muted">Tiempo de enfriamiento</small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 text-end">
+                                <div id="total-time-container">
+                                    <span class="total-time-display">
+                                        Tiempo total: <span id="total-time">0</span> minutos
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ingredientes -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Ingredientes</h5>
+                        <button type="button" class="btn btn-sm btn-light" id="add-ingredient" title="Agregar ingrediente">
+                            <i class="fas fa-plus"></i> Agregar ingrediente
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="ingredients-table">
+                                <thead>
+                                    <tr>
+                                        <th width="30%">Ingrediente *</th>
+                                        <th width="15%">Cantidad *</th>
+                                        <th width="15%">Unidad *</th>
+                                        <th width="25%">Función</th>
+                                        <th width="10%">Crítico</th>
+                                        <th width="5%"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if recipe and recipe.ingredients %}
+                                        {% for ingredient in recipe.ingredients %}
+                                        <tr class="ingredient-row">
+                                            <td>
+                                                <label class="visually-hidden">Nombre del ingrediente</label>
+                                                <input type="text" class="form-control" name="ingredient_name[]" value="{{ ingredient.name }}" required title="Nombre del ingrediente">
+                                            </td>
+                                            <td>
+                                                <label class="visually-hidden">Cantidad del ingrediente</label>
+                                                <input type="number" class="form-control" name="ingredient_amount[]" value="{{ ingredient.amount }}" min="0" step="0.01" required title="Cantidad del ingrediente">
+                                            </td>
+                                            <td>
+                                                <label class="visually-hidden">Unidad de medida</label>
+                                                <select class="form-select" name="ingredient_unit[]" required title="Unidad de medida">
+                                                    <option value="g" {% if ingredient.unit == 'g' %}selected{% endif %}>g</option>
+                                                    <option value="kg" {% if ingredient.unit == 'kg' %}selected{% endif %}>kg</option>
+                                                    <option value="ml" {% if ingredient.unit == 'ml' %}selected{% endif %}>ml</option>
+                                                    <option value="l" {% if ingredient.unit == 'l' %}selected{% endif %}>l</option>
+                                                    <option value="unit" {% if ingredient.unit == 'unit' %}selected{% endif %}>unidad</option>
+                                                    <option value="tbsp" {% if ingredient.unit == 'tbsp' %}selected{% endif %}>cucharada</option>
+                                                    <option value="tsp" {% if ingredient.unit == 'tsp' %}selected{% endif %}>cucharadita</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <label class="visually-hidden">Función del ingrediente</label>
+                                                <input type="text" class="form-control" name="ingredient_function[]" value="{{ ingredient.function }}" title="Función del ingrediente">
+                                            </td>
+                                            <td class="text-center">
+                                                <label class="visually-hidden">Ingrediente crítico</label>
+                                                <input type="checkbox" class="form-check-input" name="ingredient_critical[]" {% if ingredient.critical %}checked{% endif %} title="Ingrediente crítico">
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-danger remove-ingredient" title="Eliminar ingrediente">
+                                                    <i class="fas fa-trash"></i><span class="visually-hidden">Eliminar ingrediente</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr class="ingredient-row">
+                                            <td>
+                                                <label class="visually-hidden">Nombre del ingrediente</label>
+                                                <input type="text" class="form-control" name="ingredient_name[]" required title="Nombre del ingrediente">
+                                            </td>
+                                            <td>
+                                                <label class="visually-hidden">Cantidad del ingrediente</label>
+                                                <input type="number" class="form-control" name="ingredient_amount[]" min="0" step="0.01" required title="Cantidad del ingrediente">
+                                            </td>
+                                            <td>
+                                                <label class="visually-hidden">Unidad de medida</label>
+                                                <select class="form-select" name="ingredient_unit[]" required title="Unidad de medida">
+                                                    <option value="g" selected>g</option>
+                                                    <option value="kg">kg</option>
+                                                    <option value="ml">ml</option>
+                                                    <option value="l">l</option>
+                                                    <option value="unit">unidad</option>
+                                                    <option value="tbsp">cucharada</option>
+                                                    <option value="tsp">cucharadita</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <label class="visually-hidden">Función del ingrediente</label>
+                                                <input type="text" class="form-control" name="ingredient_function[]" title="Función del ingrediente">
+                                            </td>
+                                            <td class="text-center">
+                                                <label class="visually-hidden">Ingrediente crítico</label>
+                                                <input type="checkbox" class="form-check-input" name="ingredient_critical[]" title="Ingrediente crítico">
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-danger remove-ingredient" title="Eliminar ingrediente">
+                                                    <i class="fas fa-trash"></i><span class="visually-hidden">Eliminar ingrediente</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="alert alert-info small">
+                            <i class="fas fa-info-circle"></i> Los ingredientes marcados como "críticos" requieren un control especial durante la producción.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pasos del proceso -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Pasos del Proceso</h5>
+                        <button type="button" class="btn btn-sm btn-light" id="add-step" title="Agregar paso">
+                            <i class="fas fa-plus"></i> Agregar paso
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="process-steps">
+                            {% if recipe and recipe.process.steps %}
+                                {% for step in recipe.process.steps|sort(attribute='order') %}
+                                <div class="card mb-3 process-step">
+                                    <div class="card-header d-flex align-items-center">
+                                        <div class="me-2">
+                                            <label class="visually-hidden">Orden del paso</label>
+                                            <input type="number" class="form-control form-control-sm step-order" 
+                                                   name="step_order[]" value="{{ step.order }}" min="1" title="Orden del paso">
+                                        </div>
+                                        <h6 class="mb-0 flex-grow-1">Paso <span class="step-number">{{ loop.index }}</span></h6>
+                                        <div class="form-check form-switch me-2">
+                                            <input class="form-check-input" type="checkbox" name="step_critical[]" 
+                                                  {% if step.critical %}checked{% endif %} id="step-critical-{{ loop.index }}" title="Paso crítico">
+                                            <label class="form-check-label" for="step-critical-{{ loop.index }}">Crítico</label>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-danger remove-step" title="Eliminar paso">
+                                            <i class="fas fa-trash"></i><span class="visually-hidden">Eliminar paso</span>
+                                        </button>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <label class="form-label">Nombre del Paso *</label>
+                                                <input type="text" class="form-control" name="step_name[]" value="{{ step.name }}" required title="Nombre del paso">
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <label class="form-label">Descripción *</label>
+                                                <textarea class="form-control" name="step_description[]" rows="2" required title="Descripción del paso">{{ step.description }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Tiempo (minutos)</label>
+                                                <input type="number" class="form-control" name="step_time[]" value="{{ step.time }}" min="0" title="Tiempo en minutos">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Temperatura</label>
+                                                <input type="text" class="form-control" name="step_temperature[]" value="{{ step.temperature }}" title="Temperatura">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="card mb-3 process-step">
+                                    <div class="card-header d-flex align-items-center">
+                                        <div class="me-2">
+                                            <label class="visually-hidden">Orden del paso</label>
+                                            <input type="number" class="form-control form-control-sm step-order" 
+                                                   name="step_order[]" value="1" min="1" title="Orden del paso">
+                                        </div>
+                                        <h6 class="mb-0 flex-grow-1">Paso <span class="step-number">1</span></h6>
+                                        <div class="form-check form-switch me-2">
+                                            <input class="form-check-input" type="checkbox" name="step_critical[]" id="step-critical-1" title="Paso crítico">
+                                            <label class="form-check-label" for="step-critical-1">Crítico</label>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-danger remove-step" title="Eliminar paso">
+                                            <i class="fas fa-trash"></i><span class="visually-hidden">Eliminar paso</span>
+                                        </button>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <label class="form-label">Nombre del Paso *</label>
+                                                <input type="text" class="form-control" name="step_name[]" required title="Nombre del paso">
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col-md-12">
+                                                <label class="form-label">Descripción *</label>
+                                                <textarea class="form-control" name="step_description[]" rows="2" required title="Descripción del paso"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Tiempo (minutos)</label>
+                                                <input type="number" class="form-control" name="step_time[]" min="0" title="Tiempo en minutos">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Temperatura</label>
+                                                <input type="text" class="form-control" name="step_temperature[]" placeholder="ej. 180°C" title="Temperatura">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <!-- Características organolépticas -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Características Organolépticas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="appearance" class="form-label">Apariencia</label>
+                            <textarea class="form-control" id="appearance" name="appearance" rows="2">{{ recipe.quality_parameters.appearance if recipe else '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="texture" class="form-label">Textura</label>
+                            <textarea class="form-control" id="texture" name="texture" rows="2">{{ recipe.quality_parameters.texture if recipe else '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="taste" class="form-label">Sabor</label>
+                            <textarea class="form-control" id="taste" name="taste" rows="2">{{ recipe.quality_parameters.taste if recipe else '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="aroma" class="form-label">Aroma</label>
+                            <textarea class="form-control" id="aroma" name="aroma" rows="2">{{ recipe.quality_parameters.aroma if recipe else '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vida útil -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Vida Útil</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="shelf_life_ambient" class="form-label">Temperatura Ambiente</label>
+                            <input type="text" class="form-control" id="shelf_life_ambient" name="shelf_life_ambient" 
+                                   value="{{ recipe.recipe_info.shelf_life.ambient if recipe else '1 día' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="shelf_life_refrigerated" class="form-label">Refrigerado</label>
+                            <input type="text" class="form-control" id="shelf_life_refrigerated" name="shelf_life_refrigerated" 
+                                   value="{{ recipe.recipe_info.shelf_life.refrigerated if recipe else '3 días' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="shelf_life_frozen" class="form-label">Congelado</label>
+                            <input type="text" class="form-control" id="shelf_life_frozen" name="shelf_life_frozen" 
+                                   value="{{ recipe.recipe_info.shelf_life.frozen if recipe else '30 días' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Equipamiento requerido -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">Equipamiento Requerido</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3 equipment-section">
+                            <div class="col-md-12">
+                                <h5>Equipo requerido <span class="text-danger">*</span></h5>
+                                <div class="form-group">
+                                    <label for="equipmentSelect" class="form-label visually-hidden">Seleccionar equipos necesarios</label>
+                                    <select id="equipmentSelect" name="equipmentSelect" class="form-select required-field" aria-label="Equipos necesarios para la receta" aria-required="true" multiple>
+                                        {% for equipment in available_equipment %}
+                                            <option value="{{ equipment.id }}" {% if equipment.id in selected_equipment_ids %}selected{% endif %}>{{ equipment.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Por favor seleccione al menos un equipo requerido.
+                                    </div>
+                                    <small class="form-text text-muted mt-2">
+                                        Mantenga presionada la tecla Ctrl (o Cmd en Mac) para seleccionar múltiples equipos
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar Ficha Técnica
+                            </button>
+                            <a href="{% if recipe %}/recipe-sheets/{{ recipe.id }}{% else %}/recipe-sheets{% endif %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Validación del formulario
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+
+        // Agregar ingrediente
+        document.getElementById('add-ingredient').addEventListener('click', function() {
+            const tbody = document.querySelector('#ingredients-table tbody');
+            const template = document.querySelector('.ingredient-row').cloneNode(true);
+            
+            // Limpiar los valores
+            template.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => {
+                input.value = '';
+            });
+            template.querySelector('input[type="checkbox"]').checked = false;
+            template.querySelector('select').value = 'g';
+            
+            // Añadir eventos
+            template.querySelector('.remove-ingredient').addEventListener('click', removeIngredient);
+            
+            tbody.appendChild(template);
+        });
+
+        // Eliminar ingrediente
+        document.querySelectorAll('.remove-ingredient').forEach(button => {
+            button.addEventListener('click', removeIngredient);
+        });
+
+        function removeIngredient() {
+            const table = document.getElementById('ingredients-table');
+            const rowCount = table.rows.length;
+            
+            // No eliminar si solo queda una fila
+            if (rowCount <= 2) {
+                alert('La receta debe tener al menos un ingrediente.');
+                return;
+            }
+            
+            this.closest('tr').remove();
+        }
+
+        // Agregar paso
+        document.getElementById('add-step').addEventListener('click', function() {
+            const container = document.getElementById('process-steps');
+            const steps = container.querySelectorAll('.process-step');
+            const template = steps[0].cloneNode(true);
+            const newStepNumber = steps.length + 1;
+            
+            // Actualizar número y orden
+            template.querySelector('.step-number').textContent = newStepNumber;
+            template.querySelector('.step-order').value = newStepNumber;
+            
+            // Limpiar valores
+            template.querySelectorAll('input[type="text"], input[type="number"], textarea').forEach(input => {
+                input.value = '';
+            });
+            
+            // Actualizar checkbox
+            const checkbox = template.querySelector('input[type="checkbox"]');
+            checkbox.checked = false;
+            checkbox.id = 'step-critical-' + newStepNumber;
+            template.querySelector('label').setAttribute('for', 'step-critical-' + newStepNumber);
+            
+            // Añadir eventos
+            template.querySelector('.remove-step').addEventListener('click', removeStep);
+            
+            container.appendChild(template);
+        });
+
+        // Eliminar paso
+        document.querySelectorAll('.remove-step').forEach(button => {
+            button.addEventListener('click', removeStep);
+        });
+
+        function removeStep() {
+            const container = document.getElementById('process-steps');
+            const steps = container.querySelectorAll('.process-step');
+            
+            // No eliminar si solo queda un paso
+            if (steps.length <= 1) {
+                alert('La receta debe tener al menos un paso.');
+                return;
+            }
+            
+            this.closest('.process-step').remove();
+            
+            // Actualizar números de paso
+            container.querySelectorAll('.process-step').forEach((step, index) => {
+                step.querySelector('.step-number').textContent = index + 1;
+            });
+        }
+
+        // Calcular tiempo total
+        document.querySelectorAll('.process-time').forEach(input => {
+            input.addEventListener('input', calculateTotalTime);
+        });
+
+        // Calcular tiempo total al cargar la página
+        calculateTotalTime();
+
+        function calculateTotalTime() {
+            let total = 0;
+            document.querySelectorAll('.process-time').forEach(input => {
+                const value = parseInt(input.value) || 0;
+                total += value;
+            });
+            document.getElementById('total-time').textContent = total;
+        }
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,70 @@
+/* Estilos para la sección de fichas técnicas */
+
+/* Imagen en estado vacío */
+.empty-state-img {
+    max-width: 200px;
+}
+
+/* Estilos para la tabla de fichas técnicas */
+.table-recipe-sheets th {
+    font-weight: 600;
+}
+
+.table-recipe-sheets .actions-column {
+    width: 180px;
+}
+
+/* Estilos para tarjetas de estadísticas */
+.stats-card {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card .stats-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+/* Estilos para edición de fichas técnicas */
+.step-order {
+    width: 60px;
+}
+
+.process-step {
+    position: relative;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.process-step:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ingredient-row td {
+    vertical-align: middle;
+}
+
+.total-time-display {
+    font-weight: bold;
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* Estilos para formularios requeridos */
+.required-field {
+    border-left: 3px solid #dc3545;
+} 

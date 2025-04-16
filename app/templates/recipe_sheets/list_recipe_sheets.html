@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Fichas Técnicas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/recipe_sheets.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Fichas Técnicas</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Fichas Técnicas</h1>
+        <a href="/recipe-sheets/new" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Nueva Ficha Técnica
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="card-title mb-0">Fichas Técnicas Disponibles</h5>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="search" placeholder="Buscar por nombre o categoría">
+                        <button class="btn btn-outline-secondary" type="button" id="search-btn" title="Buscar fichas técnicas">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if recipe_sheets %}
+            <div class="table-responsive">
+                <table class="table table-hover" id="sheets-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Versión</th>
+                            <th>Actualización</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sheet in recipe_sheets %}
+                        <tr>
+                            <td>{{ sheet.id }}</td>
+                            <td>{{ sheet.name }}</td>
+                            <td>{{ sheet.category }}</td>
+                            <td>{{ sheet.version }}</td>
+                            <td>{{ sheet.updated_at|date }}</td>
+                            <td>
+                                <div class="btn-group" role="group" aria-label="Acciones">
+                                    <a href="/recipe-sheets/{{ sheet.id }}" class="btn btn-sm btn-outline-primary" title="Ver">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="/recipe-sheets/{{ sheet.id }}/edit" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="/recipe-sheets/{{ sheet.id }}/pdf" class="btn btn-sm btn-outline-success" title="Exportar PDF" target="_blank">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar" 
+                                            data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                                            data-id="{{ sheet.id }}" data-name="{{ sheet.name }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <img src="/static/img/empty-state.svg" alt="No hay fichas técnicas" class="img-fluid mb-3 empty-state-img">
+                <h3>No hay fichas técnicas disponibles</h3>
+                <p class="text-muted">Crea una nueva ficha técnica para comenzar</p>
+                <a href="/recipe-sheets/new" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> Nueva Ficha Técnica
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% if recipe_sheets and recipe_sheets|length > 10 %}
+        <div class="card-footer">
+            <nav aria-label="Paginación de fichas técnicas">
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Anterior</a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Siguiente</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Fichas técnicas</h5>
+                    <h2 class="display-4">{{ recipe_sheets|length }}</h2>
+                    <p class="text-muted">Total de fichas registradas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Categorías</h5>
+                    <h2 class="display-4">{{ categories|length }}</h2>
+                    <p class="text-muted">Tipos de recetas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Última actualización</h5>
+                    <h2 class="display-4">{{ last_update|date }}</h2>
+                    <p class="text-muted">Fecha de última modificación</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Importar / Exportar</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Importar fichas técnicas</h6>
+                    <form action="/recipe-sheets/import" method="post" enctype="multipart/form-data" aria-label="Formulario de importación de fichas técnicas">
+                        <div class="input-group mb-3">
+                            <label for="importFile" class="visually-hidden">Archivo para importar</label>
+                            <input type="file" class="form-control" id="importFile" name="importFile" accept=".json, .csv">
+                            <button class="btn btn-outline-secondary" type="submit">Importar</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <h6>Exportar todas las fichas técnicas</h6>
+                    <div class="btn-group" role="group" aria-label="Exportar formatos">
+                        <a href="/recipe-sheets/export/json" class="btn btn-outline-primary">JSON</a>
+                        <a href="/recipe-sheets/export/csv" class="btn btn-outline-primary">CSV</a>
+                        <a href="/recipe-sheets/export/pdf" class="btn btn-outline-primary">PDF (Zip)</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación para eliminar -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar la ficha técnica <strong id="sheet-name"></strong>?</p>
+                <p class="text-danger">Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="delete-form" action="/recipe-sheets/delete" method="post">
+                    <input type="hidden" name="recipe_id" id="recipe_id_to_delete">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configurar modal de eliminación
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-id');
+                const name = button.getAttribute('data-name');
+                
+                document.getElementById('sheet-name').textContent = name;
+                document.getElementById('recipe_id_to_delete').value = id;
+            });
+        }
+        
+        // Filtro de búsqueda
+        const searchInput = document.getElementById('search');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', filterTable);
+            document.getElementById('search-btn').addEventListener('click', filterTable);
+        }
+        
+        function filterTable() {
+            const searchValue = searchInput.value.toLowerCase();
+            const table = document.getElementById('sheets-table');
+            const rows = table.getElementsByTagName('tr');
+            
+            for (let i = 1; i < rows.length; i++) {
+                const name = rows[i].getElementsByTagName('td')[1].textContent.toLowerCase();
+                const category = rows[i].getElementsByTagName('td')[2].textContent.toLowerCase();
+                
+                if (name.includes(searchValue) || category.includes(searchValue)) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
+    });
+</script>
+{% endblock %} 

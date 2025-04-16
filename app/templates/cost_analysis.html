@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+
+{% block title %}Análisis de Costos{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cost_analysis.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>Análisis de Costos de Ingredientes</h1>
+            <p class="lead">Gestiona los precios de los ingredientes y calcula los costos de tus recetas</p>
+        </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="btn-toolbar" role="toolbar" aria-label="Acciones para gestionar precios">
+                <div class="btn-group me-2" role="group" aria-label="Acciones principales">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPriceModal">
+                        <i class="fas fa-plus" aria-hidden="true"></i> Agregar Precio
+                    </button>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#apiUpdateModal">
+                        <i class="fas fa-sync" aria-hidden="true"></i> Actualizar desde API
+                    </button>
+                </div>
+                <div class="btn-group me-2" role="group" aria-label="Gestión de proveedores">
+                    <a href="{{ url_for('suppliers_list') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-truck" aria-hidden="true"></i> Gestionar Proveedores
+                    </a>
+                </div>
+                <div class="btn-group" role="group" aria-label="Importar y exportar">
+                    <a href="{{ url_for('price_export') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-file-export" aria-hidden="true"></i> Exportar Precios
+                    </a>
+                    <a href="{{ url_for('import_prices') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-file-import" aria-hidden="true"></i> Importar Precios
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <div class="row mb-4 filter-section">
+        <div class="col-md-4">
+            <label for="searchInput" class="filter-label">Buscar ingrediente</label>
+            <div class="input-group">
+                <input type="text" id="searchInput" class="form-control" placeholder="Nombre del ingrediente...">
+                <button class="btn btn-outline-secondary" type="button" id="searchButton" aria-label="Buscar">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <label for="filterByUnit" class="filter-label">Filtrar por unidad</label>
+            <select id="filterByUnit" class="form-select">
+                <option value="">Todas las unidades</option>
+                <option value="kg">Kilogramo (kg)</option>
+                <option value="g">Gramo (g)</option>
+                <option value="l">Litro (l)</option>
+                <option value="ml">Mililitro (ml)</option>
+                <option value="unidad">Unidad</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="sortBy" class="filter-label">Ordenar por</label>
+            <select id="sortBy" class="form-select">
+                <option value="name-asc">Nombre (A-Z)</option>
+                <option value="name-desc">Nombre (Z-A)</option>
+                <option value="price-asc">Precio (menor a mayor)</option>
+                <option value="price-desc">Precio (mayor a menor)</option>
+                <option value="updated-desc">Última actualización</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Tabla de precios -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body">
+                    <table class="table table-hover price-table" id="priceTable">
+                        <caption class="visually-hidden">Lista de precios de ingredientes</caption>
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Ingrediente</th>
+                                <th scope="col">Precio</th>
+                                <th scope="col">Unidad</th>
+                                <th scope="col">Proveedor</th>
+                                <th scope="col">Actualizado</th>
+                                <th scope="col">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if prices %}
+                                {% for ingredient, data in prices.items() %}
+                                <tr>
+                                    <td>{{ ingredient }}</td>
+                                    <td>{{ data.price }}</td>
+                                    <td>{{ data.unit }}</td>
+                                    <td>
+                                        {% if data.supplier_id %}
+                                            {{ data.supplier_name }}
+                                        {% else %}
+                                            <span class="text-muted">No especificado</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ data.updated_at|default('N/A') }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm action-buttons" role="group" aria-label="Acciones para {{ ingredient }}">
+                                            <a href="{{ url_for('ingredient_price_history', ingredient=ingredient) }}" class="btn btn-outline-info" aria-label="Ver historial de {{ ingredient }}">
+                                                <i class="fas fa-chart-line" aria-hidden="true"></i>
+                                                <span class="visually-hidden">Ver historial</span>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-primary edit-price-btn" 
+                                                    data-ingredient="{{ ingredient }}"
+                                                    data-price="{{ data.price }}"
+                                                    data-unit="{{ data.unit }}"
+                                                    data-supplier="{{ data.supplier_id|default('') }}"
+                                                    aria-label="Editar precio de {{ ingredient }}">
+                                                <i class="fas fa-edit" aria-hidden="true"></i>
+                                                <span class="visually-hidden">Editar precio</span>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-success api-update-btn"
+                                                    data-ingredient="{{ ingredient }}"
+                                                    aria-label="Actualizar precio de {{ ingredient }} desde API">
+                                                <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                                                <span class="visually-hidden">Actualizar desde API</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="empty-state">
+                                        <p>No hay precios registrados. ¡Agrega algunos!</p>
+                                        <button type="button" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#addPriceModal">
+                                            <i class="fas fa-plus" aria-hidden="true"></i> Agregar Precio
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="price-info">
+                <i class="fas fa-info-circle" aria-hidden="true"></i> Los precios se utilizan para calcular el costo total de las recetas. Mantén actualizada esta información para obtener cálculos precisos.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para agregar/editar precio -->
+<div class="modal fade price-modal" id="addPriceModal" tabindex="-1" aria-labelledby="addPriceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPriceModalLabel">Agregar Precio de Ingrediente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form action="{{ url_for('update_ingredient_price') }}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="ingredient" class="form-label">Nombre del Ingrediente</label>
+                        <input type="text" class="form-control" id="ingredient" name="ingredient" required aria-describedby="ingredient-help">
+                        <div id="ingredient-help" class="form-text">Ingresa el nombre exacto del ingrediente</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Precio</label>
+                        <input type="number" class="form-control" id="price" name="price" step="0.01" min="0.01" required aria-describedby="price-help">
+                        <div id="price-help" class="form-text">Valor en la moneda local</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="unit" class="form-label">Unidad</label>
+                        <select class="form-select" id="unit" name="unit" required aria-describedby="unit-help">
+                            <option value="kg">Kilogramo (kg)</option>
+                            <option value="g">Gramo (g)</option>
+                            <option value="l">Litro (l)</option>
+                            <option value="ml">Mililitro (ml)</option>
+                            <option value="unidad">Unidad</option>
+                        </select>
+                        <div id="unit-help" class="form-text">Unidad de medida a la que corresponde el precio</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="supplier_id" class="form-label">Proveedor (opcional)</label>
+                        <select class="form-select" id="supplier_id" name="supplier_id" aria-describedby="supplier-help">
+                            <option value="">Seleccionar proveedor</option>
+                            {% for supplier_id, supplier in suppliers.items() %}
+                                <option value="{{ supplier_id }}">{{ supplier.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div id="supplier-help" class="form-text">Selecciona el proveedor de este ingrediente</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para actualización desde API -->
+<div class="modal fade price-modal" id="apiUpdateModal" tabindex="-1" aria-labelledby="apiUpdateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="apiUpdateModalLabel">Actualizar Precio desde API</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form action="{{ url_for('update_price_from_api') }}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="api_ingredient" class="form-label">Ingrediente</label>
+                        <input type="text" class="form-control" id="api_ingredient" name="ingredient" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="api_type" class="form-label">Fuente de Datos</label>
+                        <select class="form-select" id="api_type" name="api_type" required>
+                            <option value="market_index">Índice de Mercado (General)</option>
+                            <option value="commodity_api">API de Commodities</option>
+                            <option value="food_price_db">Base de Datos de Precios Alimentarios</option>
+                        </select>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle" aria-hidden="true"></i> La actualización desde API consultará la fuente seleccionada para obtener el precio más reciente del ingrediente. Este proceso puede tomar unos segundos.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Editar precio
+    $('.edit-price-btn').click(function() {
+        const ingredient = $(this).data('ingredient');
+        const price = $(this).data('price');
+        const unit = $(this).data('unit');
+        const supplier = $(this).data('supplier');
+        
+        // Llenar el modal con los datos
+        $('#addPriceModalLabel').text('Editar Precio de Ingrediente');
+        $('#ingredient').val(ingredient);
+        $('#price').val(price);
+        $('#unit').val(unit);
+        $('#supplier_id').val(supplier);
+        
+        // Mostrar el modal
+        $('#addPriceModal').modal('show');
+    });
+    
+    // Actualizar desde API (botón individual)
+    $('.api-update-btn').click(function() {
+        const ingredient = $(this).data('ingredient');
+        
+        // Llenar el modal con los datos
+        $('#api_ingredient').val(ingredient);
+        
+        // Mostrar el modal
+        $('#apiUpdateModal').modal('show');
+    });
+    
+    // Restablece el formulario al abrir el modal para agregar nuevo precio
+    $('#addPriceModal').on('hidden.bs.modal', function() {
+        $('#addPriceModalLabel').text('Agregar Precio de Ingrediente');
+        $('#ingredient').val('');
+        $('#price').val('');
+        $('#unit').val('kg');
+        $('#supplier_id').val('');
+    });
+    
+    // Filtrado y búsqueda
+    $('#searchInput').on('keyup', function() {
+        const value = $(this).val().toLowerCase();
+        $('#priceTable tbody tr').filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        });
+    });
+    
+    $('#filterByUnit').on('change', function() {
+        const value = $(this).val().toLowerCase();
+        if (value === '') {
+            $('#priceTable tbody tr').show();
+        } else {
+            $('#priceTable tbody tr').filter(function() {
+                return $(this).children('td:nth-child(3)').text().toLowerCase() === value;
+            }).show();
+            $('#priceTable tbody tr').filter(function() {
+                return $(this).children('td:nth-child(3)').text().toLowerCase() !== value;
+            }).hide();
+        }
+    });
+    
+    $('#sortBy').on('change', function() {
+        const value = $(this).val();
+        const tbody = $('#priceTable tbody');
+        const rows = tbody.find('tr').toArray();
+        
+        rows.sort(function(a, b) {
+            let aValue, bValue;
+            
+            if (value === 'name-asc' || value === 'name-desc') {
+                aValue = $(a).children('td:first-child').text().toLowerCase();
+                bValue = $(b).children('td:first-child').text().toLowerCase();
+                
+                return value === 'name-asc' ? 
+                    aValue.localeCompare(bValue) : 
+                    bValue.localeCompare(aValue);
+            }
+            
+            if (value === 'price-asc' || value === 'price-desc') {
+                aValue = parseFloat($(a).children('td:nth-child(2)').text());
+                bValue = parseFloat($(b).children('td:nth-child(2)').text());
+                
+                return value === 'price-asc' ? aValue - bValue : bValue - aValue;
+            }
+            
+            if (value === 'updated-desc') {
+                aValue = $(a).children('td:nth-child(5)').text();
+                bValue = $(b).children('td:nth-child(5)').text();
+                
+                return bValue.localeCompare(aValue);
+            }
+            
+            return 0;
+        });
+        
+        $.each(rows, function(index, row) {
+            tbody.append(row);
+        });
+    });
+});
+</script>
+{% endblock %} 
