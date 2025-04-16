@@ -630,3 +630,56 @@ body.light-mode .navbar {
 body.light-mode .tech-grid {
     opacity: 0.2;
 }
+
+/* Formulario de lenguaje natural */
+.natural-language-input {
+    border: 2px solid rgba(39, 174, 96, 0.2);
+    border-radius: 16px;
+    padding: 1.5rem;
+    font-size: 1.1rem;
+    background-color: var(--surface-light);
+    color: var(--text-primary);
+    resize: none;
+    transition: all 0.3s ease;
+}
+
+.natural-language-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(39, 174, 96, 0.25);
+    outline: none;
+}
+
+.natural-language-submit {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem 2rem;
+    font-weight: 600;
+    display: inline-block;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+}
+
+.natural-language-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(39, 174, 96, 0.4);
+}
+
+/* Indicador de carga */
+.spinner {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
