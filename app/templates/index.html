@@ -189,34 +189,47 @@ best_recipe = get_best_individual(population)
         // Theme toggle functionality
         const themeToggle = document.getElementById('theme-toggle');
         const themeLabel = document.getElementById('theme-label');
+        const body = document.body;
         
-        // Check for saved theme preference or prefer-color-scheme
+        // Función para aplicar el tema
+        function applyTheme(isDark) {
+            if (isDark) {
+                body.classList.remove('light-mode');
+                localStorage.setItem('theme', 'dark');
+                themeLabel.textContent = 'Oscuro';
+            } else {
+                body.classList.add('light-mode');
+                localStorage.setItem('theme', 'light');
+                themeLabel.textContent = 'Claro';
+            }
+        }
+        
+        // Verificar preferencias guardadas o del sistema
         const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
         const currentTheme = localStorage.getItem('theme');
         
         if (currentTheme === 'light') {
-            document.body.classList.add('light-mode');
+            applyTheme(false);
             themeToggle.checked = false;
-            themeLabel.textContent = 'Claro';
         } else {
+            applyTheme(true);
             themeToggle.checked = true;
-            themeLabel.textContent = 'Oscuro';
         }
         
-        // Toggle theme when the switch is clicked
+        // Escuchar cambios en el interruptor
         themeToggle.addEventListener('change', function() {
-            if (this.checked) {
-                document.body.classList.remove('light-mode');
-                localStorage.setItem('theme', 'dark');
-                themeLabel.textContent = 'Oscuro';
-            } else {
-                document.body.classList.add('light-mode');
-                localStorage.setItem('theme', 'light');
-                themeLabel.textContent = 'Claro';
+            applyTheme(this.checked);
+        });
+        
+        // Escuchar cambios en las preferencias del sistema
+        prefersDarkScheme.addListener((e) => {
+            if (!localStorage.getItem('theme')) {
+                applyTheme(e.matches);
+                themeToggle.checked = e.matches;
             }
         });
         
-        // Animate elements on scroll
+        // Animar elementos al hacer scroll
         document.addEventListener('DOMContentLoaded', function() {
             const fadeElements = document.querySelectorAll('.fade-in');
             
