@@ -1,0 +1,67 @@
+---
+name: 'Reporte de Bug'
+description: 'Reportar un error o problema'
+title: '[BUG]: '
+labels: ['bug']
+assignees:
+  - Maurosg78
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Detalles del Bug
+        Por favor, proporciona toda la información necesaria para reproducir el bug.
+  - type: textarea
+    id: description
+    attributes:
+      label: Descripción
+      description: '¿Qué ocurrió?'
+      placeholder: 'Al intentar..., ocurre que...'
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamiento Esperado
+      description: '¿Qué debería haber ocurrido?'
+      placeholder: 'Debería haber...'
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para Reproducir
+      description: Lista los pasos para reproducir el problema
+      placeholder: |
+        1. Ir a '...'
+        2. Hacer clic en '...'
+        3. Ver el error
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severidad
+      description: '¿Qué tan grave es este problema?'
+      options:
+        - Crítico (bloquea funcionalidad principal)
+        - Alto (afecta funcionalidad importante)
+        - Medio (funcionalidad afectada con alternativas)
+        - Bajo (problema menor o cosmético)
+    validations:
+      required: true
+  - type: input
+    id: sprint
+    attributes:
+      label: Sprint/Versión
+      description: '¿En qué sprint o versión se encontró este problema?'
+      placeholder: 'Sprint 3 / v1.2.0'
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Capturas de Pantalla
+      description: Si es posible, añade capturas de pantalla
+      placeholder: 'Arrastra las imágenes aquí'
+

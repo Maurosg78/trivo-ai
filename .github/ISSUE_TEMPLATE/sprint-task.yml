@@ -1,0 +1,69 @@
+---
+name: 'Tarea de Sprint'
+description: 'Crear una nueva tarea para el sprint actual'
+title: '[S3]: '
+labels: ['enhancement']
+assignees:
+  - Maurosg78
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Detalles de la Tarea
+        Por favor, proporciona toda la información necesaria para esta tarea del sprint.
+  - type: input
+    id: sprint-number
+    attributes:
+      label: Número de Sprint
+      description: '¿A qué sprint pertenece esta tarea?'
+      placeholder: 'Ejemplo: 3'
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Descripción
+      description: Describe detalladamente qué debe hacerse
+      placeholder: 'Esta tarea consiste en...'
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Prioridad
+      description: Indica la prioridad de esta tarea
+      options:
+        - Alta
+        - Media
+        - Baja
+    validations:
+      required: true
+  - type: input
+    id: story-points
+    attributes:
+      label: Puntos de Historia
+      description: Estimación en puntos de historia (1, 2, 3, 5, 8, 13)
+      placeholder: '5'
+    validations:
+      required: true
+  - type: checkboxes
+    id: acceptance-criteria
+    attributes:
+      label: Lista de Criterios de Aceptación
+      description: Marca todos los criterios que apliquen
+      options:
+        - label: El código pasa todas las pruebas
+          required: true
+        - label: Se ha añadido documentación
+          required: true
+        - label: Se ha revisado el código
+          required: true
+        - label: La funcionalidad ha sido probada manualmente
+          required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notas Adicionales
+      description: Cualquier información adicional relevante
+      placeholder: 'Otras consideraciones...'
+
