@@ -6,5 +6,7 @@ y convertirlas en recetas con todos los ingredientes y propiedades necesarias.
 """
 
 from .language_processor import LanguageProcessor
+from .ai_connector import AIConnector
+from .llm_supervisor import LLMSupervisor
 
-__all__ = ['LanguageProcessor'] 
+__all__ = ['LanguageProcessor', 'AIConnector', 'LLMSupervisor'] 

@@ -18,7 +18,15 @@ setup(
         "python-dotenv==1.0.0",
         "requests==2.28.2",
         "gunicorn==20.1.0",
-        "nltk==3.8.1"
+        "nltk==3.8.1",
+        "fastapi==0.110.0",
+        "uvicorn==0.29.0",
+        "pydantic==2.6.3",
+        "sqlalchemy==2.0.40",
+        "alembic==1.15.2",
+        "psycopg2-binary==2.9.10",
+        "email-validator==2.1.1",
+        "python-multipart==0.0.9"
     ],
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -30,7 +38,7 @@ setup(
     python_requires=">=3.8",
     entry_points={
         "console_scripts": [
-            "trivo-ai=app.app:main"
+            "trivo-api=src.run:main"
         ]
     }
 ) 
