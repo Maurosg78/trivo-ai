@@ -1,0 +1,677 @@
+/**
+ * Preferencias de Accesibilidad CSS
+ * Estilos para el panel de configuración de accesibilidad
+ */
+
+:root {
+    /* Variables para modo claro */
+    --a11y-panel-bg: #ffffff;
+    --a11y-panel-text: #333333;
+    --a11y-panel-border: #dadce0;
+    --a11y-toggle-btn-bg: #3f51b5;
+    --a11y-toggle-btn-text: #ffffff;
+    --a11y-option-bg: #f5f5f5;
+    --a11y-option-border: #e0e0e0;
+    --a11y-option-selected: #e8f0fe;
+    --a11y-option-selected-border: #3f51b5;
+    --a11y-btn-primary-bg: #3f51b5;
+    --a11y-btn-primary-text: #ffffff;
+    --a11y-section-border: #f0f0f0;
+    
+    /* Variables para modo oscuro */
+    --a11y-dark-panel-bg: #2d2d2d;
+    --a11y-dark-panel-text: #f0f0f0;
+    --a11y-dark-panel-border: #444444;
+    --a11y-dark-toggle-btn-bg: #7986cb;
+    --a11y-dark-toggle-btn-text: #ffffff;
+    --a11y-dark-option-bg: #3d3d3d;
+    --a11y-dark-option-border: #555555;
+    --a11y-dark-option-selected: #3d4f7c;
+    --a11y-dark-option-selected-border: #7986cb;
+    --a11y-dark-btn-primary-bg: #5c6bc0;
+    --a11y-dark-btn-primary-text: #ffffff;
+    --a11y-dark-section-border: #444444;
+}
+
+/* Botón flotante para abrir panel de accesibilidad */
+.a11y-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--a11y-toggle-btn-bg);
+    color: var(--a11y-toggle-btn-text);
+    border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s, background-color 0.3s;
+}
+
+.a11y-toggle-btn:hover, 
+.a11y-toggle-btn:focus {
+    transform: scale(1.1);
+    background-color: #303f9f; /* Tono más oscuro al hover */
+}
+
+.a11y-toggle-btn:focus {
+    outline: 3px solid #c5cae9; /* Anillo de foco visible */
+    outline-offset: 2px;
+}
+
+/* Reducir animación si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce) {
+    .a11y-toggle-btn {
+        transition: none;
+    }
+    
+    .a11y-toggle-btn:hover {
+        transform: none;
+    }
+}
+
+/* Panel de preferencias de accesibilidad */
+.a11y-prefs-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 350px;
+    height: 100vh;
+    background-color: var(--a11y-panel-bg);
+    border-left: 1px solid var(--a11y-panel-border);
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    z-index: 10000;
+    display: none;
+    flex-direction: column;
+    color: var(--a11y-panel-text);
+    overflow-y: auto;
+    padding: 0;
+    transition: transform 0.3s ease;
+}
+
+/* Cabecera del panel */
+.a11y-prefs-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--a11y-section-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background-color: var(--a11y-panel-bg);
+    z-index: 1;
+}
+
+.a11y-prefs-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.a11y-prefs-header .btn-close {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--a11y-panel-text);
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.a11y-prefs-header .btn-close:hover,
+.a11y-prefs-header .btn-close:focus {
+    opacity: 1;
+}
+
+/* Cuerpo del panel con secciones */
+.a11y-prefs-body {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+/* Secciones de preferencias */
+.a11y-prefs-section {
+    margin-bottom: 24px;
+}
+
+.a11y-prefs-section h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--a11y-section-border);
+}
+
+/* Contenedor de opciones */
+.a11y-prefs-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Opciones individuales */
+.a11y-option {
+    background-color: var(--a11y-option-bg);
+    border: 2px solid var(--a11y-option-border);
+    border-radius: 8px;
+    padding: 10px;
+    min-width: 70px;
+    min-height: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+    flex: 1;
+}
+
+.a11y-option.selected {
+    background-color: var(--a11y-option-selected);
+    border-color: var(--a11y-option-selected-border);
+}
+
+.a11y-option:hover,
+.a11y-option:focus {
+    border-color: var(--a11y-option-selected-border);
+}
+
+.a11y-option:focus {
+    outline: 2px solid var(--a11y-option-selected-border);
+    outline-offset: 2px;
+}
+
+.a11y-option-preview {
+    margin-bottom: 6px;
+    font-size: 1.2rem;
+}
+
+.a11y-option-label {
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+/* Acciones en la parte inferior */
+.a11y-prefs-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px;
+    border-top: 1px solid var(--a11y-section-border);
+    background-color: var(--a11y-panel-bg);
+    position: sticky;
+    bottom: 0;
+}
+
+.a11y-prefs-save,
+.a11y-prefs-reset {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.a11y-prefs-save {
+    background-color: var(--a11y-btn-primary-bg);
+    color: var(--a11y-btn-primary-text);
+    border: none;
+    margin-left: auto;
+}
+
+.a11y-prefs-save:hover,
+.a11y-prefs-save:focus {
+    background-color: #303f9f; /* Tono más oscuro */
+}
+
+.a11y-prefs-reset {
+    background-color: transparent;
+    color: var(--a11y-panel-text);
+    border: 1px solid var(--a11y-option-border);
+}
+
+.a11y-prefs-reset:hover,
+.a11y-prefs-reset:focus {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Clases de aplicación para preferencias seleccionadas */
+
+/* 1. Tamaño de texto */
+.a11y-text-large {
+    font-size: 120% !important;
+}
+
+.a11y-text-x-large {
+    font-size: 150% !important;
+}
+
+/* 2. Contraste alto */
+.a11y-high-contrast {
+    filter: contrast(1.5) !important;
+}
+
+.a11y-inverted {
+    filter: invert(1) hue-rotate(180deg) !important;
+}
+
+/* 3. Espaciado de letras */
+.a11y-letter-spacing-wide {
+    letter-spacing: 1.5px !important;
+}
+
+.a11y-letter-spacing-wider {
+    letter-spacing: 3px !important;
+}
+
+/* 4. Altura de línea */
+.a11y-line-height-spaced {
+    line-height: 1.5 !important;
+}
+
+.a11y-line-height-double {
+    line-height: 2 !important;
+}
+
+/* 5. Movimiento reducido */
+.a11y-motion-reduced *,
+.a11y-motion-reduced {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+}
+
+/* 6. Indicadores de foco mejorados */
+.a11y-focus-high :focus {
+    outline: 3px solid #ffab00 !important;
+    outline-offset: 3px !important;
+}
+
+/* Estilos específicos para modo oscuro */
+@media (prefers-color-scheme: dark) {
+    .a11y-prefs-panel {
+        background-color: var(--a11y-dark-panel-bg);
+        border-color: var(--a11y-dark-panel-border);
+        color: var(--a11y-dark-panel-text);
+    }
+    
+    .a11y-prefs-header {
+        background-color: var(--a11y-dark-panel-bg);
+        border-color: var(--a11y-dark-section-border);
+    }
+    
+    .a11y-prefs-header .btn-close {
+        color: var(--a11y-dark-panel-text);
+    }
+    
+    .a11y-prefs-section h3 {
+        border-color: var(--a11y-dark-section-border);
+    }
+    
+    .a11y-option {
+        background-color: var(--a11y-dark-option-bg);
+        border-color: var(--a11y-dark-option-border);
+        color: var(--a11y-dark-panel-text);
+    }
+    
+    .a11y-option.selected {
+        background-color: var(--a11y-dark-option-selected);
+        border-color: var(--a11y-dark-option-selected-border);
+    }
+    
+    .a11y-prefs-actions {
+        background-color: var(--a11y-dark-panel-bg);
+        border-color: var(--a11y-dark-section-border);
+    }
+    
+    .a11y-prefs-save {
+        background-color: var(--a11y-dark-btn-primary-bg);
+        color: var(--a11y-dark-btn-primary-text);
+    }
+    
+    .a11y-prefs-reset {
+        color: var(--a11y-dark-panel-text);
+        border-color: var(--a11y-dark-option-border);
+    }
+    
+    .a11y-prefs-reset:hover,
+    .a11y-prefs-reset:focus {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .a11y-toggle-btn {
+        background-color: var(--a11y-dark-toggle-btn-bg);
+        color: var(--a11y-dark-toggle-btn-text);
+    }
+    
+    .a11y-toggle-btn:hover,
+    .a11y-toggle-btn:focus {
+        background-color: #5c6bc0;
+    }
+}
+
+/* Adaptaciones responsive para pantallas pequeñas */
+@media (max-width: 576px) {
+    .a11y-prefs-panel {
+        width: 100%;
+    }
+    
+    .a11y-option {
+        min-width: 60px;
+        min-height: 60px;
+    }
+}
+
+/* Estilos para el Panel de Preferencias de Accesibilidad */
+
+/* Variables CSS */
+:root {
+    /* Colores modo claro */
+    --a11y-bg-color: #ffffff;
+    --a11y-text-color: #333333;
+    --a11y-border-color: #dddddd;
+    --a11y-focus-color: #007bff;
+    --a11y-hover-color: #f5f5f5;
+    --a11y-active-color: #e1f0ff;
+    --a11y-shadow-color: rgba(0, 0, 0, 0.1);
+    
+    /* Colores para modo oscuro */
+    --a11y-dark-bg-color: #222222;
+    --a11y-dark-text-color: #f0f0f0;
+    --a11y-dark-border-color: #444444;
+    --a11y-dark-focus-color: #4da3ff;
+    --a11y-dark-hover-color: #333333;
+    --a11y-dark-active-color: #1c4980;
+    --a11y-dark-shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Botón de acceso */
+.a11y-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--a11y-bg-color);
+    color: var(--a11y-text-color);
+    border: 2px solid var(--a11y-border-color);
+    box-shadow: 0 2px 5px var(--a11y-shadow-color);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+.a11y-toggle-btn:hover, 
+.a11y-toggle-btn:focus {
+    background-color: var(--a11y-hover-color);
+    transform: scale(1.05);
+    outline: none;
+}
+
+.a11y-toggle-btn:focus-visible {
+    outline: 3px solid var(--a11y-focus-color);
+    outline-offset: 2px;
+}
+
+.a11y-toggle-btn i {
+    font-size: 1.5rem;
+}
+
+/* Panel principal */
+.a11y-prefs-panel {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 340px;
+    max-height: 80vh;
+    background-color: var(--a11y-bg-color);
+    border-radius: 8px;
+    box-shadow: 0 5px 15px var(--a11y-shadow-color);
+    z-index: 9998;
+    overflow-y: auto;
+    display: none;
+    flex-direction: column;
+    border: 1px solid var(--a11y-border-color);
+}
+
+.a11y-prefs-panel[aria-hidden="false"] {
+    display: flex;
+}
+
+/* Cabecera del panel */
+.a11y-prefs-header {
+    padding: 15px;
+    border-bottom: 1px solid var(--a11y-border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background-color: var(--a11y-bg-color);
+    z-index: 1;
+}
+
+.a11y-prefs-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.a11y-prefs-header .btn-close {
+    background-color: transparent;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--a11y-text-color);
+}
+
+.a11y-prefs-header .btn-close:hover,
+.a11y-prefs-header .btn-close:focus {
+    color: var(--a11y-focus-color);
+    outline: none;
+}
+
+/* Cuerpo del panel */
+.a11y-prefs-body {
+    padding: 10px 15px;
+    overflow-y: auto;
+}
+
+/* Secciones */
+.a11y-prefs-section {
+    margin-bottom: 20px;
+}
+
+.a11y-prefs-section h3 {
+    font-size: 1rem;
+    margin: 0 0 10px 0;
+    font-weight: 500;
+}
+
+/* Opciones */
+.a11y-prefs-options {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.a11y-option {
+    width: calc(33.33% - 7px);
+    background-color: var(--a11y-bg-color);
+    border: 1px solid var(--a11y-border-color);
+    border-radius: 6px;
+    padding: 8px 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.a11y-option:hover {
+    background-color: var(--a11y-hover-color);
+}
+
+.a11y-option:focus {
+    outline: 2px solid var(--a11y-focus-color);
+    outline-offset: 2px;
+}
+
+.a11y-option[aria-checked="true"] {
+    background-color: var(--a11y-active-color);
+    border-color: var(--a11y-focus-color);
+}
+
+.a11y-option-preview {
+    padding: 5px 0;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.text-size-option[data-value="default"] .a11y-option-preview {
+    font-size: 1rem;
+}
+
+.text-size-option[data-value="large"] .a11y-option-preview {
+    font-size: 1.25rem;
+}
+
+.text-size-option[data-value="x-large"] .a11y-option-preview {
+    font-size: 1.5rem;
+}
+
+.contrast-option[data-value="high"] .a11y-option-preview {
+    background-color: #000;
+    color: #fff;
+    padding: 3px;
+    border-radius: 4px;
+}
+
+.contrast-option[data-value="inverted"] .a11y-option-preview {
+    background-color: #000;
+    color: #fff;
+    filter: invert(1);
+    padding: 3px;
+    border-radius: 4px;
+}
+
+.a11y-option-label {
+    font-size: 0.85rem;
+}
+
+/* Acciones */
+.a11y-prefs-actions {
+    padding: 15px;
+    border-top: 1px solid var(--a11y-border-color);
+    display: flex;
+    justify-content: space-between;
+    position: sticky;
+    bottom: 0;
+    background-color: var(--a11y-bg-color);
+}
+
+.a11y-prefs-reset,
+.a11y-prefs-save {
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.a11y-prefs-reset {
+    background-color: transparent;
+    border: 1px solid var(--a11y-border-color);
+    color: var(--a11y-text-color);
+}
+
+.a11y-prefs-save {
+    background-color: var(--a11y-focus-color);
+    border: 1px solid var(--a11y-focus-color);
+    color: white;
+}
+
+.a11y-prefs-reset:hover,
+.a11y-prefs-reset:focus {
+    background-color: var(--a11y-hover-color);
+    outline: none;
+}
+
+.a11y-prefs-save:hover,
+.a11y-prefs-save:focus {
+    background-color: #0069d9;
+    outline: none;
+}
+
+/* Adaptaciones para modo oscuro */
+@media (prefers-color-scheme: dark) {
+    .a11y-toggle-btn,
+    .a11y-prefs-panel,
+    .a11y-prefs-header,
+    .a11y-option {
+        background-color: var(--a11y-dark-bg-color);
+        color: var(--a11y-dark-text-color);
+        border-color: var(--a11y-dark-border-color);
+    }
+    
+    .a11y-prefs-header,
+    .a11y-prefs-actions {
+        background-color: var(--a11y-dark-bg-color);
+        border-color: var(--a11y-dark-border-color);
+    }
+    
+    .a11y-toggle-btn:hover, 
+    .a11y-toggle-btn:focus,
+    .a11y-option:hover {
+        background-color: var(--a11y-dark-hover-color);
+    }
+    
+    .a11y-option[aria-checked="true"] {
+        background-color: var(--a11y-dark-active-color);
+        border-color: var(--a11y-dark-focus-color);
+    }
+    
+    .a11y-prefs-reset {
+        border-color: var(--a11y-dark-border-color);
+        color: var(--a11y-dark-text-color);
+    }
+    
+    .a11y-prefs-header .btn-close:hover,
+    .a11y-prefs-header .btn-close:focus {
+        color: var(--a11y-dark-focus-color);
+    }
+}
+
+/* Preferencia para movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+    .a11y-toggle-btn,
+    .a11y-option {
+        transition: none;
+    }
+}
+
+/* Adaptaciones para pantallas pequeñas */
+@media screen and (max-width: 480px) {
+    .a11y-prefs-panel {
+        width: calc(100% - 40px);
+        bottom: 80px;
+    }
+    
+    .a11y-option {
+        width: calc(50% - 5px);
+    }
+} 

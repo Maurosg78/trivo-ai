@@ -1,10 +1,20 @@
 import time
-
 import pandas as pd
 import requests
+import os
+import sys
+from pathlib import Path
 
-# Clave de la API de la USDA
-API_KEY = "Rntzc9HDaefGgZL0w3Sid120qfk4kdJD4YZuicE4"
+# Agregar el directorio raíz al path para importaciones
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+# Importar configuración
+from config import USDA_API_KEY, DATA_DIR
+
+# Verificar que la clave API está configurada
+if not USDA_API_KEY:
+    print("Error: La clave API de USDA no está configurada. Por favor defina la variable de entorno USDA_API_KEY.")
+    sys.exit(1)
 
 # Lista de 100 ingredientes para masas vegetales
 INGREDIENTS = [
@@ -199,7 +209,7 @@ CLASSIFICATION = {
 
 # Función para obtener el fdcId de un ingrediente
 def get_fdc_id(ingredient):
-    url = f"https://api.nal.usda.gov/fdc/v1/foods/search?query={ingredient}&api_key={API_KEY}"
+    url = f"https://api.nal.usda.gov/fdc/v1/foods/search?query={ingredient}&api_key={USDA_API_KEY}"
     for attempt in range(3):
         try:
             response = requests.get(url, timeout=30).json()
@@ -220,7 +230,7 @@ def get_fdc_id(ingredient):
 
 # Función para obtener los datos nutricionales de un ingrediente usando su fdcId
 def get_nutritional_data(fdc_id):
-    url = f"https://api.nal.usda.gov/fdc/v1/food/{fdc_id}?api_key={API_KEY}"
+    url = f"https://api.nal.usda.gov/fdc/v1/food/{fdc_id}?api_key={USDA_API_KEY}"
     try:
         response = requests.get(url, timeout=30).json()
         nutrients = response["foodNutrients"]
@@ -278,7 +288,7 @@ if database:
             "contains_allergens",
         ],
     )
-    df.to_csv("../data/ingredients_data_doughs.csv", index=False)
-    print("Base de datos guardada en '../data/ingredients_data_doughs.csv'.")
+    df.to_csv(os.path.join(DATA_DIR, "ingredients_data_doughs.csv"), index=False)
+    print("Base de datos guardada en '{}'.".format(os.path.join(DATA_DIR, "ingredients_data_doughs.csv")))
 else:
     print("No se recolectaron datos para ningún ingrediente.")

@@ -1,0 +1,303 @@
+/* Estilos para la página de gestión de proveedores */
+
+/* Variables para aumentar la accesibilidad */
+:root {
+    --accent-color: #0d6efd;
+    --accent-hover: #0a58ca;
+    --danger-color: #dc3545;
+    --danger-hover: #bb2d3b;
+    --success-color: #198754;
+    --grey-color: #6c757d;
+    --light-grey: #f8f9fa;
+    --dark-text: #212529;
+    --focus-ring-color: rgba(13, 110, 253, 0.5);
+    --focus-width: 0.25rem;
+}
+
+/* Estilos generales de cards y contenedores */
+.suppliers-card {
+    border-radius: 8px;
+    transition: box-shadow 0.3s ease;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.175);
+}
+
+.suppliers-card .card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.suppliers-card:hover {
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para la tabla de proveedores */
+.suppliers-table {
+    margin-bottom: 0;
+}
+
+.suppliers-table th {
+    font-weight: 600;
+    vertical-align: middle;
+    color: var(--dark-text);
+}
+
+.suppliers-table .supplier-name {
+    font-weight: 500;
+}
+
+.suppliers-table td {
+    vertical-align: middle;
+    padding: 0.75rem;
+}
+
+/* Enlaces accesibles con mejor indicación de enfoque */
+.suppliers-table a {
+    color: var(--accent-color);
+    text-decoration: none;
+    position: relative;
+}
+
+.suppliers-table a:hover,
+.suppliers-table a:focus {
+    text-decoration: underline;
+}
+
+.suppliers-table a:focus {
+    outline: var(--focus-width) solid var(--focus-ring-color);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* Estilos para formularios */
+.supplier-form-group label {
+    font-weight: 500;
+    color: var(--dark-text);
+    margin-bottom: 0.5rem;
+}
+
+.supplier-form-group .form-text {
+    font-size: 0.85rem;
+    color: var(--grey-color);
+    margin-top: 0.25rem;
+}
+
+.required-field::after {
+    content: "*";
+    color: var(--danger-color);
+    margin-left: 4px;
+}
+
+/* Mejora de contraste para campos de formulario */
+.supplier-form-group .form-control,
+.supplier-form-group .form-select {
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.supplier-form-group .form-control:focus,
+.supplier-form-group .form-select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 var(--focus-width) var(--focus-ring-color);
+}
+
+/* Estilos para los botones de acción */
+.supplier-actions {
+    white-space: nowrap;
+}
+
+.supplier-actions .btn {
+    margin: 0 3px;
+    padding: 0.375rem 0.5rem;
+    position: relative;
+}
+
+.btn-edit {
+    color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-delete {
+    color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-edit:hover, .btn-edit:focus {
+    color: #fff;
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+}
+
+.btn-delete:hover, .btn-delete:focus {
+    color: #fff;
+    background-color: var(--danger-hover);
+    border-color: var(--danger-hover);
+}
+
+/* Mejora de foco para todos los botones */
+.btn:focus, 
+.btn:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 var(--focus-width) var(--focus-ring-color);
+}
+
+.btn-danger:focus, 
+.btn-danger:focus-visible {
+    box-shadow: 0 0 0 var(--focus-width) rgba(220, 53, 69, 0.5);
+}
+
+/* Estados de accesibilidad */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Badges con mejor contraste */
+.badge.bg-success {
+    background-color: var(--success-color) !important;
+    color: white;
+    font-weight: 500;
+}
+
+.badge.bg-secondary {
+    background-color: var(--grey-color) !important;
+    color: white;
+    font-weight: 500;
+}
+
+/* Estilos para estado vacío */
+.empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    background-color: var(--light-grey);
+    border-radius: 8px;
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    color: var(--grey-color);
+    margin-bottom: 1rem;
+}
+
+.empty-state h2 {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--dark-text);
+}
+
+/* Estilos para alertas */
+.alert {
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+}
+
+.alert .btn-close {
+    margin-left: auto;
+}
+
+/* Skip link para navegación por teclado */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--accent-color);
+    color: white;
+    padding: 8px;
+    z-index: 100;
+    transition: top 0.3s;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* DataTables accesible */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    min-width: 1.5em;
+    padding: 0.5em 1em;
+    margin-left: 2px;
+    text-align: center;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: var(--accent-color);
+    color: white !important;
+    border-color: var(--accent-color);
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: var(--accent-hover);
+    color: white !important;
+    border-color: var(--accent-hover);
+}
+
+/* Estilos para responsive */
+@media (max-width: 768px) {
+    .suppliers-card .card-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .suppliers-card .card-header button {
+        align-self: flex-start;
+    }
+    
+    .supplier-actions .btn {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Mayor tamaño de toque para dispositivos móviles */
+    .supplier-actions .btn {
+        min-height: 44px;
+        min-width: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* Modo de alto contraste */
+@media (prefers-contrast: high) {
+    :root {
+        --accent-color: #0000EE;
+        --accent-hover: #0000AA;
+        --danger-color: #CC0000;
+        --danger-hover: #990000;
+        --success-color: #006600;
+        --grey-color: #444444;
+        --light-grey: #EEEEEE;
+        --dark-text: #000000;
+        --focus-ring-color: #000000;
+    }
+    
+    .suppliers-card {
+        border: 2px solid #000;
+    }
+    
+    .suppliers-table th, 
+    .suppliers-table td {
+        border: 1px solid #000;
+    }
+    
+    .form-control, 
+    .form-select {
+        border: 2px solid #000;
+    }
+    
+    .btn {
+        border: 2px solid currentColor;
+    }
+} 

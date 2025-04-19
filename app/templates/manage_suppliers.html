@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+{% import "components/accessible_modal.html" as accessible_components %}
+
+{% block title %}Gestión de Proveedores{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/suppliers.css') }}">
+{% endblock %}
+
+{% block content %}
+<main id="main-content" class="container mt-4" tabindex="-1">
+    <nav aria-label="Navegación de rutas" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('home') }}">Inicio</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Gestión de Proveedores</li>
+        </ol>
+    </nav>
+
+    <!-- Mostrar mensajes de alerta si existen -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% call accessible_components.alert(category, true, true) %}
+                    {{ message }}
+                {% endcall %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card suppliers-card shadow-sm mb-4">
+        <div class="card-header">
+            <h1 class="h5 mb-0">Proveedores Registrados</h1>
+            <button type="button" class="btn btn-primary" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#addSupplierModal"
+                    aria-label="Añadir nuevo proveedor">
+                <i class="fas fa-plus me-1" aria-hidden="true"></i> Nuevo Proveedor
+            </button>
+        </div>
+        <div class="card-body">
+            {% if suppliers %}
+                <div class="table-responsive">
+                    <table class="table table-hover suppliers-table" id="suppliersTable">
+                        <caption class="visually-hidden">Lista de proveedores registrados</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Nombre</th>
+                                <th scope="col">Contacto</th>
+                                <th scope="col">Correo</th>
+                                <th scope="col">Teléfono</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col" class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for supplier in suppliers %}
+                            <tr>
+                                <td>{{ supplier.id }}</td>
+                                <td class="supplier-name">{{ supplier.name }}</td>
+                                <td>{{ supplier.contact_name }}</td>
+                                <td>
+                                    <a href="mailto:{{ supplier.email }}" class="text-decoration-none" aria-label="Enviar correo a {{ supplier.email }}">
+                                        {{ supplier.email }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="tel:{{ supplier.phone }}" class="text-decoration-none" aria-label="Llamar al número {{ supplier.phone }}">
+                                        {{ supplier.phone }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if supplier.active %}
+                                    <span class="badge bg-success" role="status" aria-label="Estado: activo">Activo</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary" role="status" aria-label="Estado: inactivo">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center supplier-actions">
+                                    <button type="button" 
+                                            class="btn btn-outline-primary btn-edit" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editSupplierModal{{ supplier.id }}"
+                                            aria-label="Editar proveedor {{ supplier.name }}"
+                                            title="Editar proveedor {{ supplier.name }}">
+                                        <i class="fas fa-edit" aria-hidden="true"></i>
+                                        <span class="visually-hidden">Editar</span>
+                                    </button>
+                                    <button type="button" 
+                                            class="btn btn-outline-danger btn-delete" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#deleteSupplierModal{{ supplier.id }}"
+                                            aria-label="Eliminar proveedor {{ supplier.name }}"
+                                            title="Eliminar proveedor {{ supplier.name }}">
+                                        <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                                        <span class="visually-hidden">Eliminar</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state" role="status" aria-live="polite">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-boxes" aria-hidden="true"></i>
+                    </div>
+                    <h2 class="h3">No hay proveedores registrados</h2>
+                    <p class="text-muted">Añade tu primer proveedor haciendo clic en el botón "Nuevo Proveedor"</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</main>
+
+<!-- Modal para Añadir Proveedor -->
+{% call accessible_components.modal(
+    id="addSupplierModal",
+    title="Añadir Nuevo Proveedor",
+    close_label="Cerrar modal de añadir proveedor",
+    size="lg",
+    focus="true"
+) %}
+    <form id="addSupplierForm" action="{{ url_for('add_supplier') }}" method="POST" aria-labelledby="addSupplierModalLabel">
+        <div class="modal-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="form-group mb-3 supplier-form-group">
+                        <label for="name" class="form-label required-field">Nombre del Proveedor</label>
+                        <input type="text" class="form-control" id="name" name="name" required
+                               aria-required="true" autocomplete="organization">
+                        <div class="form-text">Nombre comercial o razón social</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3 supplier-form-group">
+                        <label for="contact_name" class="form-label">Nombre de Contacto</label>
+                        <input type="text" class="form-control" id="contact_name" name="contact_name"
+                               autocomplete="name">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3 supplier-form-group">
+                        <label for="email" class="form-label required-field">Correo Electrónico</label>
+                        <input type="email" class="form-control" id="email" name="email" required
+                               aria-required="true" autocomplete="email">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3 supplier-form-group">
+                        <label for="phone" class="form-label">Teléfono</label>
+                        <input type="tel" class="form-control" id="phone" name="phone"
+                               autocomplete="tel" pattern="[0-9\+\-\s\(\)]*">
+                        <div class="form-text" id="phoneHelpText">Formato: +56 9 1234 5678</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3 supplier-form-group">
+                        <label for="address" class="form-label">Dirección</label>
+                        <input type="text" class="form-control" id="address" name="address"
+                               autocomplete="street-address">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3 supplier-form-group">
+                        <label for="active" class="form-label">Estado</label>
+                        <select class="form-select" id="active" name="active" aria-describedby="activeHelpText">
+                            <option value="1" selected>Activo</option>
+                            <option value="0">Inactivo</option>
+                        </select>
+                        <div class="form-text visually-hidden" id="activeHelpText">Selecciona si el proveedor está activo o inactivo</div>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="form-group mb-3 supplier-form-group">
+                        <label for="notes" class="form-label">Notas</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" aria-describedby="notesHelpText"></textarea>
+                        <div class="form-text visually-hidden" id="notesHelpText">Información adicional sobre el proveedor</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Proveedor</button>
+        </div>
+    </form>
+{% endcall %}
+
+<!-- Modales para Editar Proveedores -->
+{% for supplier in suppliers %}
+    {% call accessible_components.modal(
+        id="editSupplierModal" ~ supplier.id,
+        title="Editar Proveedor",
+        close_label="Cerrar modal de editar proveedor",
+        size="lg",
+        focus="true"
+    ) %}
+        <form id="editSupplierForm{{ supplier.id }}" action="{{ url_for('edit_supplier', supplier_id=supplier.id) }}" method="POST" aria-labelledby="editSupplierModal{{ supplier.id }}Label">
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3 supplier-form-group">
+                            <label for="name{{ supplier.id }}" class="form-label required-field">Nombre del Proveedor</label>
+                            <input type="text" class="form-control" id="name{{ supplier.id }}" name="name" 
+                                   value="{{ supplier.name }}" required aria-required="true" autocomplete="organization">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3 supplier-form-group">
+                            <label for="contact_name{{ supplier.id }}" class="form-label">Nombre de Contacto</label>
+                            <input type="text" class="form-control" id="contact_name{{ supplier.id }}" name="contact_name" 
+                                   value="{{ supplier.contact_name }}" autocomplete="name">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3 supplier-form-group">
+                            <label for="email{{ supplier.id }}" class="form-label required-field">Correo Electrónico</label>
+                            <input type="email" class="form-control" id="email{{ supplier.id }}" name="email" 
+                                   value="{{ supplier.email }}" required aria-required="true" autocomplete="email">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3 supplier-form-group">
+                            <label for="phone{{ supplier.id }}" class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="phone{{ supplier.id }}" name="phone" 
+                                   value="{{ supplier.phone }}" autocomplete="tel" pattern="[0-9\+\-\s\(\)]*"
+                                   aria-describedby="phoneHelp{{ supplier.id }}">
+                            <div class="form-text" id="phoneHelp{{ supplier.id }}">Formato: +56 9 1234 5678</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3 supplier-form-group">
+                            <label for="address{{ supplier.id }}" class="form-label">Dirección</label>
+                            <input type="text" class="form-control" id="address{{ supplier.id }}" name="address" 
+                                   value="{{ supplier.address }}" autocomplete="street-address">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3 supplier-form-group">
+                            <label for="active{{ supplier.id }}" class="form-label">Estado</label>
+                            <select class="form-select" id="active{{ supplier.id }}" name="active" 
+                                    aria-describedby="activeHelp{{ supplier.id }}">
+                                <option value="1" {% if supplier.active %}selected{% endif %}>Activo</option>
+                                <option value="0" {% if not supplier.active %}selected{% endif %}>Inactivo</option>
+                            </select>
+                            <div class="form-text visually-hidden" id="activeHelp{{ supplier.id }}">Selecciona si el proveedor está activo o inactivo</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group mb-3 supplier-form-group">
+                            <label for="notes{{ supplier.id }}" class="form-label">Notas</label>
+                            <textarea class="form-control" id="notes{{ supplier.id }}" name="notes" rows="3" 
+                                     aria-describedby="notesHelp{{ supplier.id }}">{{ supplier.notes }}</textarea>
+                            <div class="form-text visually-hidden" id="notesHelp{{ supplier.id }}">Información adicional sobre el proveedor</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Actualizar Proveedor</button>
+            </div>
+        </form>
+    {% endcall %}
+    
+    <!-- Modal para Eliminar Proveedor -->
+    {% call accessible_components.confirm_dialog(
+        id="deleteSupplierModal" ~ supplier.id,
+        title="Confirmar Eliminación",
+        message="¿Estás seguro de que quieres eliminar al proveedor <strong>" ~ supplier.name ~ "</strong>?<br>Esta acción no se puede deshacer.",
+        confirm_text="Eliminar",
+        cancel_text="Cancelar",
+        confirm_class="btn-danger",
+        close_label="Cerrar modal de confirmar eliminación"
+    ) %}
+        <form id="{{ "deleteSupplierModal" ~ supplier.id }}-form" action="{{ url_for('delete_supplier') }}" method="POST">
+            <input type="hidden" name="supplier_id" value="{{ supplier.id }}">
+        </form>
+    {% endcall %}
+{% endfor %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/accessibility-checker.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar DataTable con opciones de accesibilidad
+        if (document.getElementById('suppliersTable')) {
+            var table = new DataTable('#suppliersTable', {
+                responsive: true,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json',
+                },
+                columnDefs: [
+                    { responsivePriority: 1, targets: [1, 6] }, // Nombre y acciones siempre visibles
+                    { responsivePriority: 2, targets: [3, 4] }, // Email y teléfono después
+                    { responsivePriority: 3, targets: [0, 2, 5] } // El resto después
+                ]
+            });
+        }
+        
+        // Focus en el primer campo cuando se abre el modal
+        const addSupplierModal = document.getElementById('addSupplierModal');
+        if (addSupplierModal) {
+            addSupplierModal.addEventListener('shown.bs.modal', function () {
+                document.getElementById('name').focus();
+            });
+        }
+        
+        // Manejar teclas para los botones de acción
+        const actionButtons = document.querySelectorAll('.supplier-actions button');
+        actionButtons.forEach(button => {
+            button.addEventListener('keydown', function(e) {
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+{% endblock %} 

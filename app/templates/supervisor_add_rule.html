@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4 mb-3">Agregar Regla al Supervisor</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Formulario para Agregar Regla</h6>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('add_rule') }}">
+                <!-- Tipo de Regla -->
+                <div class="form-group">
+                    <label for="rule_type">Tipo de Regla</label>
+                    <select class="form-control" id="rule_type" name="rule_type" required>
+                        <option value="">Selecciona un tipo</option>
+                        <option value="safety">Seguridad Alimentaria</option>
+                        <option value="completeness">Completitud</option>
+                        <option value="clarity">Claridad</option>
+                        <option value="feasibility">Factibilidad</option>
+                        <option value="culinary_quality">Calidad Culinaria</option>
+                        <option value="general">General</option>
+                    </select>
+                </div>
+                
+                <!-- Descripción de la Regla -->
+                <div class="form-group">
+                    <label for="rule_description">Descripción de la Regla</label>
+                    <textarea class="form-control" id="rule_description" name="rule_description" 
+                              rows="3" required placeholder="Describe la regla"></textarea>
+                    <small class="form-text text-muted">Descripción clara de la regla que debe seguirse</small>
+                </div>
+                
+                <!-- Ejemplo Positivo -->
+                <div class="form-group">
+                    <label for="positive_example">Ejemplo Positivo</label>
+                    <textarea class="form-control" id="positive_example" name="positive_example" 
+                              rows="3" placeholder="Ejemplo que cumple con la regla"></textarea>
+                    <small class="form-text text-muted">Un ejemplo que cumpla correctamente con esta regla (opcional)</small>
+                </div>
+                
+                <!-- Ejemplo Negativo -->
+                <div class="form-group">
+                    <label for="negative_example">Ejemplo Negativo</label>
+                    <textarea class="form-control" id="negative_example" name="negative_example" 
+                              rows="3" placeholder="Ejemplo que viola la regla"></textarea>
+                    <small class="form-text text-muted">Un ejemplo que viole esta regla (opcional)</small>
+                </div>
+                
+                <!-- Prioridad -->
+                <div class="form-group">
+                    <label for="priority">Prioridad</label>
+                    <select class="form-control" id="priority" name="priority" required>
+                        <option value="low">Baja</option>
+                        <option value="medium" selected>Media</option>
+                        <option value="high">Alta</option>
+                        <option value="critical">Crítica</option>
+                    </select>
+                    <small class="form-text text-muted">Nivel de importancia de esta regla</small>
+                </div>
+                
+                <!-- Categoría de Receta (opcional) -->
+                <div class="form-group">
+                    <label for="recipe_category">Categoría de Receta (opcional)</label>
+                    <input type="text" class="form-control" id="recipe_category" name="recipe_category" 
+                           placeholder="Categoría específica (ej: postres, carnes, etc.)">
+                    <small class="form-text text-muted">Deja en blanco si aplica a todas las categorías</small>
+                </div>
+                
+                <!-- Botones -->
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Agregar Regla</button>
+                    <a href="{{ url_for('supervisor_status') }}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

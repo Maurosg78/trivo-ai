@@ -4,22 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="TRIVO-AI - Plataforma de gestión de recetas y análisis de costos para la industria alimentaria">
-    <title>{% block title %}TRIVO-AI{% endblock %}</title>
+    <title>{% block title %}TRIVO-AI{% endblock %} | Plataforma PLM para Alimentos</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
     <!-- Estilos propios -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Estilos de accesibilidad -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accessibility-preferences.css') }}">
     <!-- Fuentes -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
-    {% block extra_css %}{% endblock %}
+    {% block styles %}{% endblock %}
+    
+    <!-- Incluir recursos de accesibilidad -->
+    {% include 'components/accessibility_resources.html' %}
 </head>
 <body class="transition-fade">
-    <a href="#main-content" class="visually-hidden-focusable skip-link">Saltar al contenido principal</a>
+    {% from "components/skip_link.html" import skip_link %}
+    {{ skip_link("main-content") }}
     
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark" aria-label="Navegación principal">
@@ -73,6 +79,7 @@
                         <li class="nav-item ms-2">
                             <button id="themeToggle" class="theme-toggle-btn" aria-label="Cambiar tema" title="Cambiar entre modo claro y oscuro">
                                 <i class="fas fa-moon" aria-hidden="true"></i>
+                                <span class="visually-hidden">Cambiar tema</span>
                             </button>
                         </li>
                     </ul>
@@ -81,12 +88,13 @@
         </nav>
     </header>
 
-    <main id="main-content" class="container mt-4">
+    <main id="main-content" class="container mt-4" tabindex="-1">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div class="alert-container" role="region" aria-label="Notificaciones">
+                <div class="alert-container" role="region" aria-label="Notificaciones" aria-live="polite">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {% set alert_category = category if category != 'error' else 'danger' %}
+                    <div class="alert alert-{{ alert_category }} alert-dismissible fade show" role="alert">
                         <div class="d-flex">
                             {% if category == 'success' %}
                                 <i class="fas fa-check-circle me-2" aria-hidden="true"></i>
@@ -99,7 +107,7 @@
                             {% endif %}
                             <div>{{ message }}</div>
                         </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar esta notificación">
                         </button>
                     </div>
                 {% endfor %}
@@ -112,9 +120,14 @@
 
     <footer class="footer mt-auto py-3" role="contentinfo">
         <div class="container text-center text-white-50">
-            <p>&copy; 2024 TRIVO-AI | <a href="https://github.com/username/TRIVO-AI" target="_blank" rel="noopener" class="text-decoration-none text-white-50" aria-label="Repositorio de TRIVO-AI en GitHub (abre en nueva ventana)">
-                <i class="bi bi-github" aria-hidden="true"></i> GitHub
-            </a></p>
+            <p>&copy; 2024 TRIVO-AI | 
+                <a href="{{ url_for('accessibility_guide') }}" class="text-decoration-none text-white-50" aria-label="Guía de accesibilidad">
+                    <i class="fas fa-universal-access me-1" aria-hidden="true"></i> Accesibilidad
+                </a> | 
+                <a href="https://github.com/username/TRIVO-AI" target="_blank" rel="noopener" class="text-decoration-none text-white-50" aria-label="Repositorio de TRIVO-AI en GitHub (abre en nueva ventana)">
+                    <i class="bi bi-github" aria-hidden="true"></i> GitHub
+                </a>
+            </p>
         </div>
     </footer>
 
@@ -125,7 +138,6 @@
     <!-- DataTables -->
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-    <!-- Scripts propios -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Verificar tema guardado en localStorage
@@ -139,35 +151,64 @@
                 themeIcon.classList.remove('fa-moon');
                 themeIcon.classList.add('fa-sun');
                 themeToggle.setAttribute('title', 'Cambiar a modo claro');
+                themeToggle.querySelector('.visually-hidden').textContent = 'Cambiar a modo claro';
             } else {
                 themeToggle.setAttribute('title', 'Cambiar a modo oscuro');
+                themeToggle.querySelector('.visually-hidden').textContent = 'Cambiar a modo oscuro';
             }
             
             // Cambiar tema al hacer clic en el botón
             themeToggle.addEventListener('click', function() {
                 document.body.classList.toggle('dark-mode');
                 
-                // Cambiar el icono
+                // Cambiar el icono y el texto accesible
                 if (document.body.classList.contains('dark-mode')) {
                     themeIcon.classList.remove('fa-moon');
                     themeIcon.classList.add('fa-sun');
                     localStorage.setItem('theme', 'dark');
                     themeToggle.setAttribute('title', 'Cambiar a modo claro');
+                    themeToggle.querySelector('.visually-hidden').textContent = 'Cambiar a modo claro';
                 } else {
                     themeIcon.classList.remove('fa-sun');
                     themeIcon.classList.add('fa-moon');
                     localStorage.setItem('theme', 'light');
                     themeToggle.setAttribute('title', 'Cambiar a modo oscuro');
+                    themeToggle.querySelector('.visually-hidden').textContent = 'Cambiar a modo oscuro';
                 }
             });
             
-            // Manejo automático de alertas
+            // Manejo automático de alertas con anuncio para lectores de pantalla
             const alerts = document.querySelectorAll('.alert-dismissible');
             alerts.forEach(alert => {
                 setTimeout(() => {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
+                    // Anunciar que la alerta se cerrará automáticamente
+                    const message = alert.querySelector('.d-flex div').textContent;
+                    const liveRegion = document.createElement('div');
+                    liveRegion.setAttribute('aria-live', 'assertive');
+                    liveRegion.className = 'visually-hidden';
+                    liveRegion.textContent = 'Cerrando notificación: ' + message;
+                    document.body.appendChild(liveRegion);
+                    
+                    setTimeout(() => {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                        // Eliminar la región live después de la notificación
+                        document.body.removeChild(liveRegion);
+                    }, 500);
                 }, 8000); // Cerrar después de 8 segundos
+            });
+            
+            // Añadir soporte para navegación por teclado para elementos interactivos
+            const interactiveElements = document.querySelectorAll('button, a, [role="button"], input, select, textarea');
+            interactiveElements.forEach(element => {
+                element.addEventListener('keydown', function(e) {
+                    // Para botones y elementos de rol botón, permitir espacio como clic
+                    if ((e.key === ' ' || e.key === 'Spacebar') && 
+                        (this.tagName === 'BUTTON' || this.getAttribute('role') === 'button')) {
+                        e.preventDefault();
+                        this.click();
+                    }
+                });
             });
         });
     </script>

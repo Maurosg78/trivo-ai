@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4 mb-3">Proporcionar Retroalimentación al Supervisor</h1>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Formulario de Retroalimentación</h6>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('submit_feedback') }}">
+                <!-- ID de Receta -->
+                <div class="form-group">
+                    <label for="recipe_id">ID de Receta</label>
+                    <input type="text" class="form-control" id="recipe_id" name="recipe_id" 
+                           placeholder="Ingresa el ID de la receta" required>
+                    <small class="form-text text-muted">ID único de la receta con problemas</small>
+                </div>
+                
+                <!-- Tipo de Problema -->
+                <div class="form-group">
+                    <label for="feedback_type">Tipo de Problema</label>
+                    <select class="form-control" id="feedback_type" name="feedback_type" required>
+                        <option value="">Selecciona una categoría</option>
+                        <option value="safety">Seguridad Alimentaria</option>
+                        <option value="completeness">Completitud</option>
+                        <option value="clarity">Claridad</option>
+                        <option value="feasibility">Factibilidad</option>
+                        <option value="culinary_quality">Calidad Culinaria</option>
+                        <option value="other">Otro</option>
+                    </select>
+                </div>
+                
+                <!-- Descripción del Problema -->
+                <div class="form-group">
+                    <label for="issue_description">Descripción del Problema</label>
+                    <textarea class="form-control" id="issue_description" name="issue_description" 
+                              rows="3" required placeholder="Describe el problema encontrado"></textarea>
+                    <small class="form-text text-muted">Describe el problema específico con la receta</small>
+                </div>
+                
+                <!-- Acción Correctiva -->
+                <div class="form-group">
+                    <label for="correct_action">Acción Correctiva</label>
+                    <textarea class="form-control" id="correct_action" name="correct_action" 
+                              rows="3" required placeholder="Describe cómo debería corregirse"></textarea>
+                    <small class="form-text text-muted">¿Qué acción debería tomar el supervisor en casos similares?</small>
+                </div>
+                
+                <!-- Es Crítico -->
+                <div class="form-group form-check">
+                    <input type="checkbox" class="form-check-input" id="is_critical" name="is_critical" value="1">
+                    <label class="form-check-label" for="is_critical">Este es un problema crítico (afecta la seguridad o debe bloquear la publicación)</label>
+                </div>
+                
+                <!-- Botones -->
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Enviar Retroalimentación</button>
+                    <a href="{{ url_for('supervisor_status') }}" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,454 @@
+{% extends "base.html" %}
+
+{% block title %}Ficha Técnica - {{ recipe.recipe_info.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="/recipe-sheets">Fichas Técnicas</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ recipe.recipe_info.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">{{ recipe.recipe_info.name }}</h1>
+        <div>
+            <a href="/recipe-sheets/{{ recipe.id }}/pdf" class="btn btn-outline-primary" target="_blank">
+                <i class="fas fa-file-pdf"></i> Exportar PDF
+            </a>
+            <a href="/recipe-sheets/{{ recipe.id }}/edit" class="btn btn-outline-secondary ms-2">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            <button type="button" class="btn btn-outline-success ms-2" data-bs-toggle="modal" data-bs-target="#scaleModal">
+                <i class="fas fa-balance-scale"></i> Escalar Receta
+            </button>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            Información General
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <p class="lead">{{ recipe.recipe_info.description }}</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Categoría:</strong> {{ recipe.recipe_info.category }}</p>
+                            <p><strong>Dificultad:</strong> {{ recipe.recipe_info.difficulty }}</p>
+                            <p><strong>Mercado objetivo:</strong> {{ recipe.recipe_info.target_market }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Rendimiento:</strong> {{ recipe.recipe_info.yield.amount }} {{ recipe.recipe_info.yield.unit }}</p>
+                            <p><strong>Tiempo total:</strong> {{ recipe.process.total_production_time }} minutos</p>
+                            <p><strong>Versión:</strong> {{ recipe.version }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-header">Vida útil</div>
+                        <div class="card-body">
+                            <p><strong>Ambiente:</strong> {{ recipe.recipe_info.shelf_life.ambient }}</p>
+                            <p><strong>Refrigerado:</strong> {{ recipe.recipe_info.shelf_life.refrigerated }}</p>
+                            <p><strong>Congelado:</strong> {{ recipe.recipe_info.shelf_life.frozen }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-muted">
+            <small>Creado: {{ recipe.created_at|date }} | Actualizado: {{ recipe.updated_at|date }} | ID: {{ recipe.id }}</small>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    Ingredientes
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Ingrediente</th>
+                                    <th>Cantidad</th>
+                                    <th>Unidad</th>
+                                    <th>%</th>
+                                    <th>Función</th>
+                                    <th>Crítico</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ingredient in recipe.ingredients %}
+                                <tr {% if ingredient.critical %}class="table-warning"{% endif %}>
+                                    <td>{{ ingredient.order }}</td>
+                                    <td>{{ ingredient.name }}</td>
+                                    <td>{{ ingredient.amount }}</td>
+                                    <td>{{ ingredient.unit }}</td>
+                                    <td>{{ ingredient.percentage }}%</td>
+                                    <td>{{ ingredient.function }}</td>
+                                    <td>
+                                        {% if ingredient.critical %}
+                                        <span class="badge bg-warning">Sí</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">No</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    Alérgenos
+                </div>
+                <div class="card-body">
+                    <div class="row row-cols-2">
+                        {% for allergen, present in recipe.allergens.items() %}
+                        <div class="col mb-2">
+                            <div class="p-2 border rounded {% if present %}bg-warning{% endif %}">
+                                {{ allergen }}
+                                {% if present %}
+                                <span class="badge bg-danger ms-1">CONTIENE</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            Proceso de Elaboración
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-2">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Preparación</h5>
+                            <p class="display-6">{{ recipe.process.preparation_time }}</p>
+                            <p class="text-muted">minutos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Mezcla</h5>
+                            <p class="display-6">{{ recipe.process.mixing_time }}</p>
+                            <p class="text-muted">minutos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Fermentación</h5>
+                            <p class="display-6">{{ recipe.process.fermentation_time }}</p>
+                            <p class="text-muted">minutos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Horneado</h5>
+                            <p class="display-6">{{ recipe.process.baking_time }}</p>
+                            <p class="text-muted">minutos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Enfriamiento</h5>
+                            <p class="display-6">{{ recipe.process.cooling_time }}</p>
+                            <p class="text-muted">minutos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center h-100 bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">TOTAL</h5>
+                            <p class="display-6">{{ recipe.process.total_production_time }}</p>
+                            <p class="text-muted">minutos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="card-title mt-4">Pasos del Proceso</h5>
+            <div class="timeline">
+                {% for step in recipe.process.steps %}
+                <div class="timeline-item">
+                    <div class="timeline-badge {% if step.critical %}bg-warning{% else %}bg-primary{% endif %}">
+                        {{ step.order }}
+                    </div>
+                    <div class="timeline-panel card">
+                        <div class="card-header d-flex justify-content-between">
+                            <h5>{{ step.name }}</h5>
+                            <div>
+                                <span class="badge bg-info">{{ step.time }} min</span>
+                                <span class="badge bg-secondary ms-1">{{ step.temperature }}</span>
+                                {% if step.critical %}
+                                <span class="badge bg-warning ms-1">Crítico</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p>{{ step.description }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if recipe.process.critical_control_points %}
+            <div class="alert alert-warning mt-4">
+                <h5>Puntos Críticos de Control</h5>
+                <ul class="mb-0">
+                    {% for point in recipe.process.critical_control_points %}
+                    <li>{{ point }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    Parámetros de Calidad
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Apariencia:</strong> {{ recipe.quality_parameters.appearance }}</p>
+                            <p><strong>Textura:</strong> {{ recipe.quality_parameters.texture }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Sabor:</strong> {{ recipe.quality_parameters.taste }}</p>
+                            <p><strong>Aroma:</strong> {{ recipe.quality_parameters.aroma }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if recipe.quality_parameters.ph or recipe.quality_parameters.moisture %}
+                    <hr>
+                    <div class="row">
+                        {% if recipe.quality_parameters.ph %}
+                        <div class="col-md-6">
+                            <p><strong>pH:</strong> {{ recipe.quality_parameters.ph }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if recipe.quality_parameters.moisture %}
+                        <div class="col-md-6">
+                            <p><strong>Humedad:</strong> {{ recipe.quality_parameters.moisture }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    Almacenamiento
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Temperatura:</strong> {{ recipe.storage.temperature }}</p>
+                            <p><strong>Humedad:</strong> {{ recipe.storage.humidity }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Luz:</strong> {{ recipe.storage.light }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if recipe.storage.special_instructions %}
+                    <div class="alert alert-danger mt-3">
+                        <strong>Instrucciones especiales:</strong> {{ recipe.storage.special_instructions }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    Información Nutricional (por 100g)
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <th>Calorías</th>
+                                <td>{{ recipe.nutrition.per_100g.calories }} kcal</td>
+                            </tr>
+                            <tr>
+                                <th>Proteínas</th>
+                                <td>{{ recipe.nutrition.per_100g.protein }} g</td>
+                            </tr>
+                            <tr>
+                                <th>Carbohidratos</th>
+                                <td>{{ recipe.nutrition.per_100g.carbohydrates }} g</td>
+                            </tr>
+                            <tr>
+                                <th>- Azúcares</th>
+                                <td>{{ recipe.nutrition.per_100g.sugars }} g</td>
+                            </tr>
+                            <tr>
+                                <th>Grasas</th>
+                                <td>{{ recipe.nutrition.per_100g.fat }} g</td>
+                            </tr>
+                            <tr>
+                                <th>- Saturadas</th>
+                                <td>{{ recipe.nutrition.per_100g.saturated_fat }} g</td>
+                            </tr>
+                            <tr>
+                                <th>Fibra</th>
+                                <td>{{ recipe.nutrition.per_100g.fiber }} g</td>
+                            </tr>
+                            <tr>
+                                <th>Sodio</th>
+                                <td>{{ recipe.nutrition.per_100g.sodium }} mg</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    Empaque y Equipamiento
+                </div>
+                <div class="card-body">
+                    <h5>Empaque</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Primario:</strong> {{ recipe.packaging.primary }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Secundario:</strong> {{ recipe.packaging.secondary }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if recipe.packaging.tertiary %}
+                    <p><strong>Terciario:</strong> {{ recipe.packaging.tertiary }}</p>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <h5>Equipamiento Requerido</h5>
+                    <ul class="list-group">
+                        {% for equipment in recipe.equipment %}
+                        <li class="list-group-item">{{ equipment }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para escalar receta -->
+    <div class="modal fade" id="scaleModal" tabindex="-1" aria-labelledby="scaleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="scaleModalLabel">Escalar Receta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/recipe-sheets/{{ recipe.id }}/scale" method="post">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="batch_size" class="form-label">Tamaño del lote</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="batch_size" name="batch_size" min="0.1" step="0.1" required>
+                                <span class="input-group-text">{{ recipe.recipe_info.yield.unit }}</span>
+                            </div>
+                            <div class="form-text">
+                                Rendimiento actual: {{ recipe.recipe_info.yield.amount }} {{ recipe.recipe_info.yield.unit }}
+                            </div>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="generate_pdf" name="generate_pdf" value="1">
+                            <label class="form-check-label" for="generate_pdf">
+                                Generar PDF de producción
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Generar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos específicos para la línea de tiempo -->
+<style>
+.timeline {
+    position: relative;
+    padding: 20px 0;
+}
+.timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 20px;
+    width: 4px;
+    background: #ddd;
+}
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+.timeline-badge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 40px;
+    color: white;
+    font-weight: bold;
+    z-index: 1;
+}
+.timeline-panel {
+    margin-left: 60px;
+}
+</style>
+{% endblock %} 

@@ -1,670 +1,857 @@
-"""
-Aplicación web para TRIVO-AI con arquitectura modular para servicios por suscripción.
-"""
-
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
 import os
-import json
 import sys
-import logging
-import traceback
-from datetime import datetime
-import random
+import json
 import uuid
+import secrets
+import logging
+from datetime import datetime
 from functools import wraps
+import random
+import time
 
-# Agregar el directorio raíz al path para importaciones
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Flask y otros imports importantes
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash, send_file
+from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
 
-# Importar componentes del sistema
-try:
-    from trivo.features.optimizer.optimizer import RecipeOptimizer
-    from trivo.features.validator.validator import RecipeValidator
-    from trivo.features.nlp.language_processor import LanguageProcessor
-    language_processor_available = True
-except ImportError:
-    language_processor_available = False
-    print("Advertencia: Módulo de procesamiento de lenguaje natural no disponible.")
+# Cargar variables de entorno
+load_dotenv()
 
+# Configuración básica
+DEBUG = True
+PORT = int(os.getenv("PORT", "8081"))
+# Clave para acceso a la demo (para uso interno o presentaciones)
+DEMO_ACCESS_KEY = os.getenv('DEMO_ACCESS_KEY', 'trivo-demo-access')
+
+# Inicializar la aplicación
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', secrets.token_hex(16))
+
+# Configuración de directorios de datos
+app.config['DATA_FOLDER'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
+app.config['UPLOAD_FOLDER'] = os.path.join(app.config['DATA_FOLDER'], 'uploads')
+
+# Crear directorios si no existen
+os.makedirs(app.config['DATA_FOLDER'], exist_ok=True)
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Configuración de logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler()]
+    handlers=[
+        logging.StreamHandler(),
+    ]
 )
 logger = logging.getLogger('trivo-ai')
 
-# Constantes
-MOCK_MODE = True  # Activa el modo de simulación cuando el procesador real no está disponible
-DARK_MODE_DEFAULT = True  # Activa el modo oscuro por defecto
+# Funciones de utilidad
+def get_current_user():
+    # En una aplicación real, esto verificaría la sesión
+    if 'user_id' in session:
+        user_id = session['user_id']
+        # Buscar usuario en la base de datos
+        return {"id": user_id, "name": f"Usuario {user_id}", "role": "admin"}
+    return None
 
-# Configuración de módulos y planes
-MODULOS = {
-    "formulacion": {
-        "nombre": "Formulación Básica",
-        "descripcion": "Creación básica de recetas de masa",
-        "icono": "bi-file-earmark-text"
-    },
-    "optimizacion": {
-        "nombre": "Optimización",
-        "descripcion": "Optimiza recetas existentes",
-        "icono": "bi-gear"
-    },
-    "validacion": {
-        "nombre": "Validación",
-        "descripcion": "Valida recetas para producción",
-        "icono": "bi-check-circle"
-    },
-    "lenguaje_natural": {
-        "nombre": "Lenguaje Natural",
-        "descripcion": "Crea recetas a partir de descripciones en lenguaje natural",
-        "icono": "bi-chat-text"
-    },
-    "ciclo_vida": {
-        "nombre": "Ciclo de Vida",
-        "descripcion": "Gestión completa del ciclo de vida del producto",
-        "icono": "bi-arrow-repeat"
-    }
-}
+def is_demo_access_allowed():
+    """Verifica si se tiene acceso a la demo"""
+    return 'demo_access' in session and session['demo_access'] == True
 
-PLANES = {
-    "basico": {
-        "nombre": "Básico",
-        "modulos": ["formulacion"],
-        "intentos": 5,
-        "precio": 29.99
-    },
-    "profesional": {
-        "nombre": "Profesional",
-        "modulos": ["formulacion", "optimizacion", "validacion"],
-        "intentos": 20,
-        "precio": 99.99
-    },
-    "enterprise": {
-        "nombre": "Enterprise",
-        "modulos": ["formulacion", "optimizacion", "validacion", "lenguaje_natural", "ciclo_vida"],
-        "intentos": -1,  # ilimitado
-        "precio": 249.99
-    },
-    "demo": {
-        "nombre": "Demo",
-        "modulos": ["formulacion", "optimizacion", "validacion", "lenguaje_natural"],
-        "intentos": 3,
-        "precio": 0
-    }
-}
+def demo_required(f):
+    """Decorador para rutas que requieren acceso de demo."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not is_demo_access_allowed():
+            flash('Esta funcionalidad solo está disponible para usuarios autorizados.', 'warning')
+            return redirect(url_for('demo_login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
-# Simular base de datos de usuarios (en producción, usar una base de datos real)
-USUARIOS = {
-    "demo": {
-        "id": "usr_demo123",
-        "nombre": "Usuario Demo",
-        "email": "demo@trivo.ai",
-        "plan": "demo",
-        "intentos_restantes": 3,
-        "fecha_registro": datetime.now().isoformat()
-    },
-    "premium": {
-        "id": "usr_premium456",
-        "nombre": "Usuario Premium",
-        "email": "premium@trivo.ai",
-        "plan": "enterprise",
-        "intentos_restantes": -1,
-        "fecha_registro": datetime.now().isoformat()
-    }
-}
-
-# Middleware para verificar acceso a módulos
-def requiere_modulo(nombre_modulo):
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            # Obtener usuario actual (en producción, usar sistema de autenticación real)
-            usuario_id = session.get('usuario_id', 'demo')
-            usuario = USUARIOS.get(usuario_id)
-            
-            if not usuario:
-                flash('Sesión inválida. Por favor inicia sesión nuevamente.', 'danger')
-                return redirect(url_for('home'))
-                
-            plan = PLANES.get(usuario.get('plan'))
-            
-            if not plan:
-                flash('Plan no válido. Contacta a soporte.', 'danger')
-                return redirect(url_for('home'))
-                
-            if nombre_modulo not in plan.get('modulos', []):
-                flash(f'Tu plan actual no incluye acceso al módulo "{MODULOS.get(nombre_modulo, {}).get("nombre")}"', 'warning')
-                return redirect(url_for('planes'))
-                
-            # Verificar intentos disponibles (excepto si son ilimitados)
-            if plan.get('intentos') != -1 and usuario.get('intentos_restantes', 0) <= 0:
-                flash('Has agotado tus intentos disponibles. Actualiza tu plan para continuar.', 'warning')
-                return redirect(url_for('planes'))
-                
-            # Reducir contador de intentos si no es ilimitado
-            if plan.get('intentos') != -1:
-                USUARIOS[usuario_id]['intentos_restantes'] -= 1
-                
-            return f(*args, **kwargs)
-        return decorated_function
-    return decorator
-
-# Iniciar sesión de usuario (simplificado)
-@app.route('/login/<usuario_id>')
-def login(usuario_id):
-    if usuario_id in USUARIOS:
-        session['usuario_id'] = usuario_id
-        flash(f'Has iniciado sesión como {USUARIOS[usuario_id]["nombre"]}', 'success')
+# Procesador de lenguaje natural simulado
+def mock_language_processing(user_text):
+    """
+    Simula el procesamiento de lenguaje natural para generar una receta.
+    En una versión real, esto llamaría a un modelo de IA.
+    """
+    # Simulamos un tiempo de procesamiento
+    time.sleep(1)
+    
+    # Generamos una receta básica con campos aleatorios
+    pizza_types = ["Margarita", "Pepperoni", "Hawaiana", "Vegetariana", "Cuatro Quesos", "Mexicana"]
+    dificultad_levels = ["Fácil", "Media", "Difícil"]
+    
+    # Detectamos características especiales en el texto
+    is_gluten_free = "sin gluten" in user_text.lower() or "gluten free" in user_text.lower()
+    is_halloween = "halloween" in user_text.lower() or "calabaza" in user_text.lower()
+    is_orange = "naranja" in user_text.lower() or "orange" in user_text.lower()
+    is_family_size = "familiar" in user_text.lower() or "family" in user_text.lower() or "grande" in user_text.lower()
+    
+    # Extraemos algunas palabras clave del texto del usuario
+    keywords = [word for word in user_text.lower().split() 
+                if len(word) > 3 and word not in ["para", "como", "quiero", "hacer", "pizza", "gluten", "naranja", "halloween"]]
+    
+    nombre = f"Pizza {random.choice(pizza_types)}"
+    # Modificamos el nombre según las características
+    if is_gluten_free:
+        nombre = "Pizza Sin Gluten"
+    if is_halloween:
+        nombre += " de Halloween"
+    if keywords:
+        nombre += f" con {random.choice(keywords).capitalize()}"
+    
+    # Generamos ingredientes basados en el tipo de pizza
+    ingredientes = []
+    
+    # Base de la masa según si es sin gluten o no
+    if is_gluten_free:
+        ingredientes.append({"name": "Mezcla de harinas sin gluten", "amount": "300", "unit": "g"})
+        ingredientes.append({"name": "Goma xantana", "amount": "5", "unit": "g"})
     else:
-        flash('Usuario no encontrado', 'danger')
-    return redirect(url_for('home'))
+        ingredientes.append({"name": "Masa de pizza", "amount": "250", "unit": "g"})
+    
+    # Ingredientes comunes
+    ingredientes.append({"name": "Salsa de tomate", "amount": "100", "unit": "ml"})
+    ingredientes.append({"name": "Queso mozzarella", "amount": "200", "unit": "g"})
+    
+    # Añadimos ingredientes especiales para Halloween/naranja
+    if is_halloween or is_orange:
+        ingredientes.append({"name": "Calabaza asada", "amount": "150", "unit": "g"})
+        ingredientes.append({"name": "Zanahoria rallada", "amount": "50", "unit": "g"})
+        ingredientes.append({"name": "Colorante alimentario naranja", "amount": "1", "unit": "cucharadita"})
+    
+    # Añadimos ingredientes basados en el texto del usuario
+    if "vegetariana" in user_text.lower():
+        ingredientes.extend([
+            {"name": "Pimiento", "amount": "50", "unit": "g"},
+            {"name": "Cebolla", "amount": "50", "unit": "g"},
+            {"name": "Champiñones", "amount": "100", "unit": "g"}
+        ])
+    elif "pepperoni" in user_text.lower():
+        ingredientes.append({"name": "Pepperoni", "amount": "100", "unit": "g"})
+    elif "hawaiana" in user_text.lower():
+        ingredientes.extend([
+            {"name": "Jamón", "amount": "100", "unit": "g"},
+            {"name": "Piña", "amount": "80", "unit": "g"}
+        ])
+    
+    # Generamos método de preparación específico
+    metodo = []
+    
+    if is_gluten_free:
+        metodo.extend([
+            "Precalienta el horno a 200°C.",
+            "Mezcla las harinas sin gluten con la goma xantana, sal y levadura.",
+            "Añade agua tibia y aceite de oliva y amasa hasta obtener una masa homogénea.",
+            "Deja reposar la masa en un lugar cálido por 30 minutos."
+        ])
+    else:
+        metodo.append("Precalienta el horno a 220°C.")
+        
+    metodo.extend([
+        "Estira la masa hasta formar un círculo uniforme.",
+        "Extiende la salsa de tomate sobre la masa.",
+        "Añade el queso mozzarella rallado de manera uniforme."
+    ])
+    
+    if is_halloween or is_orange:
+        metodo.append("Distribuye la calabaza asada y zanahoria rallada por encima.")
+        metodo.append("Si deseas un color más intenso, mezcla unas gotas de colorante naranja con aceite de oliva y pincela los bordes.")
+    else:
+        metodo.append("Distribuye los ingredientes adicionales por encima.")
+    
+    metodo.extend([
+        f"Hornea durante {12 if is_gluten_free else 15}-{15 if is_gluten_free else 18} minutos hasta que la masa esté dorada y el queso burbujeante.",
+        "Retira del horno y deja reposar 2 minutos antes de cortar."
+    ])
+    
+    if is_halloween:
+        metodo.append("Decora con aceitunas negras formando arañas o corta queso en forma de fantasmas para una presentación temática.")
+    
+    # Generamos explicaciones personalizadas
+    explanations = []
+    
+    if is_gluten_free:
+        explanations.append("Se utilizó una mezcla de harinas sin gluten con goma xantana para lograr una textura similar a la masa tradicional.")
+    
+    if is_halloween or is_orange:
+        explanations.append("Se incorporaron ingredientes de color naranja y decoraciones temáticas para adaptarse a la celebración de Halloween.")
+    
+    if is_family_size:
+        explanations.append("Las proporciones se ajustaron para una pizza de tamaño familiar que rinde más porciones.")
+    
+    # Añadimos explicaciones estándar
+    explanations.append("La selección de ingredientes se basó en tu solicitud específica.")
+    explanations.append("El equilibrio entre los ingredientes se optimizó para el mejor sabor.")
+    explanations.append("La temperatura y tiempo de cocción se ajustaron para este tipo específico de pizza.")
+    
+    # Generamos un tip profesional contextualizado
+    tips = []
+    
+    if is_gluten_free:
+        tips.extend([
+            "Para una masa sin gluten más ligera, deja reposar la masa al menos 1 hora antes de hornearla.",
+            "Asegúrate de que todos los ingredientes, no solo la masa, sean certificados sin gluten para evitar contaminación cruzada."
+        ])
+    
+    if is_halloween or is_orange:
+        tips.extend([
+            "Puedes añadir calabaza asada previamente con un poco de canela para darle un sabor dulce y especiado.",
+            "Las semillas de calabaza tostadas añaden un toque crujiente a la pizza."
+        ])
+    
+    if is_family_size:
+        tips.append("Para pizzas grandes, hornea la masa 3-4 minutos antes de añadir los ingredientes para evitar que quede cruda en el centro.")
+    
+    # Tips generales
+    tips.extend([
+        "Para una masa más crujiente, precalienta también la bandeja de horno.",
+        "Utiliza mozzarella fresca para un sabor más auténtico.",
+        "El secreto de una buena pizza está en la calidad de la salsa de tomate.",
+        "Añade un chorrito de aceite de oliva antes de hornear para mayor sabor."
+    ])
+    
+    # Ajustamos las porciones para pizza familiar
+    porciones = 8 if is_family_size else random.randint(2, 4)
+    
+    recipe = {
+        "id": str(random.randint(1000, 9999)),
+        "nombre": nombre,
+        "descripcion": f"Una deliciosa {nombre.lower()} preparada especialmente según tu solicitud.",
+        "ingredientes": ingredientes,
+        "metodo": metodo,
+        "tiempo_preparacion": random.randint(20, 30) if is_gluten_free else random.randint(10, 20),
+        "tiempo_coccion": random.randint(12, 15),
+        "porciones": porciones,
+        "dificultad": "Difícil" if is_gluten_free else random.choice(dificultad_levels),
+        "tags": ["Pizza", "Horno"] + 
+               (["Sin Gluten"] if is_gluten_free else []) + 
+               (["Halloween", "Temática"] if is_halloween else []) + 
+               (["Familiar", "Grande"] if is_family_size else []) +
+               [keyword.capitalize() for keyword in keywords[:2]],
+        "notas": "Esta receta puede personalizarse según tus preferencias añadiendo o quitando ingredientes."
+    }
+    
+    # Guardamos temporalmente la receta generada (en una aplicación real usaríamos una base de datos)
+    recipe_filename = f"app/static/data/recipe_{recipe['id']}.json"
+    os.makedirs(os.path.dirname(recipe_filename), exist_ok=True)
+    
+    with open(recipe_filename, 'w') as f:
+        json.dump({
+            "recipe": recipe,
+            "input_text": user_text,
+            "explanations": explanations,
+            "key_tip": random.choice(tips),
+            "created_at": datetime.now().isoformat()
+        }, f)
+    
+    return recipe
 
-@app.route('/logout')
-def logout():
-    session.pop('usuario_id', None)
-    flash('Has cerrado sesión', 'success')
-    return redirect(url_for('home'))
+# Rutas simplificadas para que la aplicación arranque
 
 @app.route('/')
-def home():
-    """Página de inicio."""
-    # Aplicar modo oscuro por defecto si no está definido
-    if 'dark_mode' not in session:
-        session['dark_mode'] = DARK_MODE_DEFAULT
+def index():
+    """Página principal"""
+    return render_template('index.html')
+
+@app.route('/demo')
+def demo_home():
+    """Página principal de demostración"""
+    if is_demo_access_allowed():
+        return render_template('demo_home.html')
+    return redirect(url_for('demo_login'))
+
+@app.route('/demo-login', methods=['GET', 'POST'])
+def demo_login():
+    """Página de acceso a la demo"""
+    if request.method == 'POST':
+        access_key = request.form.get('access_key', '')
         
-    dark_mode = session.get('dark_mode', DARK_MODE_DEFAULT)
-    # Obtener información del usuario actual
-    usuario_id = session.get('usuario_id', 'demo')
-    usuario = USUARIOS.get(usuario_id)
-    plan = PLANES.get(usuario.get('plan')) if usuario else None
+        if access_key == DEMO_ACCESS_KEY:
+            session['demo_access'] = True
+            flash('¡Bienvenido al modo demostración!', 'success')
+            return redirect(url_for('demo_home'))
+        else:
+            flash('Clave de acceso incorrecta', 'error')
     
-    return render_template('index.html', 
-                          dark_mode=dark_mode, 
-                          usuario=usuario, 
-                          plan=plan, 
-                          modulos=MODULOS, 
-                          modulos_disponibles=plan.get('modulos') if plan else [])
+    return render_template('demo_login.html')
 
-@app.route('/planes')
-def planes():
-    """Página de planes de suscripción."""
-    dark_mode = session.get('dark_mode', DARK_MODE_DEFAULT)
-    usuario_id = session.get('usuario_id', 'demo')
-    usuario = USUARIOS.get(usuario_id)
-    plan_actual = usuario.get('plan') if usuario else None
-    
-    return render_template('planes.html', 
-                          dark_mode=dark_mode, 
-                          planes=PLANES, 
-                          modulos=MODULOS, 
-                          plan_actual=plan_actual)
+@app.route('/demo-logout')
+def demo_logout():
+    """Cerrar sesión de demo"""
+    session.pop('demo_access', None)
+    flash('Has salido del modo demostración', 'info')
+    return redirect(url_for('index'))
 
-@app.route('/optimize', methods=['GET', 'POST'])
-@requiere_modulo('formulacion')
-def optimize():
-    """Página de optimización de recetas."""
-    dark_mode = session.get('dark_mode', DARK_MODE_DEFAULT)
-    
-    # Obtener información del usuario actual
-    usuario_id = session.get('usuario_id', 'demo')
-    usuario = USUARIOS.get(usuario_id)
-    plan = PLANES.get(usuario.get('plan')) if usuario else None
-    
-    # Verificar si tiene acceso al módulo de optimización
-    tiene_optimizacion = 'optimizacion' in plan.get('modulos', []) if plan else False
-    
-    if request.method == 'POST':
-        try:
-            # Procesar formulario
-            ingredients = request.form.getlist('ingredient[]')
-            quantities = request.form.getlist('quantity[]')
-            
-            # Crear diccionario de ingredientes
-            recipe_ingredients = {}
-            for i, ingredient in enumerate(ingredients):
-                if ingredient and quantities[i]:
-                    recipe_ingredients[ingredient] = float(quantities[i])
-            
-            # Si tiene acceso a optimización, optimizar receta
-            optimized_recipe = None
-            validation_result = None
-            
-            if tiene_optimizacion:
-                # Configurar optimizador
-                optimizer = RecipeOptimizer(
-                    ingredients=recipe_ingredients,
-                    constraints={
-                        "max_cost": float(request.form.get('max_cost', 10)),
-                        "min_quality": float(request.form.get('min_quality', 70))
-                    }
-                )
-                
-                # Optimizar receta
-                optimized_recipe = optimizer.optimize()
-                
-                # Validar receta optimizada si tiene acceso a validación
-                if 'validacion' in plan.get('modulos', []):
-                    validator = RecipeValidator(production_scale=request.form.get('scale', 'small_business'))
-                    validation_result = validator.validate(optimized_recipe)
-            
-            # Generar ID único para la receta
-            recipe_id = str(uuid.uuid4())
-            
-            # En producción, guardar en base de datos
-            
-            # Renderizar plantilla con resultados
-            return render_template(
-                'optimize.html',
-                original_recipe=recipe_ingredients,
-                optimized_recipe=optimized_recipe,
-                validation_result=validation_result,
-                dark_mode=dark_mode,
-                usuario=usuario,
-                plan=plan,
-                tiene_optimizacion=tiene_optimizacion,
-                recipe_id=recipe_id
-            )
-            
-        except Exception as e:
-            logger.error(f"Error en optimización: {str(e)}")
-            flash(f"Error en la optimización: {str(e)}", "danger")
-            return render_template('optimize.html', 
-                                 dark_mode=dark_mode, 
-                                 usuario=usuario, 
-                                 plan=plan, 
-                                 tiene_optimizacion=tiene_optimizacion)
-    
-    return render_template('optimize.html', 
-                         dark_mode=dark_mode, 
-                         usuario=usuario, 
-                         plan=plan, 
-                         tiene_optimizacion=tiene_optimizacion)
+@app.route('/test-form')
+def test_form():
+    """Formulario de prueba para natural language"""
+    return render_template('test_form.html')
 
-@app.route('/validate', methods=['GET', 'POST'])
-@requiere_modulo('validacion')
-def validate():
-    """Página de validación de recetas."""
-    dark_mode = session.get('dark_mode', DARK_MODE_DEFAULT)
-    
-    # Obtener información del usuario
-    usuario_id = session.get('usuario_id', 'demo')
-    usuario = USUARIOS.get(usuario_id)
-    
-    if request.method == 'POST':
-        try:
-            # Manejar carga de archivo
-            if 'recipe_file' in request.files:
-                file = request.files['recipe_file']
-                if file.filename.endswith('.json'):
-                    recipe = json.load(file)
-                    
-                    # Validar receta
-                    validator = RecipeValidator(production_scale=request.form.get('scale', 'small_business'))
-                    validation_result = validator.validate(recipe)
-                    
-                    # Registrar el uso del módulo
-                    logger.info(f"Usuario {usuario_id} realizó validación de receta")
-                    
-                    return render_template('validate.html', 
-                                         recipe=recipe, 
-                                         validation_result=validation_result, 
-                                         dark_mode=dark_mode,
-                                         usuario=usuario)
-            
-            return render_template('validate.html', 
-                                 error="Archivo no válido o no seleccionado", 
-                                 dark_mode=dark_mode,
-                                 usuario=usuario)
-            
-        except Exception as e:
-            logger.error(f"Error en validación: {str(e)}")
-            flash(f"Error en la validación: {str(e)}", "danger")
-            return render_template('validate.html', 
-                                 dark_mode=dark_mode,
-                                 usuario=usuario)
-    
-    return render_template('validate.html', 
-                         dark_mode=dark_mode,
-                         usuario=usuario)
-
-@app.route('/natural-language', methods=['POST'])
-@requiere_modulo('lenguaje_natural')
+@app.route('/natural-language', methods=['GET', 'POST'])
 def natural_language():
-    """Procesa solicitudes en lenguaje natural."""
-    try:
-        # Obtener el texto del formulario
-        natural_text = request.form.get('natural_text', '')
-        
-        if not natural_text:
-            flash('Por favor, ingresa una descripción de tu receta deseada.', 'warning')
-            return redirect(url_for('home'))
-        
-        # Obtener el procesador de lenguaje natural
-        processor = get_language_processor()
+    if request.method == 'POST':
+        # Verificar acceso de demostración
+        if not is_demo_access_allowed():
+            session['demo_access'] = True  # Para propósitos de prueba, habilitamos temporalmente el acceso
             
-        # Procesar la solicitud y obtener la receta
-        recipe = processor.process_request(natural_text)
-        logger.info(f"Receta generada correctamente: {recipe['name']}")
+        user_text = request.form.get('user_text', '')
         
-        # Generar instrucciones para la receta
-        instructions = generate_instructions(recipe)
+        if not user_text:
+            flash('Por favor ingresa un texto para generar la receta', 'error')
+            return redirect(url_for('index'))
         
-        # Guardar en sesión
-        session['recipe'] = recipe
-        session['instructions'] = instructions
-        session['recipe_request'] = natural_text
+        # Procesamos el texto usando nuestro mock
+        recipe = mock_language_processing(user_text)
         
-        # Registrar uso del módulo
-        usuario_id = session.get('usuario_id', 'demo')
-        logger.info(f"Usuario {usuario_id} utilizó procesamiento lenguaje natural con éxito")
+        # Guardamos el ID de la receta en la sesión para recuperarla después
+        session['last_recipe_id'] = recipe['id']
         
-        # Redirigir a la página de optimización con los resultados
-        flash('¡Receta generada exitosamente a partir de tu descripción!', 'success')
-        return redirect(url_for('optimize'))
-        
-    except Exception as e:
-        # Mejorar el manejo de errores con información detallada
-        error_info = str(e)
-        logger.error(f"Error en procesamiento de lenguaje natural: {error_info}")
-        logger.error(traceback.format_exc())
-        
-        # Guardar información de error en sesión para debugging
-        session['nlp_error'] = {
-            'message': error_info,
-            'traceback': traceback.format_exc(),
-            'input': request.form.get('natural_text', ''),
-            'timestamp': datetime.now().isoformat()
-        }
-        
-        # Informar al usuario de manera amigable
-        flash(f'Lo sentimos, ocurrió un error al procesar tu solicitud. Estamos trabajando para resolverlo.', 'danger')
-        return redirect(url_for('home'))
-
-# Ruta para el ciclo de vida del producto
-@app.route('/lifecycle/<recipe_id>')
-@requiere_modulo('ciclo_vida')
-def lifecycle(recipe_id):
-    """Página de ciclo de vida del producto."""
-    dark_mode = session.get('dark_mode', DARK_MODE_DEFAULT)
+        # Redirigimos a la página de resultados
+        return redirect(url_for('recipe_result', recipe_id=recipe['id']))
     
-    # En producción, cargar receta desde base de datos
-    recipe = {
-        "id": recipe_id,
-        "name": "Receta de prueba",
-        "version": "1.0",
-        "created_at": datetime.now().isoformat(),
-        "stages": [
-            {"name": "Desarrollo", "status": "completed", "date": (datetime.now().isoformat())},
-            {"name": "Pruebas", "status": "in_progress", "date": None},
-            {"name": "Producción", "status": "pending", "date": None},
-            {"name": "Distribución", "status": "pending", "date": None}
-        ]
+    # Para solicitudes GET, simplemente mostramos el formulario
+    return render_template('index.html')
+
+@app.route('/recipe-result/<recipe_id>')
+def recipe_result(recipe_id):
+    # Recuperamos la receta desde el archivo JSON
+    recipe_filename = f"app/static/data/recipe_{recipe_id}.json"
+    
+    try:
+        with open(recipe_filename, 'r') as f:
+            data = json.load(f)
+            
+        return render_template('recipe_result.html', 
+                              recipe=data['recipe'],
+                              input_text=data['input_text'],
+                              explanations=data['explanations'],
+                              key_tip=data['key_tip'])
+    except FileNotFoundError:
+        flash('Receta no encontrada', 'error')
+        return redirect(url_for('index'))
+
+@app.route('/suppliers')
+def manage_suppliers():
+    """Gestión de proveedores de ingredientes"""
+    # Carga los proveedores desde el archivo JSON
+    suppliers = {}
+    suppliers_file = os.path.join(app.config['DATA_FOLDER'], 'suppliers.json')
+    
+    if os.path.exists(suppliers_file):
+        try:
+            with open(suppliers_file, 'r') as f:
+                suppliers = json.load(f)
+        except Exception as e:
+            app.logger.error(f"Error al cargar proveedores: {e}")
+            flash("Error al cargar la lista de proveedores", "error")
+    
+    return render_template('manage_suppliers.html', suppliers=suppliers)
+
+@app.route('/api/suppliers/<supplier_id>', methods=['GET'])
+def get_supplier(supplier_id):
+    """API para obtener datos de un proveedor específico"""
+    suppliers_file = os.path.join(app.config['DATA_FOLDER'], 'suppliers.json')
+    
+    if os.path.exists(suppliers_file):
+        try:
+            with open(suppliers_file, 'r') as f:
+                suppliers = json.load(f)
+                
+            if supplier_id in suppliers:
+                return jsonify(suppliers[supplier_id])
+            else:
+                return jsonify({"error": "Proveedor no encontrado"}), 404
+        except Exception as e:
+            app.logger.error(f"Error al obtener proveedor: {e}")
+            return jsonify({"error": "Error al procesar la solicitud"}), 500
+    else:
+        return jsonify({"error": "No hay proveedores registrados"}), 404
+
+@app.route('/add_supplier', methods=['POST'])
+def add_supplier():
+    """Añadir un nuevo proveedor"""
+    # Obtener datos del formulario
+    name = request.form.get('name')
+    contact_person = request.form.get('contact_person', '')
+    phone = request.form.get('phone', '')
+    email = request.form.get('email', '')
+    address = request.form.get('address', '')
+    notes = request.form.get('notes', '')
+    
+    # Validar datos mínimos
+    if not name:
+        flash("El nombre del proveedor es obligatorio", "error")
+        return redirect(url_for('manage_suppliers'))
+    
+    # Cargar proveedores existentes
+    suppliers = {}
+    suppliers_file = os.path.join(app.config['DATA_FOLDER'], 'suppliers.json')
+    
+    if os.path.exists(suppliers_file):
+        try:
+            with open(suppliers_file, 'r') as f:
+                suppliers = json.load(f)
+        except Exception as e:
+            app.logger.error(f"Error al cargar proveedores: {e}")
+    
+    # Generar ID único para el nuevo proveedor
+    supplier_id = str(uuid.uuid4())
+    
+    # Crear nuevo proveedor
+    suppliers[supplier_id] = {
+        'name': name,
+        'contact_person': contact_person,
+        'phone': phone,
+        'email': email,
+        'address': address,
+        'notes': notes,
+        'ingredients': [],
+        'created_at': datetime.now().isoformat(),
+        'updated_at': datetime.now().isoformat()
     }
     
-    return render_template('lifecycle.html', 
-                         dark_mode=dark_mode, 
-                         recipe=recipe)
-
-def generate_instructions(recipe):
-    """Genera instrucciones paso a paso basadas en la receta y sus propiedades."""
-    properties = recipe.get("properties", {})
-    ingredients = recipe.get("ingredients", [])
-    
-    # Base de instrucciones
-    instructions = []
-    
-    # Paso 1: Preparación de ingredientes secos
-    dry_ingredients = [ing for ing in ingredients if ing["unit"] == "g"]
-    wet_ingredients = [ing for ing in ingredients if ing["unit"] in ["ml", "l"]]
-    
-    # Instrucción para mezclar secos
-    dry_names = ", ".join([ing["name"] for ing in dry_ingredients[:-1]]) + f" y {dry_ingredients[-1]['name']}" if len(dry_ingredients) > 1 else dry_ingredients[0]["name"]
-    instructions.append(f"1. En un recipiente grande, mezcla {dry_names}.")
-    
-    # Instrucción para la levadura
-    instructions.append("2. En un recipiente aparte, disuelve la levadura en agua tibia (35°C) y deja reposar 5 minutos hasta que se active y forme espuma.")
-    
-    # Instrucción para mezclar todo
-    instructions.append("3. Forma un hueco en el centro de los ingredientes secos y vierte la mezcla de levadura.")
-    
-    oil_ingredient = next((ing for ing in ingredients if "aceite" in ing["name"].lower()), None)
-    if oil_ingredient:
-        instructions.append(f"4. Añade el {oil_ingredient['name']} y comienza a mezclar hasta incorporar todos los ingredientes.")
-    
-    # Amasado (diferente para sin gluten)
-    if "sin gluten" in properties.get("restricciones", []):
-        instructions.append("5. Mezcla hasta obtener una masa homogénea. La masa sin gluten será más pegajosa que la tradicional, esto es normal.")
-        instructions.append("6. Cubre la masa con papel film y deja reposar en un lugar cálido durante 45 minutos.")
-    else:
-        instructions.append("5. Amasa sobre una superficie enharinada durante 8-10 minutos hasta obtener una masa elástica y suave.")
-        instructions.append("6. Forma una bola, colócala en un recipiente ligeramente aceitado, cúbrela y deja reposar en un lugar cálido por 1-2 horas hasta que duplique su tamaño.")
-    
-    # Instrucciones de formado según escala
-    if properties.get("escala") == "familiar":
-        instructions.append("7. Divide la masa en 2 porciones iguales para hacer 2 pizzas familiares.")
-    elif properties.get("escala") == "industrial":
-        instructions.append("7. Divide la masa en porciones de 250g para hacer varias pizzas de tamaño estándar.")
-    else:
-        instructions.append("7. Estira la masa sobre una superficie enharinada hasta obtener el grosor deseado.")
-    
-    instructions.append("8. Precalienta el horno a 220°C (o lo más alto posible).")
-    instructions.append("9. Coloca la masa en una bandeja para horno, añade tus ingredientes favoritos y hornea durante 12-15 minutos o hasta que el borde esté dorado y crujiente.")
-    
-    # Instrucciones específicas según tipo
-    if properties.get("tipo_receta") != "básica":
-        instructions.append(f"10. Para una pizza {properties.get('tipo_receta')}, recomendamos los siguientes ingredientes:")
+    # Guardar cambios
+    try:
+        # Asegurar que existe el directorio
+        os.makedirs(os.path.dirname(suppliers_file), exist_ok=True)
         
-        if properties.get("tipo_receta") == "margarita":
-            instructions.append("   - Salsa de tomate, mozzarella fresca, albahaca fresca y un poco de aceite de oliva.")
-        elif properties.get("tipo_receta") == "napolitana":
-            instructions.append("   - Salsa de tomate, anchoas, aceitunas negras, alcaparras y orégano.")
-        elif properties.get("tipo_receta") == "vegetariana":
-            instructions.append("   - Salsa de tomate, mozzarella, pimientos, champiñones, cebolla, calabacín y aceitunas.")
-        elif properties.get("tipo_receta") == "hawaiana":
-            instructions.append("   - Salsa de tomate, mozzarella, jamón y piña.")
-        elif properties.get("tipo_receta") == "pepperoni":
-            instructions.append("   - Salsa de tomate, mozzarella abundante y pepperoni.")
+        with open(suppliers_file, 'w') as f:
+            json.dump(suppliers, f, indent=4)
+        
+        flash(f"Proveedor '{name}' añadido correctamente", "success")
+    except Exception as e:
+        app.logger.error(f"Error al guardar proveedor: {e}")
+        flash("Error al guardar el proveedor", "error")
     
-    return instructions
+    return redirect(url_for('manage_suppliers'))
+
+@app.route('/update_supplier', methods=['POST'])
+def update_supplier():
+    """Actualizar un proveedor existente"""
+    # Obtener datos del formulario
+    supplier_id = request.form.get('supplier_id')
+    name = request.form.get('name')
+    contact_person = request.form.get('contact_person', '')
+    phone = request.form.get('phone', '')
+    email = request.form.get('email', '')
+    address = request.form.get('address', '')
+    notes = request.form.get('notes', '')
+    
+    # Validar datos mínimos
+    if not supplier_id or not name:
+        flash("Faltan campos obligatorios", "error")
+        return redirect(url_for('manage_suppliers'))
+    
+    # Cargar proveedores existentes
+    suppliers_file = os.path.join(app.config['DATA_FOLDER'], 'suppliers.json')
+    
+    try:
+        with open(suppliers_file, 'r') as f:
+            suppliers = json.load(f)
+        
+        if supplier_id not in suppliers:
+            flash("Proveedor no encontrado", "error")
+            return redirect(url_for('manage_suppliers'))
+        
+        # Actualizar datos del proveedor
+        suppliers[supplier_id].update({
+            'name': name,
+            'contact_person': contact_person,
+            'phone': phone,
+            'email': email,
+            'address': address,
+            'notes': notes,
+            'updated_at': datetime.now().isoformat()
+        })
+        
+        # Guardar cambios
+        with open(suppliers_file, 'w') as f:
+            json.dump(suppliers, f, indent=4)
+        
+        flash(f"Proveedor '{name}' actualizado correctamente", "success")
+    except Exception as e:
+        app.logger.error(f"Error al actualizar proveedor: {e}")
+        flash("Error al actualizar el proveedor", "error")
+    
+    return redirect(url_for('manage_suppliers'))
+
+@app.route('/delete_supplier', methods=['POST'])
+def delete_supplier():
+    """Eliminar un proveedor"""
+    supplier_id = request.form.get('supplier_id')
+    
+    if not supplier_id:
+        flash("ID de proveedor no proporcionado", "error")
+        return redirect(url_for('manage_suppliers'))
+    
+    # Cargar proveedores existentes
+    suppliers_file = os.path.join(app.config['DATA_FOLDER'], 'suppliers.json')
+    
+    try:
+        with open(suppliers_file, 'r') as f:
+            suppliers = json.load(f)
+        
+        if supplier_id not in suppliers:
+            flash("Proveedor no encontrado", "error")
+            return redirect(url_for('manage_suppliers'))
+        
+        # Guardar el nombre antes de eliminar
+        supplier_name = suppliers[supplier_id]['name']
+        
+        # Eliminar proveedor
+        del suppliers[supplier_id]
+        
+        # Guardar cambios
+        with open(suppliers_file, 'w') as f:
+            json.dump(suppliers, f, indent=4)
+        
+        flash(f"Proveedor '{supplier_name}' eliminado correctamente", "success")
+    except Exception as e:
+        app.logger.error(f"Error al eliminar proveedor: {e}")
+        flash("Error al eliminar el proveedor", "error")
+    
+    return redirect(url_for('manage_suppliers'))
+
+@app.route('/cost-analysis')
+def cost_analysis():
+    """Página principal de análisis de costos"""
+    return render_template('cost_analysis.html')
+
+@app.route('/optimize')
+def optimize():
+    """Página de creación de recetas"""
+    return render_template('optimize.html')
+
+@app.route('/validate')
+def validate():
+    """Página de validación de recetas"""
+    return render_template('validate.html')
 
 @app.route('/about')
 def about():
-    """Página acerca de."""
-    dark_mode = session.get('dark_mode', DARK_MODE_DEFAULT)
-    return render_template('about.html', dark_mode=dark_mode)
+    """Página 'Acerca de'"""
+    return render_template('about.html')
 
-@app.route('/toggle-theme')
-def toggle_theme():
-    session['dark_mode'] = not session.get('dark_mode', DARK_MODE_DEFAULT)
-    return redirect(request.referrer or url_for('home'))
+@app.route('/accessibility')
+def accessibility_guide():
+    """Guía de Accesibilidad"""
+    return render_template('accessibility_guide.html')
 
-# Definir un procesador mock para desarrollo
-class MockLanguageProcessor:
-    def __init__(self):
-        self.recipe_types = ["margarita", "napolitana", "hawaiana", "vegetariana", "pepperoni"]
-        self.dietary_restrictions = ["sin gluten", "vegana", "vegetariana", "baja en sodio", "sin lactosa"]
-        self.colors = ["roja", "blanca", "integral", "verde", "negra"]
-        self.production_scales = ["familiar", "industrial", "restaurante", "pequeña"]
+@app.route('/login/<usuario_id>')
+def login(usuario_id):
+    """Inicio de sesión simplificado (solo para desarrollo)"""
+    session['user_id'] = usuario_id
+    flash(f"Sesión iniciada como Usuario {usuario_id}", "success")
+    return redirect(url_for('index'))
 
-    def process_request(self, text):
-        # Extraer propiedades del texto
-        properties = {}
-        text = text.lower()
+@app.route('/logout')
+def logout():
+    """Cerrar sesión"""
+    session.clear()
+    flash("Sesión cerrada correctamente", "success")
+    return redirect(url_for('index'))
+
+@app.route('/api/generate-recipe', methods=['POST'])
+def api_generate_recipe():
+    """API para generar recetas sin interfaz web"""
+    if request.method == 'POST':
+        user_text = request.json.get('user_text', '')
         
-        # Detectar tipo de receta
-        for tipo in self.recipe_types:
-            if tipo in text:
-                properties["tipo_receta"] = tipo
-                break
-        else:
-            properties["tipo_receta"] = "básica"
+        if not user_text:
+            return jsonify({"error": "Texto vacío. Por favor proporciona una descripción de la receta."}), 400
         
-        # Detectar restricciones dietéticas
-        properties["restricciones"] = []
-        for restriccion in self.dietary_restrictions:
-            if restriccion in text:
-                properties["restricciones"].append(restriccion)
+        # Procesamos el texto usando nuestro mock
+        recipe = mock_language_processing(user_text)
         
-        # Detectar color
-        for color in self.colors:
-            if color in text:
-                properties["color"] = color
-                break
-        else:
-            properties["color"] = "blanca"
+        # Preparamos la respuesta
+        recipe_filename = f"app/static/data/recipe_{recipe['id']}.json"
         
-        # Detectar escala
-        for escala in self.production_scales:
-            if escala in text:
-                properties["escala"] = escala
-                break
-        else:
-            properties["escala"] = "pequeña"
-        
-        # Detectar optimización nutricional
-        properties["optimizacion_nutricional"] = "nutricional" in text or "nutritiva" in text or "nutricionalmente" in text
-        
-        # Generar ingredientes base según las propiedades
-        recipe = {
-            "name": f"Masa de Pizza {properties['tipo_receta'].capitalize()} {properties['color'].capitalize()}",
-            "description": f"Masa de pizza {properties['color']} para {properties['escala']}, optimizada según tus requerimientos.",
-            "ingredients": self.generate_ingredients(properties),
-            "properties": properties
+        try:
+            with open(recipe_filename, 'r') as f:
+                data = json.load(f)
+                
+            return jsonify({
+                "success": True,
+                "recipe": data['recipe'],
+                "input_text": data['input_text'],
+                "explanations": data['explanations'],
+                "key_tip": data['key_tip']
+            })
+        except FileNotFoundError:
+            return jsonify({"error": "Error al guardar la receta"}), 500
+
+# Importar el asistente de recetas
+from recipe_assistant import RecipeAssistant
+
+# Instancia global del asistente (en producción usaría una solución basada en sesiones)
+recipe_assistant = RecipeAssistant()
+
+@app.route('/assistant')
+def recipe_assistant_view():
+    """Interfaz del asistente de recetas"""
+    return render_template('assistant_chat.html')
+
+@app.route('/api/chat', methods=['POST'])
+def chat_api():
+    """API para el chat con el asistente de recetas"""
+    data = request.json
+    user_message = data.get('message', '')
+    
+    # En una aplicación real, manejaríamos el estado de la conversación por sesión
+    # Aquí simplemente usamos una instancia global para simplicidad
+    response = recipe_assistant.respond(user_message)
+    
+    return jsonify({"response": response})
+
+@app.route('/api/generate_recipe', methods=['POST'])
+def generate_recipe_api():
+    """API para generar recetas basadas en la conversación"""
+    # Construir el prompt para el generador
+    prompt = recipe_assistant.construct_recipe_prompt()
+    
+    # Generar la receta utilizando el procesador de lenguaje natural
+    recipe = mock_language_processing(prompt)
+    
+    return jsonify(recipe)
+
+# Rutas para fichas técnicas industriales
+@app.route('/recipe-sheets')
+def list_recipe_sheets():
+    """Muestra la lista de fichas técnicas disponibles."""
+    from app.recipe_sheet import RecipeSheet
+    
+    recipe_sheet_manager = RecipeSheet(app.config['DATA_FOLDER'])
+    sheets = recipe_sheet_manager.list_recipe_sheets()
+    
+    return render_template('recipe_sheets/list_recipe_sheets.html', 
+                          sheets=sheets,
+                          title="Fichas Técnicas Industriales")
+
+@app.route('/recipe-sheets/<recipe_id>')
+def view_recipe_sheet(recipe_id):
+    """Muestra una ficha técnica específica."""
+    from app.recipe_sheet import RecipeSheet
+    
+    recipe_sheet_manager = RecipeSheet(app.config['DATA_FOLDER'])
+    recipe = recipe_sheet_manager.get_recipe_sheet(recipe_id)
+    
+    if not recipe:
+        flash('Ficha técnica no encontrada', 'error')
+        return redirect(url_for('list_recipe_sheets'))
+    
+    return render_template('view_recipe_sheet.html', recipe=recipe)
+
+@app.route('/recipe-sheets/new', methods=['GET', 'POST'])
+def new_recipe_sheet():
+    """Crea una nueva ficha técnica."""
+    if request.method == 'GET':
+        return render_template('recipe_sheets/edit_recipe_sheet.html', 
+                              recipe=None, 
+                              title="Nueva Ficha Técnica")
+    
+    # Procesar el formulario POST
+    from app.recipe_sheet import RecipeSheet
+    
+    try:
+        # Obtener datos del formulario
+        recipe_data = {
+            "name": request.form.get('name'),
+            "description": request.form.get('description'),
+            "category": request.form.get('category'),
+            "target_market": request.form.get('target_market', 'General'),
+            "serving_size": request.form.get('serving_size'),
+            "yield": {
+                "amount": float(request.form.get('yield_amount', 0)),
+                "unit": request.form.get('yield_unit', 'g')
+            },
+            "difficulty": request.form.get('difficulty', 'Media'),
+            "shelf_life": {
+                "ambient": request.form.get('shelf_life_ambient', '1 día'),
+                "refrigerated": request.form.get('shelf_life_refrigerated', '3 días'),
+                "frozen": request.form.get('shelf_life_frozen', '30 días')
+            },
+            "preparation_time": int(request.form.get('preparation_time', 0)),
+            "mixing_time": int(request.form.get('mixing_time', 0)),
+            "fermentation_time": int(request.form.get('fermentation_time', 0)),
+            "baking_time": int(request.form.get('baking_time', 0)),
+            "cooling_time": int(request.form.get('cooling_time', 0)),
+            "appearance": request.form.get('appearance', ''),
+            "texture": request.form.get('texture', ''),
+            "taste": request.form.get('taste', ''),
+            "aroma": request.form.get('aroma', ''),
+            "equipment": request.form.getlist('equipment')
         }
         
-        return recipe
-    
-    def generate_ingredients(self, properties):
+        # Procesar ingredientes (múltiples campos de un formulario dinámico)
         ingredients = []
+        ingredient_names = request.form.getlist('ingredient_name[]')
+        ingredient_amounts = request.form.getlist('ingredient_amount[]')
+        ingredient_units = request.form.getlist('ingredient_unit[]')
+        ingredient_functions = request.form.getlist('ingredient_function[]')
+        ingredient_criticals = request.form.getlist('ingredient_critical[]')
         
-        # Ingrediente base: harina
-        if "sin gluten" in properties.get("restricciones", []):
-            ingredients.append({
-                "name": "Harina de arroz",
-                "quantity": 250.0,
-                "unit": "g"
-            })
-            ingredients.append({
-                "name": "Almidón de maíz",
-                "quantity": 100.0,
-                "unit": "g"
-            })
-            ingredients.append({
-                "name": "Goma xantana",
-                "quantity": 5.0,
-                "unit": "g"
-            })
-        else:
-            ingredients.append({
-                "name": "Harina de trigo",
-                "quantity": 350.0,
-                "unit": "g"
-            })
+        for i in range(len(ingredient_names)):
+            if ingredient_names[i].strip():  # Si el nombre no está vacío
+                ingredients.append({
+                    "name": ingredient_names[i],
+                    "amount": float(ingredient_amounts[i]) if ingredient_amounts[i] else 0,
+                    "unit": ingredient_units[i],
+                    "function": ingredient_functions[i] if i < len(ingredient_functions) else "",
+                    "critical": i < len(ingredient_criticals) and ingredient_criticals[i] == "on"
+                })
         
-        # Agua
-        ingredients.append({
-            "name": "Agua",
-            "quantity": 200.0,
-            "unit": "ml"
-        })
+        # Procesar pasos del proceso
+        process_steps = []
+        step_orders = request.form.getlist('step_order[]')
+        step_names = request.form.getlist('step_name[]')
+        step_descriptions = request.form.getlist('step_description[]')
+        step_times = request.form.getlist('step_time[]')
+        step_temperatures = request.form.getlist('step_temperature[]')
+        step_criticals = request.form.getlist('step_critical[]')
         
-        # Levadura
-        ingredients.append({
-            "name": "Levadura seca",
-            "quantity": 7.0,
-            "unit": "g"
-        })
+        for i in range(len(step_names)):
+            if step_names[i].strip():  # Si el nombre no está vacío
+                process_steps.append({
+                    "order": int(step_orders[i]) if step_orders[i] else i+1,
+                    "name": step_names[i],
+                    "description": step_descriptions[i],
+                    "time": int(step_times[i]) if step_times[i] and step_times[i].isdigit() else 0,
+                    "temperature": step_temperatures[i] if i < len(step_temperatures) else "",
+                    "critical": i < len(step_criticals) and step_criticals[i] == "on"
+                })
         
-        # Sal (menos si es baja en sodio)
-        salt_quantity = 3.0 if "baja en sodio" in properties.get("restricciones", []) else 5.0
-        ingredients.append({
-            "name": "Sal",
-            "quantity": salt_quantity,
-            "unit": "g"
-        })
+        # Crear la ficha técnica
+        recipe_sheet_manager = RecipeSheet(app.config['DATA_FOLDER'])
+        recipe_sheet = recipe_sheet_manager.create_recipe_sheet(
+            recipe_data=recipe_data,
+            ingredients=ingredients,
+            process_steps=process_steps,
+            author=session.get('username', 'Sistema')
+        )
         
-        # Aceite
-        ingredients.append({
-            "name": "Aceite de oliva",
-            "quantity": 15.0,
-            "unit": "ml"
-        })
+        flash(f'Ficha técnica "{recipe_data["name"]}" creada exitosamente', 'success')
+        return redirect(url_for('view_recipe_sheet', recipe_id=recipe_sheet['id']))
         
-        # Ingredientes para color
-        if properties.get("color") == "roja":
-            ingredients.append({
-                "name": "Remolacha en polvo",
-                "quantity": 15.0,
-                "unit": "g"
-            })
-        elif properties.get("color") == "verde":
-            ingredients.append({
-                "name": "Espinaca en polvo",
-                "quantity": 20.0,
-                "unit": "g"
-            })
-        elif properties.get("color") == "negra":
-            ingredients.append({
-                "name": "Tinta de calamar",
-                "quantity": 10.0,
-                "unit": "g"
-            })
-        elif properties.get("color") == "integral":
-            # Reemplazar harina blanca por integral
-            for i, ingredient in enumerate(ingredients):
-                if ingredient["name"] == "Harina de trigo":
-                    ingredients[i] = {
-                        "name": "Harina integral",
-                        "quantity": 350.0,
-                        "unit": "g"
-                    }
-        
-        # Ingredientes adicionales para optimización nutricional
-        if properties.get("optimizacion_nutricional"):
-            ingredients.append({
-                "name": "Semillas de lino molidas",
-                "quantity": 10.0,
-                "unit": "g"
-            })
-            ingredients.append({
-                "name": "Semillas de chía",
-                "quantity": 10.0,
-                "unit": "g"
-            })
-        
-        return ingredients
-
-def get_language_processor():
-    """Obtener una instancia del procesador de lenguaje natural"""
-    try:
-        # Intentar importar el procesador real
-        sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-        try:
-            # Primero intentar desde trivo (nueva estructura)
-            from trivo.features.nlp.language_processor import LanguageProcessor
-            logger.info("Usando procesador de lenguaje natural de trivo")
-            return LanguageProcessor()
-        except ImportError:
-            # Luego intentar desde src (estructura alternativa)
-            from src.features.nlp.language_processor import LanguageProcessor
-            logger.info("Usando procesador de lenguaje natural de src")
-            return LanguageProcessor()
     except Exception as e:
-        logger.warning(f"No se pudo cargar el procesador de lenguaje real: {str(e)}")
-        logger.info("Usando procesador simulado para desarrollo")
-        return MockLanguageProcessor()
+        flash(f'Error al crear la ficha técnica: {str(e)}', 'error')
+        return redirect(url_for('list_recipe_sheets'))
 
+@app.route('/recipe-sheets/<recipe_id>/edit', methods=['GET', 'POST'])
+def edit_recipe_sheet(recipe_id):
+    """Edita una ficha técnica existente."""
+    from app.recipe_sheet import RecipeSheet
+    
+    recipe_sheet_manager = RecipeSheet(app.config['DATA_FOLDER'])
+    recipe = recipe_sheet_manager.get_recipe_sheet(recipe_id)
+    
+    if not recipe:
+        flash('Ficha técnica no encontrada', 'error')
+        return redirect(url_for('list_recipe_sheets'))
+    
+    if request.method == 'GET':
+        return render_template('recipe_sheets/edit_recipe_sheet.html', 
+                              recipe=recipe, 
+                              title=f"Editar {recipe['recipe_info']['name']}")
+    
+    # Procesar el formulario POST - similar a new_recipe_sheet
+    try:
+        # Obtener datos del formulario (similar a new_recipe_sheet)
+        # ...
+        
+        # Actualizar la ficha técnica
+        updates = {
+            # Preparar las actualizaciones según los datos del formulario
+        }
+        
+        updated_recipe = recipe_sheet_manager.update_recipe_sheet(recipe_id, updates)
+        
+        if updated_recipe:
+            flash(f'Ficha técnica "{updated_recipe["recipe_info"]["name"]}" actualizada exitosamente', 'success')
+            return redirect(url_for('view_recipe_sheet', recipe_id=recipe_id))
+        else:
+            flash('Error al actualizar la ficha técnica', 'error')
+            return redirect(url_for('edit_recipe_sheet', recipe_id=recipe_id))
+            
+    except Exception as e:
+        flash(f'Error al editar la ficha técnica: {str(e)}', 'error')
+        return redirect(url_for('view_recipe_sheet', recipe_id=recipe_id))
+
+@app.route('/recipe-sheets/<recipe_id>/delete', methods=['POST'])
+def delete_recipe_sheet(recipe_id):
+    """Elimina una ficha técnica."""
+    from app.recipe_sheet import RecipeSheet
+    
+    recipe_sheet_manager = RecipeSheet(app.config['DATA_FOLDER'])
+    success = recipe_sheet_manager.delete_recipe_sheet(recipe_id)
+    
+    if success:
+        flash('Ficha técnica eliminada exitosamente', 'success')
+    else:
+        flash('Error al eliminar la ficha técnica', 'error')
+    
+    return redirect(url_for('list_recipe_sheets'))
+
+@app.route('/recipe-sheets/<recipe_id>/pdf')
+def download_recipe_sheet_pdf(recipe_id):
+    """Genera y descarga una ficha técnica en formato PDF."""
+    from app.recipe_sheet import RecipeSheet
+    
+    recipe_sheet_manager = RecipeSheet(app.config['DATA_FOLDER'])
+    pdf_path = recipe_sheet_manager.generate_pdf(recipe_id)
+    
+    if not pdf_path or not os.path.exists(pdf_path):
+        flash('Error al generar el PDF', 'error')
+        return redirect(url_for('view_recipe_sheet', recipe_id=recipe_id))
+    
+    # Devolver el archivo PDF para descarga
+    return send_file(pdf_path, download_name=f"ficha_tecnica_{recipe_id}.pdf", as_attachment=True)
+
+@app.route('/recipe-sheets/<recipe_id>/production-sheet', methods=['GET', 'POST'])
+def production_sheet(recipe_id):
+    """Genera una hoja de producción para un lote específico."""
+    from app.recipe_sheet import RecipeSheet
+    
+    recipe_sheet_manager = RecipeSheet(app.config['DATA_FOLDER'])
+    
+    if request.method == 'POST':
+        try:
+            batch_size = float(request.form.get('batch_size', 1))
+            production_data = recipe_sheet_manager.generate_production_sheet(recipe_id, batch_size)
+            
+            if not production_data:
+                flash('Error al generar la hoja de producción', 'error')
+                return redirect(url_for('view_recipe_sheet', recipe_id=recipe_id))
+            
+            # Guardar temporalmente la hoja de producción
+            session['production_sheet'] = production_data
+            
+            return render_template('recipe_sheets/production_sheet.html', 
+                                  production=production_data,
+                                  title="Hoja de Producción")
+                                  
+        except ValueError as e:
+            flash('Por favor ingrese un valor numérico válido para el tamaño del lote', 'error')
+            return redirect(url_for('view_recipe_sheet', recipe_id=recipe_id))
+        except Exception as e:
+            flash(f'Error: {str(e)}', 'error')
+            return redirect(url_for('view_recipe_sheet', recipe_id=recipe_id))
+    
+    # Método GET muestra el formulario para ingresar el tamaño del lote
+    recipe = recipe_sheet_manager.get_recipe_sheet(recipe_id)
+    if not recipe:
+        flash('Ficha técnica no encontrada', 'error')
+        return redirect(url_for('list_recipe_sheets'))
+    
+    return render_template('recipe_sheets/scale_recipe.html', 
+                          recipe=recipe,
+                          title=f"Escalar {recipe['recipe_info']['name']}")
+
+# Iniciar la aplicación
 if __name__ == '__main__':
-    # Cambiar el puerto a 8080 para evitar conflictos
-    port = int(os.environ.get('PORT', 8080))
-    app.run(host='0.0.0.0', port=port, debug=True)
-
-def main():
-    """Función principal para el punto de entrada."""
-    # Obtener puerto desde variables de entorno o usar el valor predeterminado
-    port = int(os.environ.get('PORT', 8080))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    try:
+        print(f"Iniciando aplicación TRIVO-AI en http://localhost:{PORT}")
+        app.run(debug=DEBUG, host='0.0.0.0', port=PORT)
+    except Exception as e:
+        logger.error(f"Error al iniciar la aplicación: {e}")
+        print(f"Error al iniciar la aplicación: {e}") 

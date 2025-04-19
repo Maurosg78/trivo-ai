@@ -1,0 +1,140 @@
+<!-- Panel de Preferencias de Accesibilidad -->
+<!-- Botón de acceso -->
+<button class="a11y-toggle-btn" id="a11yToggleBtn" aria-label="Abrir panel de preferencias de accesibilidad" title="Preferencias de accesibilidad">
+    <i class="fas fa-universal-access"></i>
+</button>
+
+<!-- Panel principal de preferencias -->
+<div class="a11y-prefs-panel" id="a11yPrefsPanel" aria-hidden="true">
+    <div class="a11y-prefs-header">
+        <h2>Preferencias de Accesibilidad</h2>
+        <button class="btn-close" id="closeA11yPrefs" aria-label="Cerrar panel de preferencias">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <div class="a11y-prefs-body">
+        <!-- Sección: Tamaño de texto -->
+        <div class="a11y-prefs-section">
+            <h3>Tamaño de texto</h3>
+            <div class="a11y-prefs-options" role="radiogroup" aria-label="Opciones de tamaño de texto">
+                <div class="a11y-option text-size-option" data-value="default" tabindex="0" role="radio" aria-checked="true">
+                    <div class="a11y-option-preview">A</div>
+                    <div class="a11y-option-label">Normal</div>
+                </div>
+                <div class="a11y-option text-size-option" data-value="large" tabindex="0" role="radio" aria-checked="false">
+                    <div class="a11y-option-preview">A</div>
+                    <div class="a11y-option-label">Grande</div>
+                </div>
+                <div class="a11y-option text-size-option" data-value="x-large" tabindex="0" role="radio" aria-checked="false">
+                    <div class="a11y-option-preview">A</div>
+                    <div class="a11y-option-label">Muy grande</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección: Contraste -->
+        <div class="a11y-prefs-section">
+            <h3>Contraste</h3>
+            <div class="a11y-prefs-options" role="radiogroup" aria-label="Opciones de contraste">
+                <div class="a11y-option contrast-option" data-value="default" tabindex="0" role="radio" aria-checked="true">
+                    <div class="a11y-option-preview">Aa</div>
+                    <div class="a11y-option-label">Normal</div>
+                </div>
+                <div class="a11y-option contrast-option" data-value="high" tabindex="0" role="radio" aria-checked="false">
+                    <div class="a11y-option-preview">Aa</div>
+                    <div class="a11y-option-label">Alto contraste</div>
+                </div>
+                <div class="a11y-option contrast-option" data-value="inverted" tabindex="0" role="radio" aria-checked="false">
+                    <div class="a11y-option-preview">Aa</div>
+                    <div class="a11y-option-label">Invertido</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección: Espaciado de letras -->
+        <div class="a11y-prefs-section">
+            <h3>Espaciado de letras</h3>
+            <div class="a11y-prefs-options" role="radiogroup" aria-label="Opciones de espaciado de letras">
+                <div class="a11y-option letter-spacing-option" data-value="default" tabindex="0" role="radio" aria-checked="true">
+                    <div class="a11y-option-preview">abc</div>
+                    <div class="a11y-option-label">Normal</div>
+                </div>
+                <div class="a11y-option letter-spacing-option" data-value="wide" tabindex="0" role="radio" aria-checked="false">
+                    <div class="a11y-option-preview">a b c</div>
+                    <div class="a11y-option-label">Amplio</div>
+                </div>
+                <div class="a11y-option letter-spacing-option" data-value="wider" tabindex="0" role="radio" aria-checked="false">
+                    <div class="a11y-option-preview">a  b  c</div>
+                    <div class="a11y-option-label">Muy amplio</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección: Altura de línea -->
+        <div class="a11y-prefs-section">
+            <h3>Altura de línea</h3>
+            <div class="a11y-prefs-options" role="radiogroup" aria-label="Opciones de altura de línea">
+                <div class="a11y-option line-height-option" data-value="default" tabindex="0" role="radio" aria-checked="true">
+                    <div class="a11y-option-preview">
+                        <i class="fas fa-align-justify" aria-hidden="true"></i>
+                    </div>
+                    <div class="a11y-option-label">Normal</div>
+                </div>
+                <div class="a11y-option line-height-option" data-value="spaced" tabindex="0" role="radio" aria-checked="false">
+                    <div class="a11y-option-preview">
+                        <i class="fas fa-align-justify fa-lg" aria-hidden="true"></i>
+                    </div>
+                    <div class="a11y-option-label">Espaciado</div>
+                </div>
+                <div class="a11y-option line-height-option" data-value="double" tabindex="0" role="radio" aria-checked="false">
+                    <div class="a11y-option-preview">
+                        <i class="fas fa-align-justify fa-2x" aria-hidden="true"></i>
+                    </div>
+                    <div class="a11y-option-label">Doble</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección: Movimiento reducido -->
+        <div class="a11y-prefs-section">
+            <h3>Movimiento</h3>
+            <div class="a11y-prefs-options" role="radiogroup" aria-label="Opciones de movimiento">
+                <div class="a11y-option motion-option" data-value="default" tabindex="0" role="radio" aria-checked="true">
+                    <div class="a11y-option-preview">
+                        <i class="fas fa-running" aria-hidden="true"></i>
+                    </div>
+                    <div class="a11y-option-label">Normal</div>
+                </div>
+                <div class="a11y-option motion-option" data-value="reduced" tabindex="0" role="radio" aria-checked="false">
+                    <div class="a11y-option-preview">
+                        <i class="fas fa-walking" aria-hidden="true"></i>
+                    </div>
+                    <div class="a11y-option-label">Reducido</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección: Indicadores de foco -->
+        <div class="a11y-prefs-section">
+            <h3>Indicadores de foco</h3>
+            <div class="a11y-prefs-options" role="radiogroup" aria-label="Opciones de indicadores de foco">
+                <div class="a11y-option focus-option" data-value="default" tabindex="0" role="radio" aria-checked="true">
+                    <div class="a11y-option-preview">
+                        <i class="fas fa-border-style" aria-hidden="true"></i>
+                    </div>
+                    <div class="a11y-option-label">Normal</div>
+                </div>
+                <div class="a11y-option focus-option" data-value="high" tabindex="0" role="radio" aria-checked="false">
+                    <div class="a11y-option-preview">
+                        <i class="fas fa-border-all" aria-hidden="true"></i>
+                    </div>
+                    <div class="a11y-option-label">Destacado</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="a11y-prefs-actions">
+        <button class="a11y-prefs-reset" id="resetA11yPrefs">Restablecer</button>
+ 

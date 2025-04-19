@@ -1,0 +1,720 @@
+{% extends 'base.html' %}
+
+{% block title %}Ciclo de Vida del Producto - TRIVO-AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="section-title mb-4">Ciclo de Vida: {{ recipe.name }}</h1>
+    <p class="lead text-muted mb-5">Visualización y gestión del ciclo de vida completo de tu receta desde su desarrollo hasta la distribución.</p>
+
+    <!-- Información general de la receta -->
+    <div class="row mb-5">
+        <div class="col-md-7">
+            <div class="card bg-dark rounded-xl mb-4">
+                <div class="card-body p-4">
+                    <h4 class="card-title mb-4">Información General</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="text-muted d-block">ID de Receta</label>
+                                <h6>{{ recipe.id }}</h6>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted d-block">Categoría</label>
+                                <h6>{{ recipe.category|capitalize }}</h6>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted d-block">Fecha de Creación</label>
+                                <h6>{{ recipe.created_at }}</h6>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="text-muted d-block">Estado Actual</label>
+                                {% set current_stage = recipe.stages|selectattr('status', 'equalto', 'in_progress')|first %}
+                                <h6>
+                                    <span class="badge bg-orange px-3 py-2">
+                                        {{ current_stage.name if current_stage else "No iniciado" }}
+                                    </span>
+                                </h6>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted d-block">Última Actualización</label>
+                                <h6>{{ recipe.updated_at if recipe.updated_at else recipe.created_at }}</h6>
+                            </div>
+                            <div class="mb-3">
+                                <label class="text-muted d-block">Hidratación</label>
+                                <h6>{{ recipe.properties.hydration }}%</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Métricas clave -->
+            <div class="card bg-dark rounded-xl">
+                <div class="card-body p-4">
+                    <h4 class="card-title mb-4">Métricas Clave</h4>
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-darker rounded-xl">
+                                <div class="text-success mb-2">
+                                    <i class="bi bi-currency-dollar fs-3"></i>
+                                </div>
+                                <h5 class="mb-1">{{ "%.2f"|format(recipe.properties.cost_per_kg|default(0)) }} USD/kg</h5>
+                                <p class="text-muted mb-0 small">Costo unitario</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-darker rounded-xl">
+                                <div class="text-orange mb-2">
+                                    <i class="bi bi-droplet fs-3"></i>
+                                </div>
+                                <h5 class="mb-1">{{ recipe.properties.hydration }}%</h5>
+                                <p class="text-muted mb-0 small">Hidratación</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 bg-darker rounded-xl">
+                                <div class="text-success mb-2">
+                                    <i class="bi bi-check2-circle fs-3"></i>
+                                </div>
+                                <h5 class="mb-1">{{ recipe.properties.total_weight_g }} g</h5>
+                                <p class="text-muted mb-0 small">Peso total</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-5">
+            <!-- Timeline del progreso -->
+            <div class="card bg-dark rounded-xl h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="card-title mb-0">Progreso</h4>
+                        <button class="btn btn-sm btn-success">
+                            <i class="bi bi-plus-circle me-1"></i> Avanzar Etapa
+                        </button>
+                    </div>
+                    
+                    <ul class="timeline">
+                        {% for stage in recipe.stages %}
+                        <li class="timeline-item mb-4 position-relative ps-4">
+                            <div class="timeline-marker position-absolute {% if stage.status == 'completed' %}bg-success{% elif stage.status == 'in_progress' %}bg-orange pulse{% else %}bg-secondary{% endif %}"></div>
+                            <div class="d-flex justify-content-between">
+                                <h5 class="mb-1">{{ stage.name }}</h5>
+                                <span class="text-muted">{{ stage.date if stage.date else "Pendiente" }}</span>
+                            </div>
+                            <p class="text-muted mb-0">
+                                {% if stage.status == 'completed' %}
+                                <span class="text-success"><i class="bi bi-check-circle me-1"></i> Completado</span>
+                                {% elif stage.status == 'in_progress' %}
+                                <span class="text-orange"><i class="bi bi-hourglass-split me-1"></i> En progreso</span>
+                                {% else %}
+                                <span class="text-muted"><i class="bi bi-clock me-1"></i> Pendiente</span>
+                                {% endif %}
+                            </p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabs de información detallada -->
+    <ul class="nav nav-tabs mb-4" id="lifecycleTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="formulation-tab" data-bs-toggle="tab" data-bs-target="#formulation" type="button" role="tab" aria-controls="formulation" aria-selected="true">Formulación</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="costs-tab" data-bs-toggle="tab" data-bs-target="#costs" type="button" role="tab" aria-controls="costs" aria-selected="false">Análisis de Costos</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="testing-tab" data-bs-toggle="tab" data-bs-target="#testing" type="button" role="tab" aria-controls="testing" aria-selected="false">Pruebas</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="production-tab" data-bs-toggle="tab" data-bs-target="#production" type="button" role="tab" aria-controls="production" aria-selected="false">Producción</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="distribution-tab" data-bs-toggle="tab" data-bs-target="#distribution" type="button" role="tab" aria-controls="distribution" aria-selected="false">Distribución</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab" aria-controls="documents" aria-selected="false">Documentos</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="false">Historial</button>
+        </li>
+    </ul>
+    
+    <div class="tab-content bg-dark rounded-xl p-4" id="lifecycleTabsContent">
+        <!-- Formulación -->
+        <div class="tab-pane fade show active" id="formulation" role="tabpanel" aria-labelledby="formulation-tab">
+            <h4 class="mb-4">Detalles de Formulación</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-3">Ingredientes</h5>
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th>Ingrediente</th>
+                                <th>Cantidad</th>
+                                <th>Unidad</th>
+                                <th>Porcentaje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in recipe.properties.ingredient_costs|default([]) %}
+                            <tr>
+                                <td>{{ item.ingredient }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.unit }}</td>
+                                <td>
+                                {% if "harina" in item.ingredient or "flour" in item.ingredient %}
+                                    100%
+                                {% elif recipe.properties.total_flour_g > 0 %}
+                                    {{ ((item.quantity|float / recipe.properties.total_flour_g) * 100)|round(1) }}%
+                                {% else %}
+                                    -
+                                {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="mb-3">Propiedades</h5>
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th>Parámetro</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Categoría</td>
+                                <td>{{ recipe.category|capitalize }}</td>
+                            </tr>
+                            <tr>
+                                <td>Hidratación</td>
+                                <td>{{ recipe.properties.hydration }}%</td>
+                            </tr>
+                            <tr>
+                                <td>Porcentaje de sal</td>
+                                <td>{{ recipe.properties.salt_percentage }}%</td>
+                            </tr>
+                            <tr>
+                                <td>Peso total</td>
+                                <td>{{ recipe.properties.total_weight_g }} g</td>
+                            </tr>
+                            <tr>
+                                <td>Costo por kg</td>
+                                <td>{{ "%.2f"|format(recipe.properties.cost_per_kg|default(0)) }} USD/kg</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <h5 class="mb-3">Resultados de Validación</h5>
+                <ul class="list-group">
+                    <li class="list-group-item bg-dark border-bottom border-secondary d-flex align-items-center">
+                        <span class="badge bg-success me-2">✓</span>
+                        <div>
+                            <strong>Balance de ingredientes optimizado</strong>
+                            <div class="text-muted small">La proporción de ingredientes está dentro de los parámetros ideales</div>
+                        </div>
+                    </li>
+                    <li class="list-group-item bg-dark border-bottom border-secondary d-flex align-items-center">
+                        <span class="badge {% if recipe.properties.hydration > 60 %}bg-success{% else %}bg-warning text-dark{% endif %} me-2">
+                            {% if recipe.properties.hydration > 60 %}✓{% else %}!{% endif %}
+                        </span>
+                        <div>
+                            <strong>Hidratación {% if recipe.properties.hydration > 60 %}correcta{% else %}baja{% endif %}</strong>
+                            <div class="text-muted small">La hidratación de {{ recipe.properties.hydration }}% es 
+                            {% if recipe.properties.hydration > 60 %}óptima{% else %}inferior a la recomendada{% endif %} 
+                            para masas de {{ recipe.category }}</div>
+                        </div>
+                    </li>
+                    <li class="list-group-item bg-dark border-bottom border-secondary d-flex align-items-center">
+                        <span class="badge bg-warning text-dark me-2">!</span>
+                        <div>
+                            <strong>Revisión de escalabilidad</strong>
+                            <div class="text-muted small">Se recomienda revisar la escalabilidad para producción industrial</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Análisis de Costos -->
+        <div class="tab-pane fade" id="costs" role="tabpanel" aria-labelledby="costs-tab">
+            <h4 class="mb-4">Análisis de Costos y Escalabilidad</h4>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card bg-darker border-0 h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Desglose de Costos por Ingrediente</h5>
+                            <div class="table-responsive">
+                                <table class="table table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th>Ingrediente</th>
+                                            <th>Cantidad</th>
+                                            <th>Costo Unitario</th>
+                                            <th>Costo Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in recipe.properties.ingredient_costs|default([]) %}
+                                        <tr>
+                                            <td>{{ item.ingredient }}</td>
+                                            <td>{{ item.quantity }} {{ item.unit }}</td>
+                                            <td>{{ "%.2f"|format(item.unit_price) }} USD/{{ item.price_unit }}</td>
+                                            <td>{{ "%.2f"|format(item.cost) }} USD</td>
+                                        </tr>
+                                        {% endfor %}
+                                        <tr class="table-success text-dark">
+                                            <td colspan="3"><strong>TOTAL</strong></td>
+                                            <td><strong>{{ "%.2f"|format(recipe.properties.total_cost|default(0)) }} USD</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            {% if recipe.properties.missing_prices|default([]) %}
+                            <div class="alert alert-warning mt-3">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                <strong>Ingredientes sin precio:</strong> 
+                                {{ recipe.properties.missing_prices|join(', ') }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card bg-darker border-0 h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Métricas Económicas</h5>
+                            <div class="row g-4 mb-4">
+                                <div class="col-md-6">
+                                    <div class="border border-secondary rounded p-3 text-center">
+                                        <h3 class="text-success">{{ "%.2f"|format(recipe.properties.cost_per_kg|default(0)) }}</h3>
+                                        <p class="text-muted mb-0">USD/kg</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="border border-secondary rounded p-3 text-center">
+                                        <h3 class="text-success">{{ "%.2f"|format(recipe.properties.total_cost|default(0)) }}</h3>
+                                        <p class="text-muted mb-0">USD Total</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h6 class="mb-3">Costos Proyectados por Volumen</h6>
+                            <ul class="list-group">
+                                <li class="list-group-item bg-dark border-secondary d-flex justify-content-between align-items-center">
+                                    <span>Lote pequeño ({{ lifecycle.cost_analysis.small_batch.batch_size }})</span>
+                                    <span class="badge bg-success">{{ "%.2f"|format(lifecycle.cost_analysis.small_batch.unit_cost) }} USD/kg</span>
+                                </li>
+                                <li class="list-group-item bg-dark border-secondary d-flex justify-content-between align-items-center">
+                                    <span>Lote mediano ({{ lifecycle.cost_analysis.medium_batch.batch_size }})</span>
+                                    <span class="badge bg-success">{{ "%.2f"|format(lifecycle.cost_analysis.medium_batch.unit_cost) }} USD/kg</span>
+                                </li>
+                                <li class="list-group-item bg-dark border-secondary d-flex justify-content-between align-items-center">
+                                    <span>Producción industrial ({{ lifecycle.cost_analysis.industrial.batch_size }})</span>
+                                    <span class="badge bg-success">{{ "%.2f"|format(lifecycle.cost_analysis.industrial.unit_cost) }} USD/kg</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12">
+                    <div class="card bg-darker border-0">
+                        <div class="card-body">
+                            <h5 class="card-title">Análisis de Costos por Escala</h5>
+                            <div class="table-responsive">
+                                <table class="table table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th>Escala</th>
+                                            <th>Tamaño de Lote</th>
+                                            <th>Costo de Materiales</th>
+                                            <th>Mano de Obra</th>
+                                            <th>Gastos Generales</th>
+                                            <th>Tiempo de Preparación</th>
+                                            <th>Costo Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Lote pequeño</td>
+                                            <td>{{ lifecycle.cost_analysis.small_batch.batch_size }}</td>
+                                            <td>{{ "%.2f"|format(lifecycle.cost_analysis.small_batch.unit_cost|float * 10) }} USD</td>
+                                            <td>{{ lifecycle.cost_analysis.small_batch.labor_cost }} USD</td>
+                                            <td>{{ lifecycle.cost_analysis.small_batch.overhead }} USD</td>
+                                            <td>{{ lifecycle.cost_analysis.small_batch.setup_time }}</td>
+                                            <td>{{ "%.2f"|format((lifecycle.cost_analysis.small_batch.unit_cost|float * 10) + lifecycle.cost_analysis.small_batch.labor_cost + lifecycle.cost_analysis.small_batch.overhead) }} USD</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Lote mediano</td>
+                                            <td>{{ lifecycle.cost_analysis.medium_batch.batch_size }}</td>
+                                            <td>{{ "%.2f"|format(lifecycle.cost_analysis.medium_batch.unit_cost|float * 100) }} USD</td>
+                                            <td>{{ lifecycle.cost_analysis.medium_batch.labor_cost }} USD</td>
+                                            <td>{{ lifecycle.cost_analysis.medium_batch.overhead }} USD</td>
+                                            <td>{{ lifecycle.cost_analysis.medium_batch.setup_time }}</td>
+                                            <td>{{ "%.2f"|format((lifecycle.cost_analysis.medium_batch.unit_cost|float * 100) + lifecycle.cost_analysis.medium_batch.labor_cost + lifecycle.cost_analysis.medium_batch.overhead) }} USD</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Producción industrial</td>
+                                            <td>{{ lifecycle.cost_analysis.industrial.batch_size }}</td>
+                                            <td>{{ "%.2f"|format(lifecycle.cost_analysis.industrial.unit_cost|float * 1000) }} USD</td>
+                                            <td>{{ lifecycle.cost_analysis.industrial.labor_cost }} USD</td>
+                                            <td>{{ lifecycle.cost_analysis.industrial.overhead }} USD</td>
+                                            <td>{{ lifecycle.cost_analysis.industrial.setup_time }}</td>
+                                            <td>{{ "%.2f"|format((lifecycle.cost_analysis.industrial.unit_cost|float * 1000) + lifecycle.cost_analysis.industrial.labor_cost + lifecycle.cost_analysis.industrial.overhead) }} USD</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="alert alert-info mt-3">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Nota:</strong> Los costos proyectados son estimaciones basadas en el costo actual 
+                                de los ingredientes. Los precios de mercado pueden variar y deben verificarse regularmente.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pruebas -->
+        <div class="tab-pane fade" id="testing" role="tabpanel" aria-labelledby="testing-tab">
+            <h4 class="mb-4">Pruebas y Control de Calidad</h4>
+            <div class="alert alert-orange">
+                <i class="bi bi-info-circle me-2"></i> Este producto se encuentra actualmente en fase de pruebas.
+            </div>
+            
+            <div class="row">
+                <div class="col-md-7">
+                    <h5 class="mb-3">Resultados de Pruebas</h5>
+                    <div class="table-responsive">
+                        <table class="table table-dark">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo de Prueba</th>
+                                    <th>Resultado</th>
+                                    <th>Responsable</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2023-05-10</td>
+                                    <td>Organoléptica</td>
+                                    <td><span class="badge bg-success">Aprobado</span></td>
+                                    <td>Juan Pérez</td>
+                                </tr>
+                                <tr>
+                                    <td>2023-05-12</td>
+                                    <td>Microbiológica</td>
+                                    <td><span class="badge bg-success">Aprobado</span></td>
+                                    <td>María Gómez</td>
+                                </tr>
+                                <tr>
+                                    <td>2023-05-15</td>
+                                    <td>Físico-química</td>
+                                    <td><span class="badge bg-orange">En revisión</span></td>
+                                    <td>Carlos López</td>
+                                </tr>
+                                <tr>
+                                    <td>2023-05-18</td>
+                                    <td>Vida útil</td>
+                                    <td><span class="badge bg-secondary">Pendiente</span></td>
+                                    <td>Ana Martínez</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <h5 class="mb-3">Próximas Pruebas</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item bg-dark border-secondary d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Prueba de estabilidad</strong>
+                                <div class="text-muted small">Programada para 2023-05-25</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-success">Programar</button>
+                        </li>
+                        <li class="list-group-item bg-dark border-secondary d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Panel sensorial</strong>
+                                <div class="text-muted small">Programada para 2023-06-02</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-success">Programar</button>
+                        </li>
+                        <li class="list-group-item bg-dark border-secondary d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Prueba industrial piloto</strong>
+                                <div class="text-muted small">Pendiente de programar</div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-success">Programar</button>
+                        </li>
+                    </ul>
+                    <button class="btn btn-success w-100 mt-3">
+                        <i class="bi bi-plus-circle me-2"></i> Agregar Nueva Prueba
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Producción -->
+        <div class="tab-pane fade" id="production" role="tabpanel" aria-labelledby="production-tab">
+            <div class="text-center py-5">
+                <i class="bi bi-gear fs-1 text-muted mb-3"></i>
+                <h4 class="mb-3">Módulo de Producción</h4>
+                <p class="text-muted mb-4">La receta aún no ha entrado en fase de producción</p>
+                <button class="btn btn-success" disabled>
+                    <i class="bi bi-play-circle me-2"></i> Iniciar Fase de Producción
+                </button>
+            </div>
+        </div>
+        
+        <!-- Distribución -->
+        <div class="tab-pane fade" id="distribution" role="tabpanel" aria-labelledby="distribution-tab">
+            <div class="text-center py-5">
+                <i class="bi bi-truck fs-1 text-muted mb-3"></i>
+                <h4 class="mb-3">Módulo de Distribución</h4>
+                <p class="text-muted mb-4">La receta aún no ha entrado en fase de distribución</p>
+                <button class="btn btn-success" disabled>
+                    <i class="bi bi-play-circle me-2"></i> Iniciar Fase de Distribución
+                </button>
+            </div>
+        </div>
+        
+        <!-- Documentos -->
+        <div class="tab-pane fade" id="documents" role="tabpanel" aria-labelledby="documents-tab">
+            <h4 class="mb-4">Documentación del Producto</h4>
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <input type="text" class="form-control bg-darker border-0" placeholder="Buscar documento...">
+                        <button class="btn btn-success" type="button" aria-label="Buscar documentos">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-success">
+                        <i class="bi bi-upload me-2"></i> Subir Documento
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-dark">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Fecha</th>
+                            <th>Tamaño</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <i class="bi bi-file-earmark-text me-2"></i>
+                                Ficha técnica v1.0.pdf
+                            </td>
+                            <td>Ficha técnica</td>
+                            <td>2023-05-01</td>
+                            <td>245 KB</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-success me-1" aria-label="Descargar documento">
+                                    <i class="bi bi-download"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" aria-label="Eliminar documento">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <i class="bi bi-file-earmark-text me-2"></i>
+                                Análisis de costos.pdf
+                            </td>
+                            <td>Informe</td>
+                            <td>{{ recipe.updated_at if recipe.updated_at else recipe.created_at }}</td>
+                            <td>183 KB</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-success me-1" aria-label="Descargar documento">
+                                    <i class="bi bi-download"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" aria-label="Eliminar documento">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <i class="bi bi-file-earmark-spreadsheet me-2"></i>
+                                Costos de producción.xlsx
+                            </td>
+                            <td>Hoja de cálculo</td>
+                            <td>{{ recipe.updated_at if recipe.updated_at else recipe.created_at }}</td>
+                            <td>156 KB</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-success me-1" aria-label="Descargar documento">
+                                    <i class="bi bi-download"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" aria-label="Eliminar documento">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Historial -->
+        <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
+            <h4 class="mb-4">Historial de Cambios</h4>
+            <div class="activity-timeline">
+                <div class="activity-item d-flex pb-3 mb-3 border-bottom border-secondary">
+                    <div class="activity-icon me-3 bg-success">
+                        <i class="bi bi-plus-circle text-white"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="mb-1">Receta creada</h6>
+                            <span class="text-muted">{{ recipe.created_at }}</span>
+                        </div>
+                        <p class="mb-0 text-muted">Creación inicial de receta de {{ recipe.category }}</p>
+                    </div>
+                </div>
+                <div class="activity-item d-flex pb-3 mb-3 border-bottom border-secondary">
+                    <div class="activity-icon me-3 bg-orange">
+                        <i class="bi bi-pencil text-white"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="mb-1">Análisis de costos generado</h6>
+                            <span class="text-muted">{{ recipe.updated_at if recipe.updated_at else recipe.created_at }}</span>
+                        </div>
+                        <p class="mb-0 text-muted">Se generó el análisis de costos y escalabilidad</p>
+                    </div>
+                </div>
+                <div class="activity-item d-flex pb-3 mb-3 border-bottom border-secondary">
+                    <div class="activity-icon me-3 bg-info">
+                        <i class="bi bi-check2-circle text-white"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="mb-1">Etapa de pruebas iniciada</h6>
+                            <span class="text-muted">{{ recipe.updated_at if recipe.updated_at else recipe.created_at }}</span>
+                        </div>
+                        <p class="mb-0 text-muted">La receta ha entrado en fase de pruebas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Acciones -->
+    <div class="mt-4 d-flex justify-content-between">
+        <div>
+            <a href="{{ url_for('optimize') }}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left me-2"></i> Volver a Recetas
+            </a>
+            <button class="btn btn-outline-success">
+                <i class="bi bi-pencil me-2"></i> Editar Receta
+            </button>
+        </div>
+        <div>
+            <button class="btn btn-outline-orange me-2">
+                <i class="bi bi-share me-2"></i> Compartir
+            </button>
+            <button class="btn btn-success">
+                <i class="bi bi-download me-2"></i> Exportar Datos
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para timeline de progreso */
+    .timeline {
+        position: relative;
+        list-style: none;
+        padding: 0;
+    }
+    
+    .timeline-marker {
+        content: '';
+        top: 0;
+        left: 0;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+    
+    .pulse {
+        position: relative;
+    }
+    
+    .pulse::after {
+        content: '';
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: rgba(230, 126, 34, 0.3);
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(0.5);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1.5);
+            opacity: 0;
+        }
+    }
+    
+    /* Estilos para el historial de actividad */
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .activity-content {
+        flex: 1;
+    }
+</style>
+{% endblock %} 

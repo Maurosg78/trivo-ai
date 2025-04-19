@@ -75,6 +75,18 @@
     /* Colores mejorados para accesibilidad */
     --high-contrast-green: #44D580; /* Verde más brillante para mejor contraste */
     --high-contrast-gradient: linear-gradient(90deg, #44D580, #FFB74D); /* Gradiente de alta visibilidad */
+    /* Variables de accesibilidad */
+    --focus-ring-width: 3px;
+    --focus-ring-color: #4f98ff;
+    --focus-outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    --skip-link-bg: #4f98ff;
+    --skip-link-color: #ffffff;
+    --accessible-green: #2ecc71; /* WCAG AA compliant */
+    --accessible-orange: #e67e22; /* WCAG AA compliant */
+    --accessible-red: #e74c3c; /* WCAG AA compliant */
+    --accessible-blue: #3498db; /* WCAG AA compliant */
+    --accessible-focus-outline: 3px solid #4f98ff;
+    --min-touch-size: 44px; /* Mínimo tamaño para elementos táctiles */
 }
 
 /* Estilos para modo claro (sobreescritura) */
@@ -903,19 +915,30 @@ body.dark-mode {
 
 /* Estilos para accesibilidad */
 .skip-link {
-    background: #2c3e50;
-    color: #fff;
-    font-weight: 700;
-    left: 50%;
-    padding: 8px;
     position: absolute;
-    transform: translateY(-100%);
-    transition: transform 0.3s;
-    z-index: 1070;
+    top: -9999px;
+    left: 0;
+    background: var(--skip-link-bg);
+    color: var(--skip-link-color);
+    padding: 16px;
+    z-index: 10000;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 0 0 4px 0;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    transition: top 0.2s ease;
+    font-size: 1rem;
 }
 
 .skip-link:focus {
-    transform: translateY(0%);
+    top: 0;
+    outline: none;
+}
+
+.skip-link:hover {
+    text-decoration: underline;
+    background-color: #2c78d4;
 }
 
 /* Botón de alternar tema */
@@ -1123,4 +1146,350 @@ input:focus-visible, select:focus-visible,
 textarea:focus-visible {
     outline: 2px solid #0d6efd;
     outline-offset: 2px;
+}
+
+/* Mejora general de foco para elementos interactivos */
+a:focus-visible, 
+button:focus-visible, 
+input:focus-visible, 
+select:focus-visible, 
+textarea:focus-visible,
+[role="button"]:focus-visible,
+.btn:focus-visible,
+.form-control:focus-visible {
+    outline: var(--accessible-focus-outline);
+    outline-offset: 2px;
+    box-shadow: none;
+    text-decoration: underline;
+    z-index: 2; /* Asegurar que el elemento enfocado está por encima de otros */
+}
+
+/* Botones accesibles */
+.btn {
+    min-height: var(--min-touch-size);
+    position: relative;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+/* Botones de acción con iconos más accesibles */
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--min-touch-size);
+    min-height: var(--min-touch-size);
+}
+
+.btn-icon i {
+    pointer-events: none; /* Evitar problemas al hacer clic en iconos */
+}
+
+/* Tablas accesibles */
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table caption {
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0.75rem;
+    color: var(--text-primary);
+    text-align: left;
+    caption-side: top;
+}
+
+/* Asegurar que los enlaces de las tablas sean visibles */
+.table a {
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+/* Inputs accesibles */
+.form-control,
+.form-select {
+    min-height: var(--min-touch-size);
+    border-radius: 6px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--focus-ring-color);
+    box-shadow: 0 0 0 0.2rem rgba(79, 152, 255, 0.25);
+}
+
+/* Etiquetas de formularios más visibles */
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+/* Validación de formularios accesible */
+.was-validated .form-control:invalid,
+.form-control.is-invalid {
+    border-color: var(--accessible-red);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23e74c3c' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23e74c3c' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.was-validated .form-control:valid,
+.form-control.is-valid {
+    border-color: var(--accessible-green);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%232ecc71' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+/* Campo requerido */
+.required-field::after {
+    content: "*";
+    color: var(--accessible-red);
+    margin-left: 4px;
+}
+
+/* Badges más accesibles */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+    border-radius: 0.25rem;
+}
+
+.badge.bg-success {
+    background-color: var(--accessible-green) !important;
+    color: white;
+}
+
+.badge.bg-danger {
+    background-color: var(--accessible-red) !important;
+    color: white;
+}
+
+.badge.bg-warning {
+    background-color: var(--accessible-orange) !important;
+    color: #212529; /* Texto oscuro para mejor contraste con fondo claro */
+}
+
+.badge.bg-info {
+    background-color: var(--accessible-blue) !important;
+    color: white;
+}
+
+/* Clases para visibilidad */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.visually-hidden-focusable:not(:focus):not(:focus-within) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+/* Modo Oscuro - Ajustes para accesibilidad */
+.dark-mode .form-control,
+.dark-mode .form-select {
+    background-color: #333;
+    border-color: #555;
+    color: #f5f5f5;
+}
+
+.dark-mode .form-control:focus,
+.dark-mode .form-select:focus {
+    border-color: var(--focus-ring-color);
+    background-color: #444;
+}
+
+.dark-mode .form-label {
+    color: #f5f5f5;
+}
+
+.dark-mode .form-text {
+    color: #aaa;
+}
+
+/* Navegación de paginación accesible */
+.pagination {
+    display: flex;
+    list-style: none;
+    padding-left: 0;
+    margin: 1rem 0;
+}
+
+.pagination .page-link {
+    position: relative;
+    display: block;
+    padding: 0.5rem 0.75rem;
+    min-width: 44px;
+    min-height: 44px;
+    text-align: center;
+    line-height: 1.25;
+    border: 1px solid #dee2e6;
+    text-decoration: none;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--accessible-blue);
+    border-color: var(--accessible-blue);
+    color: white;
+    font-weight: 500;
+}
+
+.pagination .page-link:focus {
+    box-shadow: 0 0 0 0.2rem rgba(79, 152, 255, 0.25);
+    z-index: 3;
+}
+
+/* DataTables accesibles */
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 4px;
+    margin: 0 3px;
+    padding: 8px 12px;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: var(--accessible-blue) !important;
+    color: white !important;
+    border: 1px solid var(--accessible-blue);
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #f1f1f1 !important;
+    color: #333 !important;
+    border: 1px solid #ddd;
+}
+
+.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button {
+    color: #f5f5f5 !important;
+}
+
+.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: var(--accessible-blue) !important;
+    color: white !important;
+}
+
+.dark-mode .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #444 !important;
+    color: white !important;
+}
+
+/* Notificaciones */
+.toast {
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.toast-header {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+.toast-body {
+    padding: 0.75rem;
+}
+
+/* Soportes para screenreaders */
+.sr-only-focusable:not(:focus) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+/* Media queries para dispositivos táctiles */
+@media (hover: none) {
+    /* Mayor tamaño para botones en dispositivos táctiles */
+    .btn {
+        padding: 0.75rem 1rem;
+        min-height: 48px;
+    }
+    
+    .btn-sm {
+        padding: 0.5rem 0.75rem;
+        min-height: 44px;
+    }
+    
+    /* Mayor espaciado para links en dispositivos táctiles */
+    a {
+        padding: 0.25rem 0;
+        display: inline-block;
+    }
+}
+
+/* Estilos para alto contraste */
+@media (prefers-contrast: high) {
+    :root {
+        --accessible-green: #00BB00;
+        --accessible-orange: #FF8800;
+        --accessible-red: #FF0000;
+        --accessible-blue: #0000FF;
+        --focus-ring-color: #000000;
+    }
+    
+    /* Aumentar contraste en enlaces */
+    a {
+        text-decoration: underline;
+        color: #0000EE;
+    }
+    
+    a:visited {
+        color: #551A8B;
+    }
+    
+    /* Bordes más marcados */
+    .form-control, .form-select, .btn, .card {
+        border: 2px solid currentColor;
+    }
+    
+    /* Eliminar efectos sutiles que pueden reducir el contraste */
+    .card, .btn, .form-control {
+        box-shadow: none !important;
+    }
+    
+    /* Fondos y textos con mayor contraste */
+    .text-muted {
+        color: #595959 !important;
+    }
+    
+    .bg-light {
+        background-color: #FFFFFF !important;
+    }
+    
+    .bg-dark {
+        background-color: #000000 !important;
+    }
+    
+    .dark-mode {
+        --text-color: #FFFFFF;
+        --bg-primary: #000000;
+    }
 }

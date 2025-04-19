@@ -1,0 +1,443 @@
+{% extends 'base.html' %}
+
+{% block title %}Asistente de Recetas - TRIVO-AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        height: 60vh;
+        overflow-y: auto;
+        padding: 20px;
+        background-color: var(--bg-darker);
+        border-radius: 0.5rem;
+        margin-bottom: 20px;
+        border: 1px solid var(--border-color);
+    }
+    
+    .message {
+        padding: 10px 15px;
+        border-radius: 15px;
+        margin-bottom: 15px;
+        max-width: 80%;
+        position: relative;
+    }
+    
+    .user-message {
+        background-color: var(--primary-color);
+        color: white;
+        align-self: flex-end;
+        margin-left: auto;
+        border-bottom-right-radius: 5px;
+    }
+    
+    .assistant-message {
+        background-color: var(--secondary-bg);
+        color: var(--text-color);
+        align-self: flex-start;
+        border-bottom-left-radius: 5px;
+    }
+    
+    .message-time {
+        font-size: 0.7rem;
+        opacity: 0.7;
+        text-align: right;
+        margin-top: 5px;
+    }
+    
+    .chat-input {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .chat-input textarea {
+        flex-grow: 1;
+        border-radius: 20px;
+        padding: 12px 15px;
+        resize: none;
+        background-color: var(--bg-darker);
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+    }
+    
+    .chat-input button {
+        border-radius: 50%;
+        width: 46px;
+        height: 46px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .recipe-preview {
+        padding: 20px;
+        background-color: var(--bg-darker);
+        border-radius: 0.5rem;
+        margin-top: 20px;
+        border: 1px solid var(--border-color);
+        display: none;
+    }
+    
+    .recipe-preview h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: var(--primary-color);
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+    }
+    
+    .recipe-preview ul {
+        padding-left: 20px;
+    }
+    
+    .recipe-preview ol {
+        padding-left: 20px;
+    }
+    
+    .recipe-section {
+        margin-bottom: 15px;
+    }
+    
+    .recipe-section h4 {
+        margin-bottom: 10px;
+        color: var(--text-color);
+    }
+    
+    .recipe-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .recipe-meta-item {
+        background-color: var(--secondary-bg);
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .summary-box {
+        background-color: var(--secondary-bg);
+        border-left: 4px solid var(--primary-color);
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 0 5px 5px 0;
+    }
+    
+    .summary-box ul {
+        margin: 10px 0 0 0;
+        padding-left: 20px;
+    }
+    
+    @media (max-width: 768px) {
+        .chat-container {
+            height: 50vh;
+        }
+        
+        .message {
+            max-width: 90%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h1 class="mb-0">Asistente de Recetas</h1>
+                <button id="startNewChat" class="btn btn-outline-primary">
+                    <i class="bi bi-plus-circle me-2"></i> Nueva Conversación
+                </button>
+            </div>
+            
+            <p class="text-muted mb-4">Habla con el asistente para crear tu receta perfecta. El asistente analizará tus preferencias y te hará preguntas para obtener todos los detalles necesarios.</p>
+            
+            <!-- Chat container -->
+            <div class="chat-container d-flex flex-column" id="chatMessages">
+                <!-- Messages will be appended here -->
+                <div class="message assistant-message">
+                    <p>¡Hola! Soy el asistente de TRIVO-AI. ¿Qué tipo de pizza quieres preparar hoy?</p>
+                    <div class="message-time">Ahora</div>
+                </div>
+            </div>
+            
+            <!-- Chat input -->
+            <div class="chat-input">
+                <textarea id="userInput" rows="1" placeholder="Escribe tu mensaje aquí..." class="form-control"></textarea>
+                <button id="sendMessage" class="btn btn-primary" title="Enviar mensaje">
+                    <i class="bi bi-send"></i>
+                </button>
+            </div>
+            
+            <!-- Recipe preview (initially hidden) -->
+            <div class="recipe-preview" id="recipePreview">
+                <h3 id="recipeName">Nombre de la Receta</h3>
+                <p id="recipeDescription" class="text-muted">Descripción de la receta.</p>
+                
+                <div class="recipe-section">
+                    <h4><i class="bi bi-basket me-2"></i> Ingredientes</h4>
+                    <ul id="recipeIngredients">
+                        <!-- Ingredients will be added here -->
+                    </ul>
+                </div>
+                
+                <div class="recipe-section">
+                    <h4><i class="bi bi-list-ol me-2"></i> Preparación</h4>
+                    <ol id="recipeSteps">
+                        <!-- Steps will be added here -->
+                    </ol>
+                </div>
+                
+                <div class="recipe-meta">
+                    <div class="recipe-meta-item" id="recipeDifficulty">
+                        <i class="bi bi-bar-chart me-2"></i> Dificultad: Media
+                    </div>
+                    <div class="recipe-meta-item" id="recipePrepTime">
+                        <i class="bi bi-clock me-2"></i> Preparación: 20 min
+                    </div>
+                    <div class="recipe-meta-item" id="recipeCookTime">
+                        <i class="bi bi-fire me-2"></i> Cocción: 15 min
+                    </div>
+                    <div class="recipe-meta-item" id="recipeServings">
+                        <i class="bi bi-people me-2"></i> Porciones: 4
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-end mt-4">
+                    <a id="downloadRecipe" href="#" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-download me-2"></i> Descargar Receta
+                    </a>
+                    <button id="saveRecipe" class="btn btn-primary">
+                        <i class="bi bi-save me-2"></i> Guardar Receta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendMessageBtn = document.getElementById('sendMessage');
+        const startNewChatBtn = document.getElementById('startNewChat');
+        const recipePreview = document.getElementById('recipePreview');
+        
+        // Variables para seguimiento del estado
+        let conversationFinished = false;
+        let conversation = [];
+        
+        // Función para añadir un mensaje al chat
+        function addMessage(text, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = isUser ? 'message user-message' : 'message assistant-message';
+            
+            // Verificar si el mensaje contiene un resumen de la solicitud
+            if (!isUser && text.includes('Resumen de tu solicitud:')) {
+                const parts = text.split('Resumen de tu solicitud:');
+                
+                const mainText = document.createElement('p');
+                mainText.textContent = parts[0].trim();
+                messageDiv.appendChild(mainText);
+                
+                const summaryBox = document.createElement('div');
+                summaryBox.className = 'summary-box';
+                
+                const summaryLines = parts[1].trim().split('\n');
+                const summaryList = document.createElement('ul');
+                
+                summaryLines.forEach(line => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = line.replace('- ', '');
+                    summaryList.appendChild(listItem);
+                });
+                
+                summaryBox.appendChild(summaryList);
+                messageDiv.appendChild(summaryBox);
+                
+                // Marcar la conversación como finalizada para mostrar la receta
+                conversationFinished = true;
+            } else {
+                const textPara = document.createElement('p');
+                textPara.textContent = text;
+                messageDiv.appendChild(textPara);
+            }
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            
+            const now = new Date();
+            timeDiv.textContent = now.getHours().toString().padStart(2, '0') + ':' + 
+                                now.getMinutes().toString().padStart(2, '0');
+            
+            messageDiv.appendChild(timeDiv);
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll al fondo del chat
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Guardar mensaje en el historial de conversación
+            conversation.push({
+                role: isUser ? 'user' : 'assistant',
+                text: text,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Si la conversación ha terminado, mostrar la vista previa de la receta
+            if (conversationFinished) {
+                setTimeout(() => {
+                    fetchRecipePreview();
+                }, 1000);
+            }
+        }
+        
+        // Enviar mensaje cuando se hace clic en el botón o se presiona Enter
+        function sendMessage() {
+            const text = userInput.value.trim();
+            if (text === '') return;
+            
+            // Deshabilitar conversación si ya ha terminado
+            if (conversationFinished) {
+                userInput.value = '';
+                return;
+            }
+            
+            // Añadir mensaje del usuario al chat
+            addMessage(text, true);
+            
+            // Limpiar el input
+            userInput.value = '';
+            
+            // Simular respuesta del asistente (en una app real se enviaría al servidor)
+            setTimeout(() => {
+                // Simular procesamiento del servidor
+                fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: text, conversation: conversation })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    addMessage(data.response);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    addMessage('Lo siento, ha habido un error al procesar tu mensaje. Por favor, inténtalo de nuevo.');
+                });
+            }, 500);
+        }
+        
+        // Obtener vista previa de la receta
+        function fetchRecipePreview() {
+            // En una app real esto se haría con una llamada a la API
+            fetch('/api/generate_recipe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ conversation: conversation })
+            })
+            .then(response => response.json())
+            .then(recipe => {
+                // Rellenar la vista previa con los datos de la receta
+                populateRecipePreview(recipe);
+                
+                // Mostrar la vista previa
+                recipePreview.style.display = 'block';
+                
+                // Scroll a la vista previa
+                recipePreview.scrollIntoView({ behavior: 'smooth' });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addMessage('Lo siento, ha habido un error al generar la receta. Por favor, inténtalo de nuevo.');
+            });
+        }
+        
+        // Rellenar la vista previa de la receta
+        function populateRecipePreview(recipe) {
+            document.getElementById('recipeName').textContent = recipe.nombre;
+            document.getElementById('recipeDescription').textContent = recipe.descripcion;
+            
+            // Ingredientes
+            const ingredientsList = document.getElementById('recipeIngredients');
+            ingredientsList.innerHTML = '';
+            recipe.ingredientes.forEach(ing => {
+                const li = document.createElement('li');
+                li.textContent = `${ing.name}: ${ing.amount} ${ing.unit}`;
+                ingredientsList.appendChild(li);
+            });
+            
+            // Pasos
+            const stepsList = document.getElementById('recipeSteps');
+            stepsList.innerHTML = '';
+            recipe.metodo.forEach(step => {
+                const li = document.createElement('li');
+                li.textContent = step;
+                stepsList.appendChild(li);
+            });
+            
+            // Metadatos
+            document.getElementById('recipeDifficulty').innerHTML = `<i class="bi bi-bar-chart me-2"></i> Dificultad: ${recipe.dificultad}`;
+            document.getElementById('recipePrepTime').innerHTML = `<i class="bi bi-clock me-2"></i> Preparación: ${recipe.tiempo_preparacion} min`;
+            document.getElementById('recipeCookTime').innerHTML = `<i class="bi bi-fire me-2"></i> Cocción: ${recipe.tiempo_coccion} min`;
+            document.getElementById('recipeServings').innerHTML = `<i class="bi bi-people me-2"></i> Porciones: ${recipe.porciones}`;
+            
+            // Botón de descarga (en una app real generaría un PDF o similar)
+            document.getElementById('downloadRecipe').setAttribute('download', `${recipe.nombre}.json`);
+            document.getElementById('downloadRecipe').setAttribute('href', `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(recipe, null, 2))}`);
+        }
+        
+        // Iniciar nueva conversación
+        function startNewChat() {
+            // Limpiar el chat
+            chatMessages.innerHTML = '';
+            
+            // Añadir mensaje inicial
+            addMessage('¡Hola! Soy el asistente de TRIVO-AI. ¿Qué tipo de pizza quieres preparar hoy?');
+            
+            // Restablecer variables
+            conversationFinished = false;
+            conversation = [];
+            
+            // Ocultar vista previa
+            recipePreview.style.display = 'none';
+            
+            // Enfocar el input
+            userInput.focus();
+        }
+        
+        // Eventos
+        sendMessageBtn.addEventListener('click', sendMessage);
+        
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        startNewChatBtn.addEventListener('click', startNewChat);
+        
+        // Auto-resize textarea
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if (this.scrollHeight > 150) {
+                this.style.height = '150px';
+                this.style.overflowY = 'auto';
+            } else {
+                this.style.overflowY = 'hidden';
+            }
+        });
+    });
+</script>
+{% endblock %} 

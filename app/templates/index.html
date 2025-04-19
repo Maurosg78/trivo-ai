@@ -79,7 +79,7 @@
                     
                     <form action="/natural-language" method="post" class="mt-4">
                         <div class="mb-4">
-                            <textarea class="form-control natural-language-input" name="natural_text" id="natural_text" rows="3" placeholder="Ej: Quiero una masa de pizza familiar, de color roja, sin gluten, nutricionalmente optimizada para niños. Tipo margarita." required></textarea>
+                            <textarea class="form-control natural-language-input" name="user_text" id="user_text" rows="3" placeholder="Ej: Quiero una pizza familiar, de masa gruesa, con pepperoni y queso extra." required></textarea>
                         </div>
                         <button type="submit" class="natural-language-submit mb-4"><i class="fas fa-wand-magic-sparkles me-2"></i>Generar Receta</button>
                         <div class="text-muted small">Describe tu receta ideal usando lenguaje natural y nuestro sistema inteligente la creará para ti.</div>
@@ -263,7 +263,7 @@ best_recipe = get_best_individual(population)
             const nlForm = document.querySelector('form[action="/natural-language"]');
             if (nlForm) {
                 nlForm.addEventListener('submit', function(e) {
-                    const textarea = this.querySelector('textarea[name="natural_text"]');
+                    const textarea = this.querySelector('textarea[name="user_text"]');
                     const submitBtn = this.querySelector('.natural-language-submit');
                     
                     // Validar que hay texto en el área de texto

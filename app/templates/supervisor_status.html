@@ -1,0 +1,548 @@
+{% extends 'base.html' %}
+
+{% block title %}Estado del Supervisor LLM - TRIVO-AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="section-title mb-4">Panel de Control: Supervisor LLM</h1>
+    <p class="lead text-muted mb-5">Visualización del rendimiento y actividad del sistema de supervisión LLM que valida las salidas de TRIVO-AI.</p>
+
+    <!-- Métricas del Supervisor -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card bg-dark rounded-xl">
+                <div class="card-header bg-dark border-secondary">
+                    <h4 class="mb-0">Resumen de Actividad</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-darker rounded-xl">
+                                <div class="text-primary mb-2">
+                                    <i class="bi bi-check2-all fs-3"></i>
+                                </div>
+                                <h5 class="mb-1">{{ metrics.total_reviews }}</h5>
+                                <p class="text-muted mb-0 small">Total revisiones</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-darker rounded-xl">
+                                <div class="text-success mb-2">
+                                    <i class="bi bi-check-circle fs-3"></i>
+                                </div>
+                                <h5 class="mb-1">{{ metrics.approved_reviews }}</h5>
+                                <p class="text-muted mb-0 small">Aprobadas</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-darker rounded-xl">
+                                <div class="text-danger mb-2">
+                                    <i class="bi bi-x-circle fs-3"></i>
+                                </div>
+                                <h5 class="mb-1">{{ metrics.rejected_reviews }}</h5>
+                                <p class="text-muted mb-0 small">Rechazadas</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 bg-darker rounded-xl">
+                                <div class="text-orange mb-2">
+                                    <i class="bi bi-percent fs-3"></i>
+                                </div>
+                                <h5 class="mb-1">{{ "%.1f"|format(metrics.approval_rate) }}%</h5>
+                                <p class="text-muted mb-0 small">Tasa de aprobación</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-darker rounded-xl">
+                                <h5 class="mb-3">Actividad Diaria</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Días activo:</span>
+                                    <span class="badge bg-info px-3 py-2">{{ metrics.days_active }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span>Promedio diario:</span>
+                                    <span class="badge bg-info px-3 py-2">{{ "%.1f"|format(metrics.avg_reviews_per_day) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-darker rounded-xl h-100">
+                                <h5 class="mb-3">Estado del Sistema</h5>
+                                <div class="d-flex align-items-center">
+                                    <div class="status-indicator bg-success me-2 pulse"></div>
+                                    <span>Sistema de supervisión operativo y funcionando correctamente</span>
+                                </div>
+                                <div class="text-muted small mt-2">
+                                    Última actualización: {{ metrics.days_active }} días atrás
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span>Reglas aprendidas:</span>
+                                    <span class="badge bg-primary px-3 py-2">{{ metrics.learned_rules_count }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                    <span>Datos de retroalimentación:</span>
+                                    <span class="badge bg-primary px-3 py-2">{{ metrics.feedback_count }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pestañas para diferentes secciones -->
+    <ul class="nav nav-tabs" id="supervisorTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab" aria-controls="history" aria-selected="true">Historial</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="rules-tab" data-bs-toggle="tab" data-bs-target="#rules" type="button" role="tab" aria-controls="rules" aria-selected="false">Reglas Aprendidas</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="feedback-tab" data-bs-toggle="tab" data-bs-target="#feedback" type="button" role="tab" aria-controls="feedback" aria-selected="false">Retroalimentación</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="architecture-tab" data-bs-toggle="tab" data-bs-target="#architecture" type="button" role="tab" aria-controls="architecture" aria-selected="false">Arquitectura</button>
+        </li>
+    </ul>
+    
+    <div class="tab-content bg-dark rounded-b-xl p-4" id="supervisorTabsContent">
+        <!-- Historial de Revisiones -->
+        <div class="tab-pane fade show active" id="history" role="tabpanel" aria-labelledby="history-tab">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="mb-0">Historial de Revisiones</h4>
+                <button class="btn btn-sm btn-outline-primary">Exportar Datos</button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-dark">
+                    <thead>
+                        <tr>
+                            <th>ID de Receta</th>
+                            <th>Fecha y Hora</th>
+                            <th>Resultado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if history %}
+                            {% for item in history %}
+                                <tr>
+                                    <td>{{ item.recipe_id }}</td>
+                                    <td>{{ item.timestamp }}</td>
+                                    <td>
+                                        {% if item.approved %}
+                                            <span class="badge bg-success">Aprobado</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Rechazado</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center">No hay revisiones registradas</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Reglas Aprendidas -->
+        <div class="tab-pane fade" id="rules" role="tabpanel" aria-labelledby="rules-tab">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="mb-0">Reglas Aprendidas por el Supervisor</h4>
+                <div>
+                    <button class="btn btn-sm btn-outline-success me-2">
+                        <i class="bi bi-download me-1"></i> Exportar
+                    </button>
+                    <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#newRuleModal">
+                        <i class="bi bi-plus-circle me-1"></i> Nueva Regla
+                    </button>
+                </div>
+            </div>
+            
+            {% if learned_rules %}
+                <div class="table-responsive">
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                                <th>Acción Correctiva</th>
+                                <th>Criticidad</th>
+                                <th>Refuerzos</th>
+                                <th>Creación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rule in learned_rules %}
+                                <tr>
+                                    <td>
+                                        {% if rule.feedback_type == 'ingredients' %}
+                                            <span class="badge bg-info">Ingredientes</span>
+                                        {% elif rule.feedback_type == 'instructions' %}
+                                            <span class="badge bg-primary">Instrucciones</span>
+                                        {% elif rule.feedback_type == 'dietary' %}
+                                            <span class="badge bg-warning text-dark">Restricciones</span>
+                                        {% elif rule.feedback_type == 'general' %}
+                                            <span class="badge bg-secondary">General</span>
+                                        {% else %}
+                                            <span class="badge bg-light text-dark">{{ rule.feedback_type }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ rule.issue_description }}</td>
+                                    <td>{{ rule.correct_action }}</td>
+                                    <td>
+                                        {% if rule.is_critical %}
+                                            <span class="badge bg-danger">Crítico</span>
+                                        {% else %}
+                                            <span class="badge bg-success">Sugerencia</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ rule.times_reinforced }}</td>
+                                    <td>{{ rule.created_at }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i> 
+                    El supervisor aún no ha aprendido ninguna regla. A medida que reciba retroalimentación, irá generando reglas automáticamente.
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Agregar Retroalimentación -->
+        <div class="tab-pane fade" id="feedback" role="tabpanel" aria-labelledby="feedback-tab">
+            <h4 class="mb-4">Enseñar al Supervisor</h4>
+            <p class="text-muted mb-4">A través de esta interfaz, puedes proporcionar retroalimentación al supervisor para que aprenda de casos específicos. Cuando se proporciona retroalimentación similar varias veces, el sistema generará automáticamente nuevas reglas.</p>
+            
+            <div class="card bg-darker mb-4">
+                <div class="card-body">
+                    <form action="/supervisor/feedback" method="post" id="feedbackForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="recipe_id" class="form-label">ID de Receta <small class="text-muted">(Opcional)</small></label>
+                                <input type="text" class="form-control bg-dark border-secondary" id="recipe_id" name="recipe_id" placeholder="ID de la receta relacionada">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="feedback_type" class="form-label">Tipo de Retroalimentación</label>
+                                <select class="form-select bg-dark border-secondary" id="feedback_type" name="feedback_type" required>
+                                    <option value="">Selecciona un tipo...</option>
+                                    <option value="ingredients">Ingredientes</option>
+                                    <option value="instructions">Instrucciones</option>
+                                    <option value="dietary">Restricciones Dietéticas</option>
+                                    <option value="general">General</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="issue_description" class="form-label">Descripción del Problema</label>
+                                <input type="text" class="form-control bg-dark border-secondary" id="issue_description" name="issue_description" placeholder="Qué problema debería detectar el supervisor" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="correct_action" class="form-label">Acción Correcta</label>
+                                <textarea class="form-control bg-dark border-secondary" id="correct_action" name="correct_action" rows="3" placeholder="Qué debería sugerir o corregir el supervisor" required></textarea>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="is_critical" name="is_critical">
+                                    <label class="form-check-label" for="is_critical">Marcar como problema crítico (bloquea la aprobación)</label>
+                                </div>
+                            </div>
+                            <div class="col-md-12 text-end">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-send me-2"></i> Enviar Retroalimentación
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="alert alert-orange">
+                <div class="d-flex">
+                    <div class="me-3">
+                        <i class="bi bi-lightbulb-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h5>¿Cómo aprende el supervisor?</h5>
+                        <p class="mb-0">El supervisor LLM aprende de forma colaborativa a través de la retroalimentación proporcionada por expertos humanos. Cuando detecta patrones recurrentes (al menos 3 instancias similares), genera automáticamente nuevas reglas que aplica en futuras revisiones.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Arquitectura del Sistema -->
+        <div class="tab-pane fade" id="architecture" role="tabpanel" aria-labelledby="architecture-tab">
+            <h4 class="mb-4">Arquitectura de Supervisión</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-3">Descripción del Sistema</h5>
+                    <p>El sistema de supervisión LLM funciona como una capa de control de calidad sobre las salidas generadas por el modelo especializado de TRIVO-AI:</p>
+                    <ul class="list-group list-group-flush mb-4 bg-transparent">
+                        <li class="list-group-item bg-transparent border-0 ps-0">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Verifica la coherencia interna de recetas
+                        </li>
+                        <li class="list-group-item bg-transparent border-0 ps-0">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Valida parámetros técnicos de formulación
+                        </li>
+                        <li class="list-group-item bg-transparent border-0 ps-0">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Detecta problemas en restricciones dietéticas
+                        </li>
+                        <li class="list-group-item bg-transparent border-0 ps-0">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Evalúa la viabilidad de análisis de ciclo de vida
+                        </li>
+                        <li class="list-group-item bg-transparent border-0 ps-0">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            Aprende y mejora continuamente mediante retroalimentación
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="mb-3">Diagrama de Flujo</h5>
+                    <div class="diagram-container p-3 bg-darker rounded-xl">
+                        <pre class="text-light mb-0">
+┌─────────────────┐    ┌─────────────────┐
+│                 │    │                 │
+│   Usuario       │───▶│   TRIVO-AI      │
+│                 │    │                 │
+└─────────────────┘    └───────┬─────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │                 │
+                       │  LLM Supervisor ├─────┐
+                       │                 │     │
+                       └───────┬─────────┘     │
+                                │               │
+                                ▼               │
+┌─────────────────┐    ┌─────────────────┐     │
+│                 │    │                 │     │
+│   Usuario       │◀───│ Resultado Final │     │
+│                 │    │                 │     │
+└────────┬────────┘    └─────────────────┘     │
+         │                                     │
+         │            ┌─────────────────┐      │
+         └───────────▶│  Feedback       │──────┘
+                      │  Humano         │
+                      └─────────────────┘</pre>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <h5 class="mb-3">Ciclo de Aprendizaje</h5>
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="card bg-darker h-100">
+                            <div class="card-body text-center">
+                                <div class="circular-icon bg-primary mx-auto mb-3">1</div>
+                                <h6>Supervisión</h6>
+                                <p class="small text-muted mb-0">El LLM valida la salida de TRIVO-AI según reglas predefinidas</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-darker h-100">
+                            <div class="card-body text-center">
+                                <div class="circular-icon bg-info mx-auto mb-3">2</div>
+                                <h6>Retroalimentación</h6>
+                                <p class="small text-muted mb-0">Expertos humanos proporcionan correcciones y sugerencias</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-darker h-100">
+                            <div class="card-body text-center">
+                                <div class="circular-icon bg-success mx-auto mb-3">3</div>
+                                <h6>Generación de Reglas</h6>
+                                <p class="small text-muted mb-0">Se crean nuevas reglas a partir de patrones detectados</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-darker h-100">
+                            <div class="card-body text-center">
+                                <div class="circular-icon bg-orange mx-auto mb-3">4</div>
+                                <h6>Mejora Continua</h6>
+                                <p class="small text-muted mb-0">El sistema aplica las nuevas reglas a futuras validaciones</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para añadir regla manualmente -->
+    <div class="modal fade" id="newRuleModal" tabindex="-1" aria-labelledby="newRuleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="newRuleModalLabel">Añadir Regla Manualmente</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="/supervisor/add-rule" method="post" id="addRuleForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="rule_feedback_type" class="form-label">Tipo de Regla</label>
+                                <select class="form-select bg-darker border-secondary" id="rule_feedback_type" name="feedback_type" required>
+                                    <option value="">Selecciona un tipo...</option>
+                                    <option value="ingredients">Ingredientes</option>
+                                    <option value="instructions">Instrucciones</option>
+                                    <option value="dietary">Restricciones Dietéticas</option>
+                                    <option value="general">General</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="rule_is_critical" class="form-label">Nivel de Criticidad</label>
+                                <select class="form-select bg-darker border-secondary" id="rule_is_critical" name="is_critical" required>
+                                    <option value="false">Sugerencia (no bloquea)</option>
+                                    <option value="true">Crítico (bloquea aprobación)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="rule_issue_description" class="form-label">Patrón a Detectar</label>
+                                <input type="text" class="form-control bg-darker border-secondary" id="rule_issue_description" name="issue_description" placeholder="Palabra clave o patrón a buscar" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="rule_correct_action" class="form-label">Acción o Mensaje</label>
+                                <textarea class="form-control bg-darker border-secondary" id="rule_correct_action" name="correct_action" rows="3" placeholder="Mensaje o acción a realizar cuando se detecte el patrón" required></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" form="addRuleForm" class="btn btn-success">Guardar Regla</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+    
+    .pulse {
+        position: relative;
+    }
+    
+    .pulse::after {
+        content: '';
+        position: absolute;
+        top: -4px;
+        left: -4px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: rgba(40, 167, 69, 0.3);
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(0.5);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1.5);
+            opacity: 0;
+        }
+    }
+    
+    .diagram-container {
+        overflow-x: auto;
+    }
+    
+    .nav-tabs {
+        border-color: #2c3034;
+    }
+    
+    .nav-tabs .nav-link {
+        color: rgba(255,255,255,.6);
+        border: none;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        color: rgba(255,255,255,.9);
+        border-bottom-color: rgba(255,255,255,.3);
+        background-color: transparent;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #fff;
+        background-color: transparent;
+        border-bottom-color: #0d6efd;
+    }
+    
+    .rounded-b-xl {
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+    }
+    
+    .bg-darker {
+        background-color: #212529;
+    }
+    
+    .circular-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Manejar el cambio de pestañas
+        const triggerTabList = document.querySelectorAll('#supervisorTabs button')
+        triggerTabList.forEach(triggerEl => {
+            triggerEl.addEventListener('click', event => {
+                event.preventDefault()
+                const tab = new bootstrap.Tab(triggerEl)
+                tab.show()
+            })
+        })
+        
+        // Animación para tablas
+        const tableRows = document.querySelectorAll('table tbody tr');
+        tableRows.forEach((row, index) => {
+            row.style.opacity = '0';
+            row.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                row.style.opacity = '1';
+                row.style.transform = 'translateY(0)';
+            }, 50 * index);
+        });
+    });
+</script>
+{% endblock %} 

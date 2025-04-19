@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha Técnica - {{ recipe.recipe_info.name }}</title>
+    <style>
+        @page {
+            size: {{ page_size }};
+            margin: 1cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            font-size: 10pt;
+            line-height: 1.4;
+            color: #333;
+        }
+        .document {
+            max-width: 21cm;
+            margin: 0 auto;
+        }
+        .header {
+            padding: 0.5cm 0;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header img {
+            max-height: 2cm;
+        }
+        .header-text {
+            text-align: right;
+        }
+        h1 {
+            font-size: 18pt;
+            margin: 0.5cm 0;
+            color: #0066cc;
+            text-align: center;
+        }
+        h2 {
+            font-size: 14pt;
+            margin: 0.3cm 0;
+            color: #0066cc;
+            page-break-after: avoid;
+            border-bottom: 1px solid #0066cc;
+        }
+        h3 {
+            font-size: 12pt;
+            margin: 0.2cm 0;
+            color: #333;
+            page-break-after: avoid;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.3cm 0 0.5cm 0;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 0.2cm;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        .info-block {
+            margin-bottom: 0.5cm;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.3cm;
+        }
+        .info-item {
+            margin-bottom: 0.2cm;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .process-step {
+            margin-bottom: 0.3cm;
+            border-left: 3px solid #0066cc;
+            padding-left: 0.2cm;
+        }
+        .critical {
+            background-color: #fff0f0;
+        }
+        .step-header {
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+        .allergens-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.2cm;
+        }
+        .allergen-item {
+            border: 1px solid #ccc;
+            padding: 0.2cm;
+            text-align: center;
+        }
+        .allergen-present {
+            background-color: #ffd700;
+            font-weight: bold;
+        }
+        .footer {
+            position: running(footer);
+            text-align: center;
+            font-size: 8pt;
+            color: #777;
+            border-top: 1px solid #ccc;
+            padding-top: 0.2cm;
+        }
+        .page-number:before {
+            content: counter(page);
+        }
+        .page-count:before {
+            content: counter(pages);
+        }
+        @page {
+            @bottom-center {
+                content: element(footer);
+            }
+        }
+        .quality-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.3cm;
+        }
+        .nutrition-table {
+            width: 70%;
+            margin: 0 auto;
+        }
+        .nutrition-table th {
+            text-align: center;
+        }
+        .nutrition-table td:nth-child(2),
+        .nutrition-table td:nth-child(3) {
+            text-align: center;
+        }
+        .barcode {
+            text-align: center;
+            margin: 0.5cm 0;
+        }
+        .barcode img {
+            max-width: 7cm;
+            height: auto;
+        }
+        .signature-block {
+            margin-top: 1cm;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1cm;
+        }
+        .signature {
+            text-align: center;
+            margin-top: 2cm;
+            border-top: 1px solid #000;
+            padding-top: 0.2cm;
+        }
+        .warning-box {
+            border: 2px solid #cc0000;
+            padding: 0.3cm;
+            margin: 0.5cm 0;
+            font-weight: bold;
+            color: #cc0000;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="document">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h2>FICHA TÉCNICA DE PRODUCTO</h2>
+                <div>Código: {{ recipe.id }}</div>
+                <div>Versión: {{ recipe.version }}</div>
+            </div>
+            <div class="header-text">
+                <div>Fecha: {{ current_date }}</div>
+                <div>Elaborado por: {{ recipe.author }}</div>
+            </div>
+        </div>
+
+        <!-- Recipe Information -->
+        <h1>{{ recipe.recipe_info.name }}</h1>
+        
+        <div class="info-block">
+            <p>{{ recipe.recipe_info.description }}</p>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Categoría:</span> {{ recipe.recipe_info.category }}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Rendimiento:</span> 
+                    {{ recipe.recipe_info.yield.amount }} {{ recipe.recipe_info.yield.unit }}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Tiempo Total:</span> 
+                    {{ recipe.process.total_production_time }} minutos
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Dificultad:</span> {{ recipe.recipe_info.difficulty }}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Mercado Objetivo:</span> {{ recipe.recipe_info.target_market }}
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Tamaño de Porción:</span> {{ recipe.recipe_info.serving_size }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Ingredients -->
+        <h2>Ingredientes</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Ingrediente</th>
+                    <th>Cantidad</th>
+                    <th>Unidad</th>
+                    <th>%</th>
+                    <th>Función</th>
+                    <th>Crítico</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ingredient in recipe.ingredients %}
+                <tr {% if ingredient.critical %}class="critical"{% endif %}>
+                    <td>{{ ingredient.order }}</td>
+                    <td>{{ ingredient.name }}</td>
+                    <td>{{ ingredient.amount }}</td>
+                    <td>{{ ingredient.unit }}</td>
+                    <td>{{ ingredient.percentage }}%</td>
+                    <td>{{ ingredient.function }}</td>
+                    <td>{% if ingredient.critical %}Sí{% else %}No{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Process -->
+        <h2>Proceso de Elaboración</h2>
+        
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Tiempo de Preparación:</span> 
+                {{ recipe.process.preparation_time }} min
+            </div>
+            <div class="info-item">
+                <span class="info-label">Tiempo de Mezcla:</span> 
+                {{ recipe.process.mixing_time }} min
+            </div>
+            <div class="info-item">
+                <span class="info-label">Tiempo de Fermentación:</span> 
+                {{ recipe.process.fermentation_time }} min
+            </div>
+            <div class="info-item">
+                <span class="info-label">Tiempo de Horneado:</span> 
+                {{ recipe.process.baking_time }} min
+            </div>
+            <div class="info-item">
+                <span class="info-label">Tiempo de Enfriamiento:</span> 
+                {{ recipe.process.cooling_time }} min
+            </div>
+            <div class="info-item">
+                <span class="info-label">Tiempo Total de Producción:</span> 
+                {{ recipe.process.total_production_time }} min
+            </div>
+        </div>
+        
+        <!-- Process Steps -->
+        <h3>Pasos del Proceso</h3>
+        {% for step in recipe.process.steps %}
+        <div class="process-step {% if step.critical %}critical{% endif %}">
+            <div class="step-header">
+                <div>{{ step.order }}. {{ step.name }}</div>
+                <div>{{ step.time }} min | {{ step.temperature }}</div>
+            </div>
+            <div>{{ step.description }}</div>
+        </div>
+        {% endfor %}
+        
+        <!-- Critical Control Points -->
+        {% if recipe.process.critical_control_points %}
+        <h3>Puntos Críticos de Control</h3>
+        <ul>
+            {% for point in recipe.process.critical_control_points %}
+            <li>{{ point }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <!-- Quality Parameters -->
+        <h2>Parámetros de Calidad</h2>
+        <div class="quality-grid">
+            <div class="info-item">
+                <span class="info-label">Apariencia:</span> {{ recipe.quality_parameters.appearance }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">Textura:</span> {{ recipe.quality_parameters.texture }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">Sabor:</span> {{ recipe.quality_parameters.taste }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">Aroma:</span> {{ recipe.quality_parameters.aroma }}
+            </div>
+            {% if recipe.quality_parameters.ph %}
+            <div class="info-item">
+                <span class="info-label">pH:</span> {{ recipe.quality_parameters.ph }}
+            </div>
+            {% endif %}
+            {% if recipe.quality_parameters.moisture %}
+            <div class="info-item">
+                <span class="info-label">Humedad:</span> {{ recipe.quality_parameters.moisture }}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Nutrition Information -->
+        <h2>Información Nutricional</h2>
+        <table class="nutrition-table">
+            <thead>
+                <tr>
+                    <th>Nutriente</th>
+                    <th>Por 100g</th>
+                    <th>% Valor Diario*</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Calorías (kcal)</td>
+                    <td>{{ recipe.nutrition.per_100g.calories }}</td>
+                    <td>-</td>
+                </tr>
+                <tr>
+                    <td>Proteínas (g)</td>
+                    <td>{{ recipe.nutrition.per_100g.protein }}</td>
+                    <td>{{ recipe.nutrition.daily_values.protein|default('-') }}</td>
+                </tr>
+                <tr>
+                    <td>Carbohidratos totales (g)</td>
+                    <td>{{ recipe.nutrition.per_100g.carbohydrates }}</td>
+                    <td>{{ recipe.nutrition.daily_values.carbohydrates|default('-') }}</td>
+                </tr>
+                <tr>
+                    <td>- Azúcares (g)</td>
+                    <td>{{ recipe.nutrition.per_100g.sugars }}</td>
+                    <td>{{ recipe.nutrition.daily_values.sugars|default('-') }}</td>
+                </tr>
+                <tr>
+                    <td>Grasas totales (g)</td>
+                    <td>{{ recipe.nutrition.per_100g.fat }}</td>
+                    <td>{{ recipe.nutrition.daily_values.fat|default('-') }}</td>
+                </tr>
+                <tr>
+                    <td>- Grasas saturadas (g)</td>
+                    <td>{{ recipe.nutrition.per_100g.saturated_fat }}</td>
+                    <td>{{ recipe.nutrition.daily_values.saturated_fat|default('-') }}</td>
+                </tr>
+                <tr>
+                    <td>Fibra (g)</td>
+                    <td>{{ recipe.nutrition.per_100g.fiber }}</td>
+                    <td>{{ recipe.nutrition.daily_values.fiber|default('-') }}</td>
+                </tr>
+                <tr>
+                    <td>Sodio (mg)</td>
+                    <td>{{ recipe.nutrition.per_100g.sodium }}</td>
+                    <td>{{ recipe.nutrition.daily_values.sodium|default('-') }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <p><small>*Valores diarios basados en una dieta de 2000 calorías. Sus valores diarios pueden ser mayores o menores dependiendo de sus necesidades calóricas.</small></p>
+
+        <!-- Allergens -->
+        <h2>Información de Alérgenos</h2>
+        <div class="allergens-grid">
+            {% for allergen, present in recipe.allergens.items() %}
+            <div class="allergen-item {% if present %}allergen-present{% endif %}">
+                {{ allergen }}
+                {% if present %}
+                <div>(CONTIENE)</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Storage Information -->
+        <h2>Almacenamiento y Vida Útil</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Ambiente:</span> {{ recipe.recipe_info.shelf_life.ambient }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">Refrigerado:</span> {{ recipe.recipe_info.shelf_life.refrigerated }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">Congelado:</span> {{ recipe.recipe_info.shelf_life.frozen }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">Temperatura:</span> {{ recipe.storage.temperature }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">Humedad:</span> {{ recipe.storage.humidity }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">Luz:</span> {{ recipe.storage.light }}
+            </div>
+        </div>
+        
+        {% if recipe.storage.special_instructions %}
+        <div class="warning-box">{{ recipe.storage.special_instructions }}</div>
+        {% endif %}
+
+        <!-- Equipment -->
+        <h2>Equipamiento Requerido</h2>
+        <ul>
+            {% for equipment in recipe.equipment %}
+            <li>{{ equipment }}</li>
+            {% endfor %}
+        </ul>
+
+        <!-- Packaging -->
+        <h2>Empaque y Etiquetado</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Empaque Primario:</span> {{ recipe.packaging.primary }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">Empaque Secundario:</span> {{ recipe.packaging.secondary }}
+            </div>
+        </div>
+        
+        {% if recipe.packaging.labeling %}
+        <h3>Información de Etiquetado</h3>
+        <ul>
+            {% for label in recipe.packaging.labeling %}
+            <li>{{ label }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <!-- Signature Block -->
+        <div class="signature-block">
+            <div class="signature">Elaborado por</div>
+            <div class="signature">Revisado por</div>
+            <div class="signature">Aprobado por</div>
+        </div>
+
+        <!-- Footer Info -->
+        <div class="footer">
+            <p>FICHA TÉCNICA DE PRODUCTO | {{ recipe.id }} | Versión: {{ recipe.version }} | Página <span class="page-number"></span> de <span class="page-count"></span></p>
+            <p>DOCUMENTO CONFIDENCIAL - PROHIBIDA SU REPRODUCCIÓN SIN AUTORIZACIÓN</p>
+        </div>
+    </div>
+</body>
+</html> 

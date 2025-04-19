@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+
+{% block title %}Guía de Accesibilidad{% endblock %}
+
+{% block styles %}
+<style>
+    .accessibility-guide h2 {
+        margin-top: 2rem;
+        border-bottom: 2px solid var(--primary);
+        padding-bottom: 0.5rem;
+    }
+    
+    .accessibility-guide h3 {
+        margin-top: 1.5rem;
+        color: var(--trivo-green);
+    }
+    
+    .accessibility-checklist {
+        list-style-type: none;
+        padding-left: 0;
+    }
+    
+    .accessibility-checklist li {
+        margin-bottom: 0.75rem;
+        padding-left: 2rem;
+        position: relative;
+    }
+    
+    .accessibility-checklist li::before {
+        content: "✅";
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+    
+    .wcag-level {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        margin-left: 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .level-a {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .level-aa {
+        background-color: #cce5ff;
+        color: #004085;
+    }
+    
+    .level-aaa {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .code-example {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 4px;
+        border-left: 4px solid var(--primary);
+        margin: 1rem 0;
+        overflow-x: auto;
+    }
+    
+    .dark-mode .code-example {
+        background-color: #2d2d2d;
+        border-left: 4px solid var(--primary);
+        color: #f8f9fa;
+    }
+    
+    .resource-card {
+        height: 100%;
+        transition: all 0.3s;
+    }
+    
+    .resource-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main id="main-content" class="container mt-4 accessibility-guide" tabindex="-1">
+    <h1>Guía de Accesibilidad de TRIVO-AI</h1>
+    <p class="lead">Esta guía explica los estándares de accesibilidad implementados en TRIVO-AI y proporciona buenas prácticas para mantener y mejorar la accesibilidad del sitio.</p>
+    
+    <div class="alert alert-info" role="alert">
+        <div class="d-flex">
+            <i class="fas fa-info-circle me-2 fs-4" aria-hidden="true"></i>
+            <div>
+                <strong>Nota:</strong> La accesibilidad es un proceso continuo. Esta guía se actualiza regularmente para asegurar que nuestra aplicación cumple con los estándares actuales.
+            </div>
+        </div>
+    </div>
+    
+    <section aria-labelledby="intro-heading">
+        <h2 id="intro-heading">Introducción a WCAG 2.1</h2>
+        <p>Las Pautas de Accesibilidad para el Contenido Web (WCAG) 2.1 establecen cómo hacer el contenido web más accesible para personas con discapacidades. En TRIVO-AI, nos esforzamos por cumplir con el nivel AA de WCAG 2.1.</p>
+        
+        <div class="row mt-4">
+            <div class="col-md-3 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-eye fs-1 mb-3 text-primary" aria-hidden="true"></i>
+                        <h3 class="h5">Perceptible</h3>
+                        <p class="mb-0">La información y los componentes de la interfaz deben ser presentables a los usuarios de manera que puedan percibirlos.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-hand-pointer fs-1 mb-3 text-primary" aria-hidden="true"></i>
+                        <h3 class="h5">Operable</h3>
+                        <p class="mb-0">Los componentes de la interfaz y la navegación deben ser operables para todos los usuarios.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-lightbulb fs-1 mb-3 text-primary" aria-hidden="true"></i>
+                        <h3 class="h5">Comprensible</h3>
+                        <p class="mb-0">La información y el funcionamiento de la interfaz deben ser comprensibles.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-code fs-1 mb-3 text-primary" aria-hidden="true"></i>
+                        <h3 class="h5">Robusto</h3>
+                        <p class="mb-0">El contenido debe ser lo suficientemente robusto para que pueda ser interpretado por una amplia variedad de agentes de usuario.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section aria-labelledby="implemented-heading" class="mt-5">
+        <h2 id="implemented-heading">Características de Accesibilidad Implementadas</h2>
+        
+        <h3>Navegación y Estructura</h3>
+        <ul class="accessibility-checklist">
+            <li>Enlaces de omisión (skip links) para saltar al contenido principal <span class="wcag-level level-a">Nivel A</span></li>
+            <li>Estructura de encabezados semántica y jerárquica <span class="wcag-level level-a">Nivel A</span></li>
+            <li>Texto alternativo para todas las imágenes <span class="wcag-level level-a">Nivel A</span></li>
+            <li>Navegación coherente en todas las páginas <span class="wcag-level level-aa">Nivel AA</span></li>
+            <li>Indicadores visibles de foco para la navegación por teclado <span class="wcag-level level-aa">Nivel AA</span></li>
+        </ul>
+        
+        <div class="code-example">
+            <p><strong>Ejemplo de skip link:</strong></p>
+            <pre><code>&lt;a href="#main-content" class="skip-link"&gt;Saltar al contenido principal&lt;/a&gt;
+
+&lt;main id="main-content" tabindex="-1"&gt;
+    &lt;!-- Contenido principal --&gt;
+&lt;/main&gt;</code></pre>
+        </div>
+        
+        <h3>Formularios</h3>
+        <ul class="accessibility-checklist">
+            <li>Etiquetas (labels) asociadas a todos los campos de formulario <span class="wcag-level level-a">Nivel A</span></li>
+            <li>Mensajes de error accesibles y descriptivos <span class="wcag-level level-a">Nivel A</span></li>
+            <li>Agrupación lógica de elementos relacionados con fieldset y legend <span class="wcag-level level-aa">Nivel AA</span></li>
+            <li>Autocompletado para campos comunes <span class="wcag-level level-aa">Nivel AA</span></li>
+            <li>Indicación clara de campos obligatorios <span class="wcag-level level-aa">Nivel AA</span></li>
+        </ul>
+        
+        <div class="code-example">
+            <p><strong>Ejemplo de campo de formulario accesible:</strong></p>
+            <pre><code>&lt;div class="form-group"&gt;
+    &lt;label for="email" class="form-label required-field"&gt;Correo Electrónico&lt;/label&gt;
+    &lt;input type="email" class="form-control" id="email" name="email" 
+           required aria-required="true" autocomplete="email"&gt;
+    &lt;div class="form-text" id="emailHelp"&gt;Nunca compartiremos tu correo.&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+        
+        <h3>Colores y Contraste</h3>
+        <ul class="accessibility-checklist">
+            <li>Relación de contraste de al menos 4.5:1 para texto normal <span class="wcag-level level-aa">Nivel AA</span></li>
+            <li>Relación de contraste de al menos 3:1 para texto grande <span class="wcag-level level-aa">Nivel AA</span></li>
+            <li>No se usa el color como única forma de transmitir información <span class="wcag-level level-a">Nivel A</span></li>
+            <li>Modo oscuro para reducir la fatiga visual <span class="wcag-level level-aaa">Nivel AAA</span></li>
+            <li>Soporte para preferencias de contraste alto <span class="wcag-level level-aaa">Nivel AAA</span></li>
+        </ul>
+        
+        <h3>Responsive y Dispositivos Táctiles</h3>
+        <ul class="accessibility-checklist">
+            <li>Diseño responsive para todos los tamaños de pantalla <span class="wcag-level level-aa">Nivel AA</span></li>
+            <li>Objetivos táctiles con tamaño mínimo de 44x44px <span class="wcag-level level-aaa">Nivel AAA</span></li>
+            <li>Espaciado adecuado entre elementos interactivos en dispositivos táctiles <span class="wcag-level level-aaa">Nivel AAA</span></li>
+        </ul>
+        
+        <h3>ARIA y Atributos Semánticos</h3>
+        <ul class="accessibility-checklist">
+            <li>Uso de landmark roles (main, nav, header, footer) <span class="wcag-level level-a">Nivel A</span></li>
+            <li>Atributos aria-label para elementos sin texto visible <span class="wcag-level level-a">Nivel A</span></li>
+            <li>Atributos aria-expanded para elementos colapsables <span class="wcag-level level-aa">Nivel AA</span></li>
+            <li>Atributos aria-live para actualizaciones dinámicas <span class="wcag-level level-aa">Nivel AA</span></li>
+        </ul>
+        
+        <div class="code-example">
+            <p><strong>Ejemplo de uso de ARIA:</strong></p>
+            <pre><code>&lt;nav aria-label="Navegación principal"&gt;
+    &lt;button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
+            data-bs-target="#navbarNav" aria-controls="navbarNav" 
+            aria-expanded="false" aria-label="Mostrar menú de navegación"&gt;
+        &lt;span class="navbar-toggler-icon"&gt;&lt;/span&gt;
+    &lt;/button&gt;
+&lt;/nav&gt;</code></pre>
+        </div>
+    </section>
+    
+    <section aria-labelledby="testing-heading" class="mt-5">
+        <h2 id="testing-heading">Pruebas de Accesibilidad</h2>
+        <p>TRIVO-AI incluye herramientas para comprobar automáticamente la accesibilidad utilizando axe-core. Para ejecutar una comprobación de accesibilidad en cualquier página:</p>
+        
+        <ol>
+            <li>Busca el botón flotante <strong>"Comprobar Accesibilidad"</strong> en la esquina inferior derecha.</li>
+            <li>Haz clic en él para iniciar la evaluación de la página actual.</li>
+            <li>Revisa el informe generado que muestra problemas encontrados y posibles soluciones.</li>
+            <li>Puedes descargar el informe para su análisis posterior.</li>
+        </ol>
+        
+        <div class="alert alert-warning mt-3">
+            <div class="d-flex">
+                <i class="fas fa-exclamation-triangle me-2 fs-4" aria-hidden="true"></i>
+                <div>
+                    <strong>Importante:</strong> Las pruebas automáticas pueden detectar aproximadamente el 30% de los problemas de accesibilidad. Complementa siempre con pruebas manuales y pruebas con usuarios reales.
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section aria-labelledby="best-practices-heading" class="mt-5">
+        <h2 id="best-practices-heading">Buenas Prácticas para Desarrolladores</h2>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="h5 mb-3">HTML Semántico</h3>
+                        <ul>
+                            <li>Usa elementos HTML5 semánticos (main, nav, article, section, etc.)</li>
+                            <li>Estructura jerárquica correcta de encabezados (h1-h6)</li>
+                            <li>Usa listas (ul, ol) para grupos de elementos relacionados</li>
+                            <li>Utiliza tablas solo para datos tabulares, no para layout</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="h5 mb-3">Imágenes y Multimedia</h3>
+                        <ul>
+                            <li>Proporciona texto alternativo descriptivo para imágenes</li>
+                            <li>Usa atributo alt vacío (alt="") para imágenes decorativas</li>
+                            <li>Proporciona subtítulos y transcripciones para videos</li>
+                            <li>No uses GIFs o animaciones que parpadeen más de 3 veces por segundo</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="h5 mb-3">Interactividad y JavaScript</h3>
+                        <ul>
+                            <li>Asegura que toda funcionalidad sea accesible por teclado</li>
+                            <li>Mantén indicadores visibles de foco al navegar con teclado</li>
+                            <li>Usa ARIA para componentes personalizados</li>
+                            <li>Prueba con lectores de pantalla (NVDA, VoiceOver, JAWS)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="h5 mb-3">Formularios</h3>
+                        <ul>
+                            <li>Asocia siempre elementos label con sus inputs</li>
+                            <li>Agrupa campos relacionados con fieldset y legend</li>
+                            <li>Proporciona mensajes de error descriptivos y accesibles</li>
+                            <li>Añade atributos autocomplete adecuados a los campos</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section aria-labelledby="resources-heading" class="mt-5 mb-5">
+        <h2 id="resources-heading">Recursos Adicionales</h2>
+        
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card resource-card">
+                    <div class="card-body">
+                        <h3 class="h5">WCAG 2.1</h3>
+                        <p>Estándares oficiales de las Pautas de Accesibilidad para el Contenido Web 2.1</p>
+                        <a href="https://www.w3.org/TR/WCAG21/" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-external-link-alt me-1" aria-hidden="true"></i> Visitar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card resource-card">
+                    <div class="card-body">
+                        <h3 class="h5">WebAIM</h3>
+                        <p>Artículos y checklist de accesibilidad web con ejemplos prácticos</p>
+                        <a href="https://webaim.org/" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-external-link-alt me-1" aria-hidden="true"></i> Visitar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card resource-card">
+                    <div class="card-body">
+                        <h3 class="h5">a11y Project</h3>
+                        <p>Comunidad de código abierto con recursos y checklists de accesibilidad</p>
+                        <a href="https://www.a11yproject.com/" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-external-link-alt me-1" aria-hidden="true"></i> Visitar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %} 

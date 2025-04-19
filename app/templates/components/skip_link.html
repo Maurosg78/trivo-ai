@@ -1,0 +1,14 @@
+{% macro skip_link(target_id, text="Saltar al contenido principal") %}
+<!-- 
+    Macro para crear un enlace de salto para accesibilidad
+    
+    Parámetros:
+    - target_id: ID del elemento al que se desea saltar (obligatorio)
+    - text: Texto del enlace (opcional, predeterminado: "Saltar al contenido principal")
+    
+    Uso:
+    {% from "components/skip_link.html" import skip_link %}
+    {{ skip_link("main-content") }}
+-->
+<a href="#{{ target_id }}" class="skip-link">{{ text }}</a>
+{% endmacro %} 

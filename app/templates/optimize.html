@@ -3,282 +3,243 @@
 {% block title %}Crear Receta - TRIVO-AI{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 class="mb-4">Crear y Optimizar Receta</h1>
+<div class="container mt-4">
+    <h1 class="display-4 mb-4">Creación de Recetas</h1>
     
-    <!-- Natural Language Result -->
-    {% if nlp_request %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5>Tu solicitud</h5>
+    <!-- Pestañas para modos de creación -->
+    <ul class="nav nav-tabs" id="creationTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="natural-tab" data-bs-toggle="tab" data-bs-target="#natural" type="button" role="tab" aria-controls="natural" aria-selected="true">Lenguaje Natural</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual" type="button" role="tab" aria-controls="manual" aria-selected="false">Modo Avanzado</button>
+        </li>
+    </ul>
+    
+    <!-- Contenido de las pestañas -->
+    <div class="tab-content" id="creationTabsContent">
+        <!-- Tab de Lenguaje Natural -->
+        <div class="tab-pane fade show active" id="natural" role="tabpanel" aria-labelledby="natural-tab">
+            <div class="card mt-3 mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Describe tu receta ideal</h5>
+                    <p class="card-text">Describe con tus propias palabras la receta que deseas crear. Puedes especificar características como:</p>
+                    <ul>
+                        <li>Tipo de masa (familiar, individual)</li>
+                        <li>Color deseado (rojo, natural)</li>
+                        <li>Restricciones dietéticas (sin gluten, vegana)</li>
+                        <li>Características nutricionales</li>
+                        <li>Tipo de pizza (margarita, clásica)</li>
+                    </ul>
+                    
+                    <form action="/natural-language" method="post">
+                        <div class="mb-3">
+                            <textarea name="text" class="form-control natural-language-input" rows="3" placeholder="Ejemplo: Quiero una masa de pizza familiar, de color rojo, sin gluten, nutricionalmente optimizada para mis hijos. Tipo margarita."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Crear Receta <i class="bi bi-magic"></i></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab de Creación Manual -->
+        <div class="tab-pane fade" id="manual" role="tabpanel" aria-labelledby="manual-tab">
+            <div class="card mt-3 mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Crear receta manualmente</h5>
+                    <form id="recipe-form" action="/optimize" method="post" class="mt-3">
+                        <!-- Aquí el formulario original de creación manual -->
+                        <div class="mb-3">
+                            <h5>Ingredientes Base</h5>
+                            <div class="row mb-2">
+                                <div class="col-md-4">
+                                    <label for="flour" class="form-label">Harina (g)</label>
+                                    <input type="number" class="form-control" id="flour" name="flour" value="500" min="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="water" class="form-label">Agua (ml)</label>
+                                    <input type="number" class="form-control" id="water" name="water" value="325" min="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="salt" class="form-label">Sal (g)</label>
+                                    <input type="number" class="form-control" id="salt" name="salt" value="10" min="0">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="yeast" class="form-label">Levadura (g)</label>
+                                    <input type="number" class="form-control" id="yeast" name="yeast" value="7" min="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="oil" class="form-label">Aceite (ml)</label>
+                                    <input type="number" class="form-control" id="oil" name="oil" value="15" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h5>Proceso</h5>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="fermentation_time" class="form-label">Tiempo Fermentación (h)</label>
+                                    <input type="number" class="form-control" id="fermentation_time" name="fermentation_time" value="24" min="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="fermentation_temp" class="form-label">Temperatura Fermentación (°C)</label>
+                                    <input type="number" class="form-control" id="fermentation_temp" name="fermentation_temp" value="4" min="0">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="cooking_temp" class="form-label">Temperatura Cocción (°C)</label>
+                                    <input type="number" class="form-control" id="cooking_temp" name="cooking_temp" value="250" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Crear Receta</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Resultados -->
+    {% if natural_language_input %}
+    <div class="alert alert-success">
+        <h4 class="alert-heading">Solicitud procesada</h4>
+        <p><strong>Tu solicitud:</strong> {{ natural_language_input }}</p>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    Propiedades Detectadas
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for key, value in properties.items() %}
+                        <li class="list-group-item">
+                            <strong>{{ key|replace('_', ' ')|title }}:</strong> 
+                            {% if value is string %}
+                                {{ value }}
+                            {% elif value is iterable and value is not mapping %}
+                                {{ value|join(', ') }}
+                            {% else %}
+                                {{ value }}
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    Receta Generada
+                </div>
+                <div class="card-body">
+                    <h5>Ingredientes</h5>
+                    <ul class="list-group list-group-flush mb-3">
+                        {% for ingrediente in generated_recipe.ingredientes %}
+                        <li class="list-group-item">
+                            {{ ingrediente.cantidad }} {{ ingrediente.unidad }} de {{ ingrediente.nombre }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <h5>Proceso</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for key, value in generated_recipe.procedimiento.items() %}
+                        <li class="list-group-item">
+                            <strong>{{ key|replace('_', ' ')|title }}:</strong> {{ value }}
+                            {% if 'temperatura' in key %}°C{% endif %}
+                            {% if 'tiempo' in key %}h{% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Instrucciones de la receta -->
+    <div class="card mt-4">
+        <div class="card-header bg-success text-white">
+            Instrucciones de Preparación
         </div>
         <div class="card-body">
-            <p class="lead">{{ nlp_request }}</p>
-            
-            {% if nlp_result %}
-            <div class="mt-3">
-                <h6>Propiedades detectadas:</h6>
-                <ul class="list-group list-group-flush">
-                    {% if nlp_result.properties.pizza_type %}
-                    <li class="list-group-item">Tipo de pizza: <span class="badge bg-primary">{{ nlp_result.properties.pizza_type }}</span></li>
-                    {% endif %}
-                    
-                    {% if nlp_result.properties.dough_type %}
-                    <li class="list-group-item">Tipo de masa: <span class="badge bg-primary">{{ nlp_result.properties.dough_type }}</span></li>
-                    {% endif %}
-                    
-                    {% if nlp_result.properties.size %}
-                    <li class="list-group-item">Tamaño: <span class="badge bg-primary">{{ nlp_result.properties.size }}</span></li>
-                    {% endif %}
-                    
-                    {% if nlp_result.properties.restrictions %}
-                    <li class="list-group-item">Restricciones:
-                        {% for restriction in nlp_result.properties.restrictions %}
-                        <span class="badge bg-warning text-dark me-1">{{ restriction }}</span>
-                        {% endfor %}
-                    </li>
-                    {% endif %}
-                    
-                    {% if nlp_result.properties.color %}
-                    <li class="list-group-item">Color: <span class="badge bg-primary">{{ nlp_result.properties.color }}</span></li>
-                    {% endif %}
-                </ul>
-            </div>
-            {% endif %}
+            <ol class="list-group list-group-numbered">
+                {% for instruccion in generated_recipe.instrucciones %}
+                <li class="list-group-item">{{ instruccion }}</li>
+                {% endfor %}
+            </ol>
         </div>
     </div>
     {% endif %}
     
-    <div class="row">
-        <!-- Form for manual optimization -->
-        {% if not optimized_recipe %}
-        <div class="col-lg-12">
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h4 class="card-title">Modo avanzado: Crear receta manualmente</h4>
-                    <form method="post" action="/optimize">
-                        <div class="ingredients-container">
-                            <div class="row mb-2">
-                                <div class="col-md-5">
-                                    <label for="ingredient1" class="form-label">Ingrediente</label>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="quantity1" class="form-label">Cantidad (g/ml)</label>
-                                </div>
-                            </div>
-                            
-                            <div class="row mb-2 ingredient-row">
-                                <div class="col-md-5">
-                                    <input type="text" class="form-control" name="ingredient[]" placeholder="Ej: harina">
-                                </div>
-                                <div class="col-md-4">
-                                    <input type="number" class="form-control" name="quantity[]" placeholder="Ej: 1000">
-                                </div>
-                                <div class="col-md-3">
-                                    <button type="button" class="btn btn-outline-danger remove-ingredient">Eliminar</button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <button type="button" id="add-ingredient" class="btn btn-outline-primary">+ Añadir ingrediente</button>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="max_cost" class="form-label">Costo máximo (€/kg)</label>
-                                <input type="number" step="0.01" class="form-control" id="max_cost" name="max_cost" value="5.0">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="min_quality" class="form-label">Calidad mínima (0-100)</label>
-                                <input type="number" class="form-control" id="min_quality" name="min_quality" value="80">
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="scale" class="form-label">Escala de producción</label>
-                            <select class="form-select" id="scale" name="scale">
-                                <option value="small_business">Pequeño negocio (menos de 50kg/día)</option>
-                                <option value="restaurant">Restaurante (50-200kg/día)</option>
-                                <option value="industrial">Industrial (más de 200kg/día)</option>
-                            </select>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">Optimizar receta</button>
-                    </form>
-                </div>
-            </div>
-            
-            <!-- Start with Natural Language -->
-            <div class="card shadow-sm natural-language-input mb-4">
-                <div class="card-body">
-                    <h4 class="card-title">Modo simple: Describe lo que necesitas</h4>
-                    <form action="/natural-language" method="post">
-                        <div class="mb-3">
-                            <textarea class="form-control" name="text" rows="3" placeholder="Ej: Quiero una masa de pizza familiar, de color rojo, sin gluten, nutricionalmente optimizada para niños"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Crear con IA</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-        
-        <!-- Display optimized recipe -->
-        {% if optimized_recipe %}
-        <div class="col-lg-7">
-            <div class="card shadow-sm mb-4 recipe-container">
-                <div class="card-header">
-                    <h4>Receta optimizada: {{ optimized_recipe.name }}</h4>
+    {% if original_recipe %}
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    Receta Original
                 </div>
                 <div class="card-body">
-                    <h5>Ingredientes:</h5>
-                    <ul class="ingredient-list">
-                        {% for ingredient, quantity in optimized_recipe.ingredients.items() %}
-                        <li><strong>{{ ingredient }}</strong>: {{ quantity }}{{ 'g' if ingredient != 'agua' and ingredient != 'aceite de oliva' else 'ml' }}</li>
+                    <h5>Ingredientes</h5>
+                    <ul>
+                        {% for ingredient, data in original_recipe.ingredients.items() %}
+                        <li>{{ data.amount }} {{ data.unit }} de {{ ingredient|replace('_', ' ') }}</li>
                         {% endfor %}
                     </ul>
                     
-                    {% if optimized_recipe.instructions %}
-                    <h5 class="mt-4">Instrucciones:</h5>
-                    <ol>
-                        {% for instruction in optimized_recipe.instructions %}
-                        <li>{{ instruction }}</li>
+                    <h5>Proceso</h5>
+                    <ul>
+                        {% for param, value in original_recipe.process.items() %}
+                        <li>{{ param|replace('_', ' ')|title }}: {{ value }}</li>
                         {% endfor %}
-                    </ol>
-                    {% endif %}
-                    
-                    {% if optimized_recipe.cost %}
-                    <div class="mt-4">
-                        <h5>Características:</h5>
-                        <p><strong>Costo estimado:</strong> {{ optimized_recipe.cost }}€/kg</p>
-                        
-                        {% if optimized_recipe.hydration %}
-                        <p><strong>Hidratación:</strong> {{ optimized_recipe.hydration }}%</p>
-                        {% endif %}
-                        
-                        {% if optimized_recipe.estimated_quality %}
-                        <p><strong>Calidad estimada:</strong> {{ optimized_recipe.estimated_quality }}/100</p>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                    
-                    {% if recipe_data and recipe_data.recommendations %}
-                    <div class="mt-4">
-                        <h5 class="card-title text-success border-bottom pb-2">Recomendaciones específicas para esta receta</h5>
-                        <ul class="list-group list-group-flush">
-                            {% for recommendation in recipe_data.recommendations %}
-                            <li class="list-group-item bg-transparent border-0 ps-0 py-1">
-                                <i class="bi bi-check-circle-fill text-success me-2"></i> {{ recommendation }}
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                </div>
-                <div class="card-footer">
-                    <a href="/optimize" class="btn btn-outline-primary">Crear nueva receta</a>
+                    </ul>
                 </div>
             </div>
         </div>
         
-        <!-- Display validation results -->
-        <div class="col-lg-5">
-            {% if validation_result %}
-            <div class="card shadow-sm mb-4">
-                <div class="card-header">
-                    <h4>Resultados de validación</h4>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    Receta Optimizada
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <span class="validation-badge {{ 'validation-valid' if validation_result.valid else 'validation-invalid' }}">
-                            {{ 'Válida' if validation_result.valid else 'No válida' }} para escala: {{ validation_result.scale }}
-                        </span>
-                    </div>
+                    <h5>Ingredientes</h5>
+                    <ul>
+                        {% for ingredient, data in optimized_recipe.ingredients.items() %}
+                        <li>{{ data.amount }} {{ data.unit }} de {{ ingredient|replace('_', ' ') }}</li>
+                        {% endfor %}
+                    </ul>
                     
-                    {% if validation_result.issues %}
-                    <div class="mt-3">
-                        <h5 class="text-danger">Problemas críticos:</h5>
-                        <ul class="list-group">
-                            {% for issue in validation_result.issues %}
-                            <li class="list-group-item list-group-item-danger">{{ issue }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
+                    <h5>Proceso</h5>
+                    <ul>
+                        {% for param, value in optimized_recipe.process.items() %}
+                        <li>{{ param|replace('_', ' ')|title }}: {{ value }}</li>
+                        {% endfor %}
+                    </ul>
                     
-                    {% if validation_result.warnings %}
-                    <div class="mt-3">
-                        <h5 class="text-warning">Advertencias:</h5>
-                        <ul class="list-group">
-                            {% for warning in validation_result.warnings %}
-                            <li class="list-group-item list-group-item-warning">{{ warning }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                    
-                    {% if validation_result.suggestions %}
-                    <div class="mt-3">
-                        <h5 class="text-info">Sugerencias:</h5>
-                        <ul class="list-group">
-                            {% for suggestion in validation_result.suggestions %}
-                            <li class="list-group-item list-group-item-info">{{ suggestion }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                    
-                    {% if not validation_result.issues and not validation_result.warnings and not validation_result.suggestions %}
-                    <div class="alert alert-success">
-                        <i class="bi bi-check-circle-fill me-2"></i> No se detectaron problemas en la receta.
+                    {% if optimized_recipe.validation_results %}
+                    <div class="mt-4">
+                        <h5>Resultados de Validación</h5>
+                        <div class="alert alert-info">
+                            <ul class="mb-0">
+                                {% for result in optimized_recipe.validation_results %}
+                                <li>{{ result }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
                     {% endif %}
                 </div>
             </div>
-            {% endif %}
         </div>
-        {% endif %}
     </div>
+    {% endif %}
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add ingredient row
-        const addIngredientBtn = document.getElementById('add-ingredient');
-        if (addIngredientBtn) {
-            addIngredientBtn.addEventListener('click', function() {
-                const container = document.querySelector('.ingredients-container');
-                const newRow = document.createElement('div');
-                newRow.className = 'row mb-2 ingredient-row';
-                newRow.innerHTML = `
-                    <div class="col-md-5">
-                        <input type="text" class="form-control" name="ingredient[]" placeholder="Ej: harina">
-                    </div>
-                    <div class="col-md-4">
-                        <input type="number" class="form-control" name="quantity[]" placeholder="Ej: 1000">
-                    </div>
-                    <div class="col-md-3">
-                        <button type="button" class="btn btn-outline-danger remove-ingredient">Eliminar</button>
-                    </div>
-                `;
-                container.appendChild(newRow);
-            });
-        }
-        
-        // Remove ingredient row
-        document.addEventListener('click', function(e) {
-            if (e.target && e.target.classList.contains('remove-ingredient')) {
-                const row = e.target.closest('.ingredient-row');
-                if (document.querySelectorAll('.ingredient-row').length > 1) {
-                    row.remove();
-                } else {
-                    alert('Debe haber al menos un ingrediente');
-                }
-            }
-        });
-    });
-</script>
 {% endblock %} 
